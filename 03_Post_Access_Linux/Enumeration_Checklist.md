@@ -68,6 +68,48 @@ netstat -tlnp 2>/dev/null
 
 **着眼点：** `127.0.0.1` にバインドされているサービス（外部から見えないサービス）は、内部からアクセスできる可能性がある。
 
+### Dockerコンテナ環境かどうかの確認
+
+シェルを取得したら早期に「自分がコンテナ内にいるか」を確認する。コンテナ内にいる場合、ホストへの脱出経路を探す必要がある。
+
+```bash
+# 方法1: /etc/hosts でホスト名と IP を確認
+cat /etc/hosts
+# ホスト名がランダムな16進文字列 かつ IPが 172.17.0.x → Docker コンテナ
+# 例: 172.17.0.2   e6ff5b1cbc85
+
+# 方法2: 自分の IP アドレスを確認
+ip addr show
+hostname -I
+# 172.17.0.x であればDockerデフォルトブリッジネットワーク上にいる
+
+# 方法3: /.dockerenv の存在を確認
+ls /.dockerenv 2>/dev/null && echo "コンテナ内"
+
+# 方法4: cgroup の確認
+cat /proc/1/cgroup | grep -i docker
+```
+
+**コンテナ内と判断したら確認すること：**
+
+```bash
+# ブロックデバイスが見えるか（ホスト breakout の前提条件）
+ls /dev/sd* /dev/vd* 2>/dev/null
+
+# マウント状況の確認
+cat /proc/mounts
+
+# 実行中コンテナの特権モードの確認（privileged だと breakout が容易）
+cat /proc/self/status | grep -i "capeff\|capbnd"
+# CapEff や CapBnd が 0000003fffffffff（全権限）なら privileged コンテナ
+```
+
+**コンテナIDはホストへの sudo docker exec 悪用時に必要：**
+`/etc/hosts` のホスト名（例: `e6ff5b1cbc85`）がコンテナIDとして使える。
+
+→ sudo docker exec の悪用: `Sudo_Misconfig.md`（パターン4）
+→ IPレンジと環境の対応: `../01_Reconnaissance/Network_Scanning.md`（IPアドレスレンジから環境を読む）
+
 ### 環境変数
 ```bash
 env
