@@ -81,6 +81,62 @@ ldapsearch ... "(objectClass=user)" sAMAccountName info description \
 
 ---
 
+## パターン5: Webアプリの内部データベースからハッシュを取得
+
+### 着火条件
+- パストラバーサルやファイル読み取り系の脆弱性で、アプリのデータディレクトリにアクセスできた
+- Grafana / WordPress / Gitea 等のWebアプリが SQLite や MySQL を使って認証情報を保存している
+
+### 観点・着眼点
+Webアプリが独自の認証機構を持つ場合、OSのユーザーではなくアプリ独自のDBにパスワードハッシュを保存している。
+ハッシュ形式はアプリによって異なり、Grafanaは PBKDF2-HMAC-SHA256、WordPress は MD5 ベース等。
+**取得したDBファイルはまずテーブル一覧を確認し、ユーザー・認証関連テーブルを特定する。**
+
+### 手順
+
+```bash
+# SQLite の場合 — テーブル一覧を確認
+sqlite3 [FILE].db ".tables"
+
+# ユーザー関連テーブルを確認
+sqlite3 [FILE].db "SELECT * FROM user LIMIT 5;"
+
+# カラム構成を確認
+sqlite3 [FILE].db "PRAGMA table_info(user);"
+```
+
+#### Grafana（PBKDF2-HMAC-SHA256）の場合
+
+```bash
+# ユーザー情報の取得
+sqlite3 grafana.db "SELECT id, name, login, email, password, salt FROM user;"
+
+# 出力例:
+# 1||admin|admin@localhost|[HEX_HASH]|[SALT]
+# 2|username|username|user@domain.local|[HEX_HASH]|[SALT]
+```
+
+取得したハッシュを Hashcat (mode 10900) 形式に変換する：
+
+```python
+import base64, binascii
+
+salt = b'[SALT_STRING]'
+hash_hex = '[HEX_HASH]'
+hash_bytes = binascii.unhexlify(hash_hex)
+print(f'sha256:10000:{base64.b64encode(salt).decode()}:{base64.b64encode(hash_bytes).decode()}')
+```
+
+→ 変換後ハッシュのクラック: `../../05_Tools_Reference/Hashcat.md`（mode 10900）
+
+### 注意点・落とし穴
+- ハッシュが HEX 文字列で保存されている場合、Hashcat に渡す前に base64 形式に変換が必要（アプリ依存）
+- salt が別カラムに保存されていることが多い。必ずセットで取得する
+- admin アカウントのハッシュが強固でクラックできなくても、一般ユーザーのハッシュがクラックできることがある
+- パスワードを取得できたら必ず他サービス（SSH, FTP, 管理画面等）でも試す（使い回し確認）
+
+---
+
 ## 認証情報を取得したら必ず試すこと
 
 **パスワードの使い回し確認：**
@@ -106,3 +162,5 @@ netexec smb [IP] -u users.txt -p '[PASSWORD]' --continue-on-success
 - PCAPからFTP認証情報 → SSHで同じ認証情報を試す
 - LDAP認証情報でLDAPにアクセス → `../../01_Reconnaissance/LDAP_Enumeration.md`
 - バイナリから認証情報 → `../Binary_Analysis.md`
+- Webアプリのファイル読み取りでDBを取得 → `Web_Vulnerabilities/Path_Traversal.md`
+- Grafana ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`

