@@ -14,6 +14,33 @@ whoami
 groups
 ```
 
+**`id` 出力の読み方 — グループに着目する：**
+
+`id` の出力には `uid`・`gid`・`groups` が含まれる。**特権昇格の糸口はグループに隠れていることが多い。**
+
+```
+uid=1000(jkr) gid=1000(jkr) groups=1000(jkr),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),108(netdev),999(staff)
+```
+
+権限昇格に直結しうるグループ一覧：
+
+| グループ | 何ができるか | 攻撃の観点 |
+|---------|-------------|-----------|
+| `sudo` / `wheel` | sudo コマンドが使える | `sudo -l` で確認 |
+| `docker` | Docker デーモンへのアクセス | コンテナ経由でホスト root ファイルアクセス |
+| `lxd` / `lxc` | LXD コンテナの操作 | 特権コンテナでホストマウント → root |
+| `disk` | `/dev/sda` 等のブロックデバイス直接読み書き | `debugfs` で `/etc/shadow` 直読み |
+| `shadow` | `/etc/shadow` の読み取り | ハッシュを取得してクラック |
+| `adm` | `/var/log/` の読み取り | ログからパスワード・セッション情報を探す |
+| `staff` | `/usr/local/bin`, `/usr/local/sbin` への書き込み | PATH ハイジャック → root が実行するスクリプトへの注入 |
+| `video` | フレームバッファ（画面）の読み取り | スクリーンショット取得 |
+| `kmem` | カーネルメモリの読み取り | カーネルレベルの情報漏洩 |
+
+**`staff` グループが特に重要な理由：**
+`/usr/local/sbin` および `/usr/local/bin` は多くの Linux システムで `PATH` の最前列にある。root が `run-parts` や他のコマンドを**フルパスなしで実行する**スクリプト（PAM の MOTD 処理等）が動いている場合、この場所に同名のバイナリを置くだけで root として実行させられる。
+
+> 原理 → `../06_Concepts/PAM.md`（SSHログイン時のPAMスタックとPATH）
+
 ### Linux Capabilities（最重要）
 ```bash
 getcap -r / 2>/dev/null
@@ -194,3 +221,4 @@ curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas
 - Capabilities 発見 → `Capabilities.md`
 - SUID 発見 → `SUID_SGID.md`
 - sudo 権限 → `Sudo_Misconfig.md`
+- staff グループ / PAM 経由の昇格 → `PAM_Misconfig.md`

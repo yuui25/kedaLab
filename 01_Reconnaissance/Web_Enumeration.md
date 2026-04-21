@@ -1,5 +1,52 @@
 # Web列挙
 
+## robots.txt の確認
+
+### 着火条件
+Webポートが開いており、まず手動でサイト構造を把握したい場合。**ディレクトリ列挙の前に必ず確認する。**
+
+### 観点・着眼点
+
+`robots.txt` はクローラーに「アクセスさせたくないパス」を伝えるファイルだが、**攻撃者にとっては隠しディレクトリの地図になる。**
+
+`Disallow:` エントリに含まれるパスは「隠したい重要なページ」である可能性が高い：
+- 管理画面（`/admin`, `/wp-admin`, `/panel` 等）
+- CMSのインストールパス（`/cms`, `/writeup` 等）
+- 内部ドキュメント・バックアップ（`/private`, `/backup` 等）
+
+```bash
+curl -s http://[TARGET]/robots.txt
+```
+
+**nmap の `-sC`（デフォルトスクリプト）を使った場合、スキャン結果に自動で表示される：**
+```
+| http-robots.txt: 1 disallowed entry
+|_/writeup/
+```
+
+### 手順
+
+```bash
+# 直接取得
+curl -s http://[TARGET]/robots.txt
+
+# Disallow エントリを抽出
+curl -s http://[TARGET]/robots.txt | grep -i "disallow\|allow"
+```
+
+**見つけたパスへのアクセスで確認すること：**
+1. パスが存在するか（404 か 200/301 か）
+2. CMSや特定のアプリが動いているか（ログインページ・フッター・バージョン情報）
+3. バージョンが判明したら即 `searchsploit [アプリ名] [バージョン]` で CVE 検索
+
+### 注意点・落とし穴
+
+- `robots.txt` が存在しない（404）場合でも、`/sitemap.xml` や `/sitemap_index.xml` に同等の情報がある場合がある
+- `Disallow: /` だけの場合は全ブロックで情報量が少ない。次のディレクトリ列挙に移る
+- サブドメイン・vhost では `/robots.txt` が別になる場合があるため、vhost ごとに確認する
+
+---
+
 ## ディレクトリ・エンドポイントの列挙
 
 ### 着火条件
