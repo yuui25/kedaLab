@@ -113,61 +113,61 @@
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `07_AI_ML/Overview.md` |
-| 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `07_AI_ML/Overview.md` |
-| 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `07_AI_ML/Overview.md` |
-| データ漏洩（Data Leakage）の防止 | AI/ML 基礎 | `07_AI_ML/Overview.md` |
+| 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| データ漏洩（Data Leakage）の防止 | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 
 ### 教師あり学習
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| 線形回帰（Linear Regression）+ Ridge/Lasso | Supervised Learning | `07_AI_ML/Supervised_Learning/Linear_Regression.md` |
-| ロジスティック回帰（Logistic Regression） | Supervised Learning | `07_AI_ML/Supervised_Learning/Linear_Regression.md` |
-| 決定木（Decision Trees）・ランダムフォレスト | Supervised Learning | `07_AI_ML/Supervised_Learning/Decision_Trees.md` |
-| Naive Bayes（テキスト分類・スパムフィルタリング） | Supervised Learning | `07_AI_ML/Supervised_Learning/Naive_Bayes.md` |
-| SVM（サポートベクターマシン）・カーネルトリック | Supervised Learning | `07_AI_ML/Supervised_Learning/SVM.md` |
+| 線形回帰（Linear Regression）+ Ridge/Lasso | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Linear_Regression.md` |
+| ロジスティック回帰（Logistic Regression） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Linear_Regression.md` |
+| 決定木（Decision Trees）・ランダムフォレスト | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Decision_Trees.md` |
+| Naive Bayes（テキスト分類・スパムフィルタリング） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Naive_Bayes.md` |
+| SVM（サポートベクターマシン）・カーネルトリック | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/SVM.md` |
 
 ### 教師なし学習
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| K-Meansクラスタリング・エルボー法 | Unsupervised Learning | `07_AI_ML/Unsupervised_Learning/KMeans_Clustering.md` |
-| PCA（主成分分析・次元削減・可視化） | Unsupervised Learning | `07_AI_ML/Unsupervised_Learning/PCA.md` |
-| 異常検知（Isolation Forest・One-Class SVM・Autoencoder） | Unsupervised Learning | `07_AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
-| 異常検知のセキュリティ応用（ネットワーク侵入検知・ログ解析） | Unsupervised Learning | `07_AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| K-Meansクラスタリング・エルボー法 | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/KMeans_Clustering.md` |
+| PCA（主成分分析・次元削減・可視化） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/PCA.md` |
+| 異常検知（Isolation Forest・One-Class SVM・Autoencoder） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
+| 異常検知のセキュリティ応用（ネットワーク侵入検知・ログ解析） | Unsupervised Learning | `06_Concepts/AI_ML/Unsupervised_Learning/Anomaly_Detection.md` |
 
 ### 強化学習
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| 強化学習の基本概念（エージェント・状態・報酬・方策） | Reinforcement Learning | `07_AI_ML/Reinforcement_Learning/RL_Overview.md` |
-| Q-Learning（オフポリシー・Bellman方程式） | Reinforcement Learning | `07_AI_ML/Reinforcement_Learning/Q_Learning.md` |
-| SARSA（オンポリシー・安全性重視） | Reinforcement Learning | `07_AI_ML/Reinforcement_Learning/SARSA.md` |
+| 強化学習の基本概念（エージェント・状態・報酬・方策） | Reinforcement Learning | `06_Concepts/AI_ML/Reinforcement_Learning/RL_Overview.md` |
+| Q-Learning（オフポリシー・Bellman方程式） | Reinforcement Learning | `06_Concepts/AI_ML/Reinforcement_Learning/Q_Learning.md` |
+| SARSA（オンポリシー・安全性重視） | Reinforcement Learning | `06_Concepts/AI_ML/Reinforcement_Learning/SARSA.md` |
 
 ### 深層学習
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| パーセプトロン・ニューロン・活性化関数 | Deep Learning | `07_AI_ML/Deep_Learning/Neural_Networks.md` |
-| ニューラルネットワーク（誤差逆伝播・勾配降下法・Adam） | Deep Learning | `07_AI_ML/Deep_Learning/Neural_Networks.md` |
-| ドロップアウト・バッチ正規化 | Deep Learning | `07_AI_ML/Deep_Learning/Neural_Networks.md` |
-| オートエンコーダ（次元削減・異常検知） | Deep Learning | `07_AI_ML/Deep_Learning/Neural_Networks.md` |
-| CNN（畳み込みニューラルネットワーク・画像処理） | Deep Learning | `07_AI_ML/Deep_Learning/CNN.md` |
-| 転移学習（ResNet・VGG・Fine-tuning） | Deep Learning | `07_AI_ML/Deep_Learning/CNN.md` |
-| RNN・LSTM・GRU（系列データ・時系列） | Deep Learning | `07_AI_ML/Deep_Learning/RNN.md` |
+| パーセプトロン・ニューロン・活性化関数 | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/Neural_Networks.md` |
+| ニューラルネットワーク（誤差逆伝播・勾配降下法・Adam） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/Neural_Networks.md` |
+| ドロップアウト・バッチ正規化 | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/Neural_Networks.md` |
+| オートエンコーダ（次元削減・異常検知） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/Neural_Networks.md` |
+| CNN（畳み込みニューラルネットワーク・画像処理） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| 転移学習（ResNet・VGG・Fine-tuning） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| RNN・LSTM・GRU（系列データ・時系列） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/RNN.md` |
 
 ### 生成AI
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
-| Transformerアーキテクチャ・Self-Attention | Generative AI | `07_AI_ML/Generative_AI/LLM.md` |
-| LLM（大規模言語モデル）・GPT系・BERT系 | Generative AI | `07_AI_ML/Generative_AI/LLM.md` |
-| RAG（Retrieval-Augmented Generation） | Generative AI | `07_AI_ML/Generative_AI/LLM.md` |
-| Fine-tuning・LoRA | Generative AI | `07_AI_ML/Generative_AI/LLM.md` |
-| プロンプトインジェクション攻撃 | Generative AI / Security | `07_AI_ML/Generative_AI/LLM.md` |
-| 拡散モデル（Diffusion Models）・Stable Diffusion | Generative AI | `07_AI_ML/Generative_AI/Diffusion_Models.md` |
-| Latent Diffusion・DDIM・LCM | Generative AI | `07_AI_ML/Generative_AI/Diffusion_Models.md` |
+| Transformerアーキテクチャ・Self-Attention | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| LLM（大規模言語モデル）・GPT系・BERT系 | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| RAG（Retrieval-Augmented Generation） | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| Fine-tuning・LoRA | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| プロンプトインジェクション攻撃 | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
+| 拡散モデル（Diffusion Models）・Stable Diffusion | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
+| Latent Diffusion・DDIM・LCM | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 
 ---
 
