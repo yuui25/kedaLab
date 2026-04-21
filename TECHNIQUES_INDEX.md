@@ -170,6 +170,14 @@
 | 拡散モデル（Diffusion Models）・Stable Diffusion | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 | Latent Diffusion・DDIM・LCM | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 
+### データ変換・前処理
+
+| 技術名 | カテゴリ | ファイルパス |
+|--------|---------|------------|
+| カテゴリ特徴量エンコーディング（OneHotEncoder・LabelEncoder・HashingEncoder） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
+| 歪み補正（log1p 変換・Skewed Data 処理） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
+| データ分割（Train/Validation/Test・Data Leakage 防止） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
+
 ### データ攻撃
 
 | 技術名 | カテゴリ | ファイルパス |
