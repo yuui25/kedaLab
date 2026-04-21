@@ -116,6 +116,8 @@
 | 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| 補足指標（Specificity・AUC・Matthews Correlation Coefficient） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
+| セキュリティ文脈での指標選択（脅威検知→Recall・誤検知削減→Precision） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | データ漏洩（Data Leakage）の防止 | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 
 ### 教師あり学習
