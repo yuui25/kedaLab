@@ -100,9 +100,72 @@ P(Not Spam|F1,F2) = (0.06 × 0.7) / 0.102 = 0.042 / 0.102 ≈ 0.412
 
 > **直感的な読み方：** 事前確率は「スパム 30%」だったが、F1・F2 という特徴を観察した後に「スパム 58.8%」へ更新された。特徴がスパムらしさの証拠として積み上がった結果。
 
+### テキスト前処理パイプライン（NLP分類の共通手順）
+
+ベクトル化（CountVectorizer / TF-IDF）の前に以下の順で処理する。
+
+```python
+import re, nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+
+nltk.download("punkt")
+nltk.download("stopwords")
+
+stemmer = PorterStemmer()
+stop_words = set(stopwords.words("english"))
+
+# Step 1: 小文字化 — "Free" と "free" を同じトークンとして扱う
+df["message"] = df["message"].str.lower()
+
+# Step 2: 記号・数字の除去 — ただしスパム文脈で意味を持つ $ ! は残す
+df["message"] = df["message"].apply(lambda x: re.sub(r"[^a-z\s$!]", "", x))
+
+# Step 3: トークン化 — 文字列をワードリストに分割
+df["message"] = df["message"].apply(word_tokenize)
+
+# Step 4: ストップワード除去 — "and" "the" "is" など意味を持たない語を削除
+df["message"] = df["message"].apply(
+    lambda x: [w for w in x if w not in stop_words]
+)
+
+# Step 5: ステミング — 語を語幹形に正規化
+df["message"] = df["message"].apply(
+    lambda x: [stemmer.stem(w) for w in x]
+)
+
+# Step 6: 文字列に戻す — TF-IDF等のベクトライザは文字列を期待する
+df["message"] = df["message"].apply(lambda x: " ".join(x))
+```
+
+**ステミングとは何か（メモ：数式より直感で理解する）：**
+
+同じ意味を持つ単語の表記揺れを統一する処理。`PorterStemmer` はルールベースで語尾を切り捨てる。
+
+```
+"running"  → "run"
+"runner"   → "runner"   ← 完全には一致しないこともある
+"runs"     → "run"
+"fishing"  → "fish"
+"fished"   → "fish"
+```
+
+**なぜ必要か：** Naive Bayes は「running と run は別の単語」として別々にカウントする。ステミングで統一しておかないと語彙サイズが無駄に大きくなり、同じ概念を表す単語が分散してしまう。
+
+**注意点：** PorterStemmer は意味的な正しさより速度優先の粗削りな処理。`"university" → "univers"` のように意味が読み取りにくくなることがある。精度が重要な場合は **Lemmatization（見出し語化）** を検討する（`"running" → "run"` を品詞解析で正確に行う手法）。
+
+**各ステップで情報が絞られる流れ：**
+
+```
+元の文 → 小文字化 → 記号除去 → [単語リスト] → ストップワード削除 → ステミング → "結合文字列"
+           ↓              ↓           ↓                ↓                ↓
+        大文字揺れ解消  数字ノイズ除去  構造化      非情報語を除去    語形の統一
+```
+
 ### 手順
 
-1. テキストの場合：`CountVectorizer`または`TfidfVectorizer`で特徴量化
+1. テキストの場合：上記パイプラインで前処理 → `CountVectorizer`または`TfidfVectorizer`で特徴量化
 2. `MultinomialNB()`または`GaussianNB()`でfit
 3. `predict_proba()`で各クラスの確率を確認
 4. Precision/Recall/F1で評価（スパムフィルタはRecallを重視）
