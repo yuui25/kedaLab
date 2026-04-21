@@ -155,6 +155,7 @@
 | オートエンコーダ（次元削減・異常検知） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/Neural_Networks.md` |
 | CNN（畳み込みニューラルネットワーク・画像処理） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | 転移学習（ResNet・VGG・Fine-tuning） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| バイトプロット（Byteplot）によるマルウェア静的分類 | Deep Learning / Security | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | RNN・LSTM・GRU（系列データ・時系列） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/RNN.md` |
 
 ### 生成AI
@@ -168,6 +169,13 @@
 | プロンプトインジェクション攻撃 | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | 拡散モデル（Diffusion Models）・Stable Diffusion | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
 | Latent Diffusion・DDIM・LCM | Generative AI | `06_Concepts/AI_ML/Generative_AI/Diffusion_Models.md` |
+
+### データ攻撃
+
+| 技術名 | カテゴリ | ファイルパス |
+|--------|---------|------------|
+| データ品質属性と攻撃ベクタの対応（ノイズインジェクション・ラベルフリッピング・バイアスインジェクション） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| クラス不均衡攻撃（少数クラスの意図的欠落） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 
 ---
 
