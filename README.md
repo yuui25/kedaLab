@@ -15,10 +15,12 @@
 **まず Playbook から入る：**
 
 環境が判明したら、まず `00_Playbook/` の該当フローを開く。
+**OSがまだ不明な場合は `00_Playbook/00_OS_Identification.md` から始める。**
 
-| 環境 | 参照するファイル |
+| 状況 | 参照するファイル |
 |------|----------------|
-| Linux | `00_Playbook/Linux_Attack_Flow.md` |
+| OSが不明（最初の一手） | `00_Playbook/00_OS_Identification.md` |
+| Linux と判明している | `00_Playbook/Linux_Attack_Flow.md` |
 | Windows（ドメインコントローラーあり） | `00_Playbook/Windows_AD_Attack_Flow.md` |
 
 Playbook は「今何を試すべきか」の判断フローになっており、各ステップから詳細ファイルへのリンクが張ってある。詳細が必要になったらリンク先の `.md` を開く、という2段階の使い方が基本。
@@ -177,6 +179,7 @@ kedalab/
 ├── TECHNIQUES_INDEX.md              # 全技術の横断インデックス
 │
 ├── 00_Playbook/                     # 判断フロー（何を・どの順で試すか）
+│   ├── 00_OS_Identification.md      # OS判定（TTL・ポート・ヘッダー・バナー）← 最初に参照
 │   ├── Linux_Attack_Flow.md
 │   └── Windows_AD_Attack_Flow.md
 │

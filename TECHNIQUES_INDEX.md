@@ -11,6 +11,7 @@
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | ポートスキャン（nmap） | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
+| OS判定（TTL・ポート構成・HTTPヘッダー・SMBバナー・SSH バナー） | Reconnaissance | `00_Playbook/00_OS_Identification.md` |
 | robots.txt からの隠しパス発見 | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | サービスバージョン検出 | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
 | IPレンジからDockerコンテナを特定（172.17.0.x） | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
