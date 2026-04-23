@@ -69,7 +69,7 @@ xmllint --format nmap_initial.xml
 **① ドメイン名・ホスト名（LDAP / SMB バナーから）**
 ```
 389/tcp open ldap  Microsoft Windows Active Directory LDAP
-|                  (Domain: example.htb, Site: Default-First-Site-Name)
+|                  (Domain: corp.local, Site: Default-First-Site-Name)
 ```
 → `Domain:` の値が AD のドメイン名。**`/etc/hosts` への登録をここで行う。**
 
@@ -106,7 +106,7 @@ Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows_server_2008:r
 ```
 # この出力が出たら → AD環境 + DC確定
 88/tcp   open  kerberos-sec  → AD確定
-389/tcp  open  ldap  (Domain: xxx.htb) → ドメイン名を /etc/hosts に登録
+389/tcp  open  ldap  (Domain: corp.local) → ドメイン名を /etc/hosts に登録
 445/tcp  open  microsoft-ds  → SMBアクセスを試みる
 smb2-security-mode: signing required → NTLMリレー不可
 

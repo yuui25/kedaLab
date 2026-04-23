@@ -23,9 +23,7 @@
 ### 着火条件
 ping が通る環境であれば、nmap より先に実行できる。
 
-### 原理
-OS によってデフォルトの IP パケット TTL（Time To Live）初期値が異なる。
-ルーターを経由するたびに TTL が 1 ずつ減るため、受信した TTL から経由ホップ数を逆算して初期値を推定する。
+> 原理（なぜ OS ごとに TTL 初期値が違うのか・ホップ数でどうズレるか・偽装の可能性） → `../06_Concepts/OS_Fingerprinting_Principles.md`
 
 ```bash
 ping -c 1 [IP]
@@ -137,15 +135,15 @@ curl -sI http://[IP]/ | grep -i "server\|x-powered-by\|x-aspnet"
 ### 着火条件
 Web が動いており、既存のパス（`/index.html` 等）がわかっている場合。
 
-### 原理
-- **Linux（ext4 等）**: ファイルシステムが大文字小文字を**区別する**。`/index.html` と `/INDEX.HTML` は別ファイル
-- **Windows（NTFS）**: 大文字小文字を**区別しない**。`/index.html` でも `/INDEX.HTML` でも同じファイルが返る
+> 原理（ext4 / NTFS / APFS の仕様差・アプリ側の正規化で判定が崩れるケース） → `../06_Concepts/OS_Fingerprinting_Principles.md`
+
+**判定ルール：**
+- 200 が返る → 大文字でもヒット → Windows 寄り（NTFS 既定 case-insensitive）
+- 404 が返る → 大文字だと見つからない → Linux 寄り（ext4 既定 case-sensitive）
 
 ```bash
 # 存在するパスを大文字に変えてアクセス
 curl -s http://[IP]/INDEX.HTML -o /dev/null -w "%{http_code}\n"
-# 200 → Windows（区別しない）
-# 404 → Linux（区別する）
 ```
 
 ### 注意点
