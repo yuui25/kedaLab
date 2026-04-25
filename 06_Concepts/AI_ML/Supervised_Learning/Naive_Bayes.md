@@ -183,5 +183,6 @@ df["message"] = df["message"].apply(lambda x: " ".join(x))
 - ロジスティック回帰（同じく確率的分類、独立性仮定なし） → `Linear_Regression.md`
 - SVM（テキスト分類でNaive Bayesと競合する手法） → `SVM.md`
 - TF-IDF / 単語ベクトル（特徴量表現）
+- **CountVectorizer / Bag-of-Words の詳細（パラメータ・動作ステージ・bigram の効果）** → `Feature_Extraction.md`
 
 > 原理（ベイズの定理・条件付き確率の導出） → `../../06_Concepts/Bayes_Theorem.md`

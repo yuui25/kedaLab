@@ -158,6 +158,9 @@
 | 決定木（Decision Trees）・ランダムフォレスト | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Decision_Trees.md` |
 | Naive Bayes（テキスト分類・スパムフィルタリング） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Naive_Bayes.md` |
 | NLP テキスト前処理パイプライン（小文字化・トークン化・ストップワード除去・ステミング） | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/Naive_Bayes.md` |
+| Bag-of-Words モデル（CountVectorizer・語彙構築・unigram/bigram） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
+| CountVectorizer パラメータ（min_df・max_df・ngram_range） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
+| テキスト→数値ベクトル変換の3ステージ（Tokenization・語彙構築・Vectorization） | Supervised Learning / NLP | `06_Concepts/AI_ML/Supervised_Learning/Feature_Extraction.md` |
 | SVM（サポートベクターマシン）・カーネルトリック | Supervised Learning | `06_Concepts/AI_ML/Supervised_Learning/SVM.md` |
 
 ### 教師なし学習
