@@ -258,8 +258,15 @@
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
+| ML OWASP Top 10 分類フレームワーク（ML01〜ML10 の攻撃段階・着火条件・参照先） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | データ品質属性と攻撃ベクタの対応（ノイズインジェクション・ラベルフリッピング・バイアスインジェクション） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | クラス不均衡攻撃（少数クラスの意図的欠落） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| Model Skewing — 攻撃者目的に沿ったバイアス誘導型データ汚染 | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| モデル逆転攻撃（Model Inversion Attack）— 出力からの入力再構成 | AI Inference Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| AI サプライチェーン攻撃（データソース・ライブラリ・事前学習済みモデルの悪用） | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| 転移学習攻撃（Transfer Learning Attack）— 事前学習済みモデルへのバックドア埋め込み | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| 出力完全性攻撃（Output Integrity Attack）— ML出力の中間者改ざん | AI Integrity Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| モデルポイズニング（Model Poisoning）— パラメータ直接操作とデータポイズニングとの区別 | AI Model Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 敵対的サンプル攻撃の原理（ノルム制約・決定境界の不安定性） | AI Evasion 基礎 | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 | FGSM（Fast Gradient Sign Method）— 一階勾配ベース攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 | PGD（Projected Gradient Descent）— 反復型敵対的攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
