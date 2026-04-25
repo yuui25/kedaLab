@@ -144,6 +144,14 @@
 | AIシステムへの攻撃面・アクセスレベル・攻撃目的の分類 | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | セキュリティ評価手法の選択（脆弱性評価・ペネトレーションテスト・レッドチームの違い） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | MLシステムにレッドチームが適している条件（時間・相互作用点・スコープ定義の困難さ） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| Google SAIF — 4エリア構造（Data/Infrastructure/Model/Application）によるパイプライン分解 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
+| SAIF リスクの3点分析（リスク導入点・露出点・緩和点の区別） | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
+| SAIF モデル作成者 vs モデル利用者の責任分担 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
+| Unauthorized Training Data — 無許可データ訓練による法的・倫理的リスク | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
+| Excessive Data Handling — 規制範囲を超えたデータ収集・保持 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
+| Model Source Tampering — モデルソースコード・重みの直接改ざん | AI Model Attacks | `06_Concepts/AI_ML/SAIF.md` |
+| Model Deployment Tampering — デプロイインフラ・CI/CDパイプラインへの改ざん | AI Model Attacks | `06_Concepts/AI_ML/SAIF.md` |
+| Inferred Sensitive Data — 直接アクセス不要の統計的推論による機密情報漏洩 | AI Inference Attacks | `06_Concepts/AI_ML/SAIF.md` |
 | 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
