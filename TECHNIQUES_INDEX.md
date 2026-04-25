@@ -142,6 +142,8 @@
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | AIシステムへの攻撃面・アクセスレベル・攻撃目的の分類 | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| セキュリティ評価手法の選択（脆弱性評価・ペネトレーションテスト・レッドチームの違い） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| MLシステムにレッドチームが適している条件（時間・相互作用点・スコープ定義の困難さ） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 機械学習の種類と選択基準（教師あり・なし・強化学習） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 過学習・未学習・バイアス-バリアンストレードオフ | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
 | 評価指標（Accuracy・Precision・Recall・F1・ROC-AUC） | AI/ML 基礎 | `06_Concepts/AI_ML/Overview.md` |
