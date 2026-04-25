@@ -284,6 +284,18 @@
 | 歪み補正（log1p 変換・Skewed Data 処理） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 | データ分割（Train/Validation/Test・Data Leakage 防止） | AI/ML 前処理 | `06_Concepts/AI_ML/Data_Transformation.md` |
 
+### システムコンポーネント攻撃
+
+| 技術名 | カテゴリ | ファイルパス |
+|--------|---------|------------|
+| インセキュアな ML モデルデプロイ（認証・暗号化・入力バリデーション欠如）の攻撃面 | AI System Attacks | `06_Concepts/AI_ML/System_Attacks.md` |
+| ML 固有のリソース枯渇 DoS（複雑入力による推論処理圧迫）| AI System Attacks | `06_Concepts/AI_ML/System_Attacks.md` |
+| オートスケーリングコスト増大攻撃（少数の高コスト入力でクラウド課金を急増させる） | AI System Attacks | `06_Concepts/AI_ML/System_Attacks.md` |
+| DoS を隠れ蓑にした複合攻撃（セキュリティチームを DoS に集中させ別コンポーネントを侵害） | AI System Attacks | `06_Concepts/AI_ML/System_Attacks.md` |
+| ML インフラ設定不備（推論 API ポート露出・ML 管理 UI 認証なし・デフォルト認証情報） | AI System Attacks | `06_Concepts/AI_ML/System_Attacks.md` |
+
+---
+
 ### データ攻撃・敵対的攻撃
 
 | 技術名 | カテゴリ | ファイルパス |
