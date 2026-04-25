@@ -147,6 +147,9 @@
 | 生成AIの4コンポーネント分類（Model/Data/Application/System）と各コンポーネント固有 TTPs | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | オープンソースモデルのローカルホスト戦術（レート制限回避・疑惑なし大量テスト） | AI Red Teaming 戦術 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 継続学習システムのデータパイプラインの高価値ターゲット性（ポイズニング経路・機密集積） | AI Red Teaming 戦術 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| モデルコンポーネントのブラックボックスプロービング TTP（入出力ペア収集→特性分析→攻撃設計） | AI Red Teaming 戦術 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| Model Extraction — 入力空間スパン戦略・Adaptive Querying・代替モデルの用途拡充 | AI Model Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| Model Extraction — 非API経路での直接取得（不安全ストレージ・平文転送） | AI Model Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | Google SAIF — 4エリア構造（Data/Infrastructure/Model/Application）によるパイプライン分解 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
 | SAIF リスクの3点分析（リスク導入点・露出点・緩和点の区別） | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
 | SAIF モデル作成者 vs モデル利用者の責任分担 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
@@ -254,6 +257,7 @@
 | RAG（Retrieval-Augmented Generation） | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | Fine-tuning・LoRA | Generative AI | `06_Concepts/AI_ML/Generative_AI/LLM.md` |
 | プロンプトインジェクション攻撃（直接型・間接型） | Generative AI / Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
+| Jailbreak — LLM ガードレール迂回（耐性による難易度変化・多層防御との連鎖） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | LLM OWASP Top 10 分類フレームワーク（LLM01〜LLM10・着火条件・連鎖パターン） | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | Sensitive Information Disclosure — Fine-tuning 済みモデルの学習データ漏洩 | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
 | Improper Output Handling — LLM出力経由の XSS・SQLi・Command Injection | LLM Security | `06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md` |
