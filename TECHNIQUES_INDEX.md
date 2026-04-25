@@ -286,6 +286,10 @@
 | クラス不均衡攻撃（少数クラスの意図的欠落） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | Model Skewing — 攻撃者目的に沿ったバイアス誘導型データ汚染 | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | 標的特化型ポイズニング（特定入力の予測変更・全体精度への影響最小・重複排除対応） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| Federated Learning 攻撃（勾配汚染・バックドア注入・分散学習への毒入れ） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| 学習データ盗取（Training Data Theft）— クラウド設定不備・暗号化不足・データパイプライン・脆弱API 経由 | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| インサイダー脅威（Insider Threat）— 正規アクセスを利用したデータ漏洩・悪意ある内部者・侵害された内部者 | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| データサプライチェーン攻撃（ベンダー侵害による学習データの事前取得） | AI Supply Chain | `06_Concepts/AI_ML/Data_Attacks.md` |
 | モデル逆転攻撃（Model Inversion Attack）— 出力からの入力再構成 | AI Inference Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | AI サプライチェーン攻撃（データソース・ライブラリ・事前学習済みモデルの悪用） | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 転移学習攻撃（Transfer Learning Attack）— 事前学習済みモデルへのバックドア埋め込み | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
