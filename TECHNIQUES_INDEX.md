@@ -216,6 +216,9 @@
 | クラス不均衡の可視化と対策（EDA → seaborn 水平バープロット → macro avg 乖離確認 → クラス重み付き損失） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | split-folders による画像データセット分割（80/20・valフォルダ空パターン） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | torchvision ImageFolder + DataLoader パイプライン（フォルダ名→ラベル自動認識） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| tensor.permute(1,2,0)による PyTorch 画像テンソル可視化（CHW→HWC 変換） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| load_datasets() 関数化パターン（前処理・DataLoader・n_classes を一元管理） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| データ分割後のファイル数確認（find \| wc -l による split 比率の検証） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | ResNet50 全層 freeze + 最終 FC 層差し替えによる転移学習 | Deep Learning / Security | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | PyTorch 訓練ループ（CrossEntropyLoss・Adam・zero_grad→backward→step） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | torch.jit.script によるモデルのシリアライズ（TorchScript 保存） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
