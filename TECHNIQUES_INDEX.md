@@ -144,6 +144,9 @@
 | AIシステムへの攻撃面・アクセスレベル・攻撃目的の分類 | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | セキュリティ評価手法の選択（脆弱性評価・ペネトレーションテスト・レッドチームの違い） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | MLシステムにレッドチームが適している条件（時間・相互作用点・スコープ定義の困難さ） | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| 生成AIの4コンポーネント分類（Model/Data/Application/System）と各コンポーネント固有 TTPs | AI Red Teaming 基礎 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| オープンソースモデルのローカルホスト戦術（レート制限回避・疑惑なし大量テスト） | AI Red Teaming 戦術 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| 継続学習システムのデータパイプラインの高価値ターゲット性（ポイズニング経路・機密集積） | AI Red Teaming 戦術 | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | Google SAIF — 4エリア構造（Data/Infrastructure/Model/Application）によるパイプライン分解 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
 | SAIF リスクの3点分析（リスク導入点・露出点・緩和点の区別） | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
 | SAIF モデル作成者 vs モデル利用者の責任分担 | AI Security Framework | `06_Concepts/AI_ML/SAIF.md` |
