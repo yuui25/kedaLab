@@ -208,6 +208,9 @@
 | CNN（畳み込みニューラルネットワーク・画像処理） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | 転移学習（ResNet・VGG・Fine-tuning） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | バイトプロット（Byteplot）によるマルウェア静的分類 | Deep Learning / Security | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| マルウェアファミリーの概念（行動・配送・技術的特徴による分類軸） | Security / Malware | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| マルウェア分類手法の選択基準（静的解析・動的解析・画像ベースMLの使い分け） | Security / Malware | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| 画像ベースマルウェア分類の安全性（バイナリ不使用・感染リスクなし） | Security / Malware | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | RNN・LSTM・GRU（系列データ・時系列） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/RNN.md` |
 
 ### 生成AI
