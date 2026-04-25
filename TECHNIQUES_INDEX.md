@@ -220,6 +220,8 @@
 | load_datasets() 関数化パターン（前処理・DataLoader・n_classes を一元管理） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | データ分割後のファイル数確認（find \| wc -l による split 比率の検証） | AI/ML 前処理 | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | ResNet50 全層 freeze + 最終 FC 層差し替えによる転移学習 | Deep Learning / Security | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| ResNet アーキテクチャ選択基準（18/50/101 の速度-精度トレードオフ） | Deep Learning | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
+| fc.in_features 動的読み取りパターン（ResNet variants 間の互換性確保） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | PyTorch 訓練ループ（CrossEntropyLoss・Adam・zero_grad→backward→step） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | torch.jit.script によるモデルのシリアライズ（TorchScript 保存） | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |
 | 推論時の model.eval() + torch.no_grad() パターン | Deep Learning / PyTorch | `06_Concepts/AI_ML/Deep_Learning/CNN.md` |

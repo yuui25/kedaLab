@@ -331,6 +331,18 @@ def load_datasets(base_path, train_batch_size, test_batch_size):
 
 **ステップ3：ResNet50 転移学習モデルの定義**
 
+**モデル選択の根拠（ResNet50 を選ぶ条件）：**
+
+| 条件 | ResNet50 が適合する理由 |
+|------|----------------------|
+| 入力が画像データ | 画像分類タスクで実績のある代表的アーキテクチャ |
+| データ量が限られている | ImageNet で学習済みの特徴抽出器を流用できる（転移学習） |
+| 訓練コストを抑えたい | 全層 freeze + 最終層のみ学習で訓練時間を大幅短縮 |
+| PoC・プロトタイプ段階 | 50 層・約 2,300 万パラメータと十分な表現力を持ちながら扱いやすい |
+
+- ResNet50 は「残差接続（Residual Connection）」によって 50 層の深さでも勾配消失を回避している
+- 同ファミリーに ResNet18（軽量・高速）、ResNet101/152（高精度・低速）があり、速度と精度のトレードオフで選択する
+
 ```python
 import torch.nn as nn
 import torchvision.models as models
@@ -342,7 +354,8 @@ class MalwareClassifier(nn.Module):
         # 特徴抽出層をすべて freeze（最終 FC 層のみ学習対象）
         for param in self.resnet.parameters():
             param.requires_grad = False
-        # 最終 FC 層を差し替え：in_features → hidden_size → n_classes
+        # 最終 FC 層を差し替え：in_features を動的に読み取る
+        # → ResNet18/34/101 等に変更してもコードが壊れない
         num_features = self.resnet.fc.in_features  # ResNet50 は 2048
         self.resnet.fc = nn.Sequential(
             nn.Linear(num_features, hidden_size),
@@ -354,9 +367,10 @@ class MalwareClassifier(nn.Module):
         return self.resnet(x)
 ```
 
-- **全層 freeze の理由：** 特徴抽出器は ImageNet で既に十分に学習済み。学習するのは分類ヘッドのみにすることで数日単位かかる訓練コストを数十分に短縮できる
-- **trade-off：** freeze しすぎると精度の上限が下がる。精度重視なら freeze を外すか一部だけ unfreeze する
+- **全層 freeze の理由：** ImageNet 学習済みの特徴抽出器はそのまま流用できる。分類ヘッドのみ学習することで、数日〜数週間単位かかる訓練コストを数十分に短縮できる
+- **trade-off：** 全層 freeze は訓練速度を最大化するが精度の上限が下がる。精度重視なら freeze を解除するか一部だけ unfreeze（最終数ブロックを学習対象にする）する
 - `weights='DEFAULT'` は最新の推奨済み重みを自動選択（`pretrained=True` は非推奨）
+- **`fc.in_features` を動的に読み取るパターン：** ResNet50 は `2048`、ResNet18/34 は `512` と variant ごとに異なる。ハードコードせず `model.fc.in_features` で読み取れば、バックボーンを変更してもコードが壊れない
 
 **ステップ4：訓練ループ**
 
