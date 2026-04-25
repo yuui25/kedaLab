@@ -147,6 +147,190 @@ model.fc = nn.Linear(2048, num_classes)
 - 高度な難読化・ポリモーフィック型マルウェアでは視覚的特徴が崩れ、精度が落ちる
 - バイナリサイズによって画像の縦横比が変わるため、リサイズの方法がモデル精度に影響する
 
+---
+
+#### Malimg データセット（画像ベースマルウェア分類のベンチマーク）
+
+**着火条件：** 画像ベースのマルウェア分類器を学習・評価する際の標準データセットとして参照する。
+
+**データセット構造：**
+- 9,339枚・25クラス（マルウェアファミリー単位）のグレースケール PNG 画像
+- 各画像は Windows PE ファイル（実行可能バイナリ）をバイト単位で可視化したもの
+- 1ピクセル = 1バイト（値 0→黒、255→白、中間→グレー）
+- ロスレスエンコーディング：画像からバイナリを完全再現可能
+- フォルダ構成：`malimg_paper_dataset_imgs/<ファミリー名>/` 形式でクラスごとに分離
+
+**クラス不均衡の確認手順：**
+- データ探索の最初にクラスごとのサンプル数を集計してバープロット化する
+- 不均衡が大きい場合、学習後の精度が支配的クラスに偏る可能性がある
+- 対策：データ拡張・オーバーサンプリング・クラス重み付き損失関数（`weight` パラメータ）
+
+```python
+import os
+
+dist = {cls: len(os.listdir(os.path.join(DATA_BASE_PATH, cls)))
+        for cls in os.listdir(DATA_BASE_PATH)}
+# → {ファミリー名: サンプル数} の辞書。不均衡クラスを特定する
+```
+
+**観点：** `Allaple.A`・`Allaple.L` 系は他ファミリーより大幅にサンプル数が多い。精度評価時は macro avg と weighted avg の乖離でクラス不均衡の影響を確認する。
+
+---
+
+#### PyTorch 実装パイプライン（マルウェア画像分類）
+
+**着火条件：** Malimg 等の画像ベースマルウェアデータセットを PyTorch で学習・推論する場合。
+
+**ステップ1：データ分割（split-folders）**
+
+```bash
+pip install split-folders
+```
+
+```python
+import splitfolders
+
+# 80% train / 20% test に分割。val フォルダは空になる
+splitfolders.ratio(
+    input="./malimg_paper_dataset_imgs/",
+    output="./newdata/",
+    ratio=(0.8, 0, 0.2)
+)
+# 出力: ./newdata/train/, ./newdata/val/, ./newdata/test/
+```
+
+- `ratio` の第2引数が 0 だと val フォルダは空で作成される（使わない場合はこのまま）
+- 分割はランダムのため、実行ごとにテスト精度が変わりうる
+
+**ステップ2：前処理 transform と DataLoader の構築**
+
+```python
+from torchvision import transforms
+from torchvision.datasets import ImageFolder
+from torch.utils.data import DataLoader
+import os
+
+# ImageNet 事前学習済みモデルが期待する正規化値を使う
+transform = transforms.Compose([
+    transforms.Resize((75, 75)),           # 全画像を同サイズに統一
+    transforms.ToTensor(),                 # PIL → Tensor（値 0-1 に正規化）
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],        # ImageNet の RGB 平均
+        std=[0.229, 0.224, 0.225]          # ImageNet の RGB 標準偏差
+    )
+])
+
+train_dataset = ImageFolder(root=os.path.join(BASE_PATH, "train"), transform=transform)
+test_dataset  = ImageFolder(root=os.path.join(BASE_PATH, "test"),  transform=transform)
+
+train_loader = DataLoader(train_dataset, batch_size=512, shuffle=True,  num_workers=2)
+test_loader  = DataLoader(test_dataset,  batch_size=1024, shuffle=False, num_workers=2)
+
+n_classes = len(train_dataset.classes)  # データから動的にクラス数を取得
+```
+
+- `Resize(75, 75)` は速度優先の小サイズ。精度が不足する場合は `(224, 224)` に変更する
+- `ImageFolder` はフォルダ名をクラスラベルとして自動認識する（フォルダ構成がラベルになる）
+- `n_classes` をハードコードせず動的取得することで、クラス追加・削除後もコードが壊れない
+
+**ステップ3：ResNet50 転移学習モデルの定義**
+
+```python
+import torch.nn as nn
+import torchvision.models as models
+
+class MalwareClassifier(nn.Module):
+    def __init__(self, n_classes, hidden_size=1000):
+        super().__init__()
+        self.resnet = models.resnet50(weights='DEFAULT')  # ImageNet 学習済み重みを使用
+        # 特徴抽出層をすべて freeze（最終 FC 層のみ学習対象）
+        for param in self.resnet.parameters():
+            param.requires_grad = False
+        # 最終 FC 層を差し替え：in_features → hidden_size → n_classes
+        num_features = self.resnet.fc.in_features  # ResNet50 は 2048
+        self.resnet.fc = nn.Sequential(
+            nn.Linear(num_features, hidden_size),
+            nn.ReLU(),
+            nn.Linear(hidden_size, n_classes)
+        )
+
+    def forward(self, x):
+        return self.resnet(x)
+```
+
+- **全層 freeze の理由：** 特徴抽出器は ImageNet で既に十分に学習済み。学習するのは分類ヘッドのみにすることで数日単位かかる訓練コストを数十分に短縮できる
+- **trade-off：** freeze しすぎると精度の上限が下がる。精度重視なら freeze を外すか一部だけ unfreeze する
+- `weights='DEFAULT'` は最新の推奨済み重みを自動選択（`pretrained=True` は非推奨）
+
+**ステップ4：訓練ループ**
+
+```python
+import torch
+
+def train(model, train_loader, n_epochs):
+    model.train()
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters())
+    for epoch in range(n_epochs):
+        running_loss, n_total, n_correct = 0, 0, 0
+        for inputs, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            _, predicted = outputs.max(1)
+            n_total += labels.size(0)
+            n_correct += predicted.eq(labels).sum().item()
+        print(f"Epoch {epoch+1}: Acc={100*n_correct/n_total:.2f}% Loss={running_loss/len(train_loader):.4f}")
+```
+
+- `optimizer.zero_grad()` → `loss.backward()` → `optimizer.step()` の順序は必須
+- `outputs.max(1)` で予測クラスのインデックスを取得（`_` は max 値自体で不要）
+
+**ステップ5：モデル保存と推論**
+
+```python
+# 保存：TorchScript 形式（デプロイに適した形式）
+def save_model(model, path):
+    model_scripted = torch.jit.script(model)
+    model_scripted.save(path)
+
+# 推論：勾配計算を無効化して高速化・メモリ節約
+def evaluate(model, test_loader):
+    model.eval()
+    n_correct, n_total = 0, 0
+    with torch.no_grad():
+        for data, target in test_loader:
+            _, predicted = torch.max(model(data), 1)
+            n_total += target.size(0)
+            n_correct += (predicted == target).sum().item()
+    return 100 * n_correct / n_total
+```
+
+- `model.eval()` は Dropout・BatchNorm を推論モードに切り替える（忘れると精度が落ちる）
+- `torch.no_grad()` は勾配グラフを作らずメモリ使用量を削減する
+- `torch.jit.script` でシリアライズするとデプロイ時に Python 環境が不要になる
+
+**性能参考値（Malimg・10 エポック・全層 freeze・Resize 75×75）：**
+
+| エポック | 訓練精度 | 備考 |
+|---------|---------|------|
+| 1 | ~57% | 最終FC層の初期収束フェーズ |
+| 3 | ~89% | 実用的な最低ラインの目安 |
+| 10 | ~96% | 訓練データでの精度 |
+| — | **~88.5%** | テストデータでの精度（汎化性能） |
+
+- 訓練精度とテスト精度の約 8% 乖離は過学習の兆候。より強い Dropout や Data Augmentation を追加する余地がある
+- 精度はデータ分割のランダムシードに依存するため実行ごとに変わりうる
+
+**注意点・落とし穴：**
+- グレースケール画像（1ch）を ImageNet 学習済みモデル（3ch 期待）に入力する際は、PNG を RGB 変換するか `transforms.Grayscale(3)` で 3ch に複製する必要がある
+- `num_workers` を増やすと高速化するが、Windows 環境では `num_workers=0` にしないとエラーになる場合がある
+- バッチサイズを大きくすると GPU メモリ不足になりやすい。512 → 256 → 128 と下げて調整する
+
+---
+
 ### 関連技術
 
 - ニューラルネットワーク基礎 → `Neural_Networks.md`
