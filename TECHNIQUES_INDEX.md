@@ -35,6 +35,13 @@
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
+| クロスサイトスクリプティング（XSS）— 反射型・格納型・DOM型 | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| XSS セッショントークン窃取（Cookie スティーリング）| Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| XSS DOM偽装・フィッシングリダイレクト | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| 入力バイパス — エンコーディング・難読化によるフィルタ回避（HTML / URL / ダブルエンコーディング） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| ソーシャルエンジニアリング（フィッシング・スピアフィッシング・BEC） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
+| プリテキスティング（IT サポート・監査員・ベンダーを装った認証情報詐取） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
+| ベイティング（感染USB放置・偽ダウンロードリンク） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
 | パストラバーサル（ディレクトリトラバーサル） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | Grafana パストラバーサル CVE-2021-43798 | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | IDOR（連番ID・オブジェクト直接参照） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
