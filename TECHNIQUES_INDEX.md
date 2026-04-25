@@ -262,11 +262,14 @@
 | データ品質属性と攻撃ベクタの対応（ノイズインジェクション・ラベルフリッピング・バイアスインジェクション） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | クラス不均衡攻撃（少数クラスの意図的欠落） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | Model Skewing — 攻撃者目的に沿ったバイアス誘導型データ汚染 | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
+| 標的特化型ポイズニング（特定入力の予測変更・全体精度への影響最小・重複排除対応） | AI Data Attacks | `06_Concepts/AI_ML/Data_Attacks.md` |
 | モデル逆転攻撃（Model Inversion Attack）— 出力からの入力再構成 | AI Inference Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | AI サプライチェーン攻撃（データソース・ライブラリ・事前学習済みモデルの悪用） | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 転移学習攻撃（Transfer Learning Attack）— 事前学習済みモデルへのバックドア埋め込み | AI Supply Chain | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | 出力完全性攻撃（Output Integrity Attack）— ML出力の中間者改ざん | AI Integrity Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
 | モデルポイズニング（Model Poisoning）— パラメータ直接操作とデータポイズニングとの区別 | AI Model Attacks | `06_Concepts/AI_ML/AI_Red_Teaming_Concepts.md` |
+| テキスト分類器への入力操作（Rephrasing・Overpowering・HTML コメント隠蔽） | AI Evasion / NLP | `06_Concepts/AI_ML/Adversarial_Examples.md` |
+| プロービング（語・フレーズ単位の分類シグナル強度測定） | AI Evasion / NLP | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 | 敵対的サンプル攻撃の原理（ノルム制約・決定境界の不安定性） | AI Evasion 基礎 | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 | FGSM（Fast Gradient Sign Method）— 一階勾配ベース攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |
 | PGD（Projected Gradient Descent）— 反復型敵対的攻撃 | AI Evasion | `06_Concepts/AI_ML/Adversarial_Examples.md` |

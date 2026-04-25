@@ -185,5 +185,6 @@ df["message"] = df["message"].apply(lambda x: " ".join(x))
 - TF-IDF / 単語ベクトル（特徴量表現）
 - **CountVectorizer / Bag-of-Words の詳細（パラメータ・動作ステージ・bigram の効果）** → `Feature_Extraction.md`
 - **Pipeline・GridSearchCV・joblib（学習・チューニング・モデル保存の一連フロー）** → `Model_Training_Pipeline.md`
+- **Naive Bayes の独立性仮定を突いた Overpowering 攻撃（テキスト分類器回避）** → `../Adversarial_Examples.md`
 
 > 原理（ベイズの定理・条件付き確率の導出） → `../../06_Concepts/Bayes_Theorem.md`
