@@ -194,6 +194,67 @@ gpp-decrypt '[cpassword 属性の値]'
 
 ---
 
+## パターン7: Webアプリの .env ファイルからの認証情報取得
+
+### 着火条件
+- Webサーバ（nginx / Apache 等）の公開ディレクトリ（`/var/www/html/` 等）にシェルでアクセスできた
+- PHP / Node.js / Laravel / Django 等のフレームワークベースのWebアプリが動作している
+
+### 観点・着眼点
+`.env` ファイルはWebアプリの設定を環境変数として管理するファイル。**本番環境ではDBの認証情報・APIキー・シークレットキー等が平文で格納されている**ことが多い。
+
+www-data等の低権限ユーザーでシェルを取得した直後に確認するべき最優先ファイルの一つ。OSユーザーのパスワードとDBパスワードが使い回されているケースが多く、そのまま `su` や SSH での横展開に使える。
+
+**確認すべきパスと優先順位：**
+
+```bash
+# Webルートの直下（最優先）
+cat /var/www/html/.env
+ls -la /var/www/html/
+
+# フレームワーク特有のパス
+cat /var/www/[アプリ名]/.env
+cat /opt/[アプリ名]/.env
+cat /srv/[アプリ名]/.env
+
+# 隠しファイルを含めて一覧表示
+ls -la /var/www/html/
+```
+
+`.env` が見つかったら以下を確認する：
+
+```
+DB_HOST=127.0.0.1
+DB_DATABASE=app_prod
+DB_USERNAME=admin
+DB_PASSWORD=passowrd    ← これがOSユーザーでも使われている可能性
+APP_KEY=base64:...               ← アプリの暗号化キー
+```
+
+### 手順
+
+```bash
+# カレントディレクトリのWebルートを確認
+ls -la /var/www/html/
+
+# .env の中身を確認
+cat /var/www/html/.env
+
+# 取得したパスワードを /etc/passwd のユーザーに対して試す
+cat /etc/passwd | grep "/home"
+# → ホームディレクトリを持つOSユーザーを確認
+su [USERNAME]
+# パスワードに .env の DB_PASSWORD 等を入力
+```
+
+### 注意点・落とし穴
+- `.env` はデフォルトで隠しファイル（`.` 始まり）のため、`ls` だけでは見えない。`ls -la` で確認する
+- DB_PASSWORD と OSユーザーのパスワードが同一になっているのは設定ミス（パスワード使い回し）だが、実際に多い
+- `.env` が見つからない場合は `config.php`, `database.yml`, `appsettings.json`, `docker-compose.yml` 等も確認する
+- アプリケーションによっては `.env.production` / `.env.local` 等の派生ファイルが存在する
+
+---
+
 ## 認証情報を取得したら必ず試すこと
 
 **パスワードの使い回し確認：**

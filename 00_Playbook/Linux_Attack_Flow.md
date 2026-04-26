@@ -60,6 +60,14 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 4. gobuster / ffuf でディレクトリ列挙
 5. **エンドポイントのIDやパラメータに連番・予測可能な値がないか確認** → IDOR の可能性
 6. vhost（仮想ホスト）のファジングを検討
+7. **JS ソースに難読化コードがある場合はデコードしてAPIエンドポイントを発見する**
+   - `eval(function(p,a,c,k,e,d){...})` が見えたらブラウザ Console で `eval → console.log` に置換
+   - APIレスポンスのエンコーディング種別（ROT13 / Base64 等）も確認する
+   → `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md`
+8. **APIが `username`, `host`, `ip` 等のパラメータを受け取る場合はコマンドインジェクションを試みる**
+   - まず管理者APIへの権限昇格（`is_admin=1` 等のパラメータ改ざん）を確認
+   - `; id` で注入テスト → リバースシェルへ
+   → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
 
 → 詳細: `../01_Reconnaissance/Web_Enumeration.md`
 → CVE 検索: `../05_Tools_Reference/Searchsploit.md`
@@ -158,6 +166,22 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 
 → 詳細手順（スクリプト配置・引き金の引き方・失敗パターン）: `../03_Post_Access_Linux/PAM_Misconfig.md`
 → 原理（なぜ PAM session が root 権限で外部コマンドを呼ぶのか）: `../06_Concepts/PAM.md`
+
+### カーネルバージョンが古い場合
+
+**シグナル → 次アクション：**
+
+| `uname -a` の出力 | 次に確認すること |
+|----------------|--------------|
+| ビルド日時が2年以上前（例：2022年以前） | `searchsploit linux kernel [バージョン]` で CVE 候補を確認 |
+| `/var/mail/<username>` に脆弱性名の言及あり | そのCVEを最優先に調べる |
+| `findmnt \| grep overlay` でOverlayFSが使われている | CVE-2023-0386 の適用条件が整っている可能性 |
+
+PoC取得→ターゲットへの転送→コンパイル（gcc / make）→実行の流れが典型。
+
+→ 詳細手順（CVE選択基準・PoC転送・コンパイル・2プロセス並行実行等）: `../03_Post_Access_Linux/Kernel_Exploits.md`
+
+---
 
 ### `sudo -l` に `docker exec *` の NOPASSWD がある場合（重要）
 

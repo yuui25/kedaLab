@@ -137,6 +137,15 @@ cat /proc/self/status | grep -i "capeff\|capbnd"
 → sudo docker exec の悪用: `Sudo_Misconfig.md`（パターン4）
 → IPレンジと環境の対応: `../01_Reconnaissance/Network_Scanning.md`（IPアドレスレンジから環境を読む）
 
+### システムメールの確認
+
+```bash
+cat /var/mail/$(whoami)
+ls /var/mail/
+```
+
+**着眼点：** システムメールには管理者からの通知・cronジョブの出力・セキュリティ警告が届いていることがある。「〜の脆弱性が危険」「パッチを当てろ」という内容があれば、そこに記載の CVE / 技術名を権限昇格の手がかりにする。
+
 ### 環境変数
 ```bash
 env
@@ -190,7 +199,18 @@ uname -a
 cat /etc/os-release
 ```
 
-**着眼点：** 古いカーネルバージョンは既知のローカル権限昇格エクスプロイト（DirtyPipe, DirtyCOW等）が存在する。
+**着眼点：** `uname -a` の出力からカーネルバージョンとビルド日時を確認する。
+
+```
+Linux hostname 5.15.70-051570-generic #202209231339 SMP Fri Sep 23 13:45:37 UTC 2022 x86_64
+                ^^^^^^^^^^^^^^^^^^^^^^^^             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                カーネルバージョン                    ビルド日時（古いほど未パッチのCVEが存在する可能性）
+```
+
+ビルド日時が古い場合（目安：2年以上前）は `searchsploit linux kernel [バージョン]` で既知CVEを確認する。
+`/var/mail/<username>` に特定の脆弱性への言及があれば、そのCVEを最優先に調べる。
+
+→ 詳細手順（CVE選択・PoC転送・コンパイル・実行）: `Kernel_Exploits.md`
 
 ### インストール済みパッケージ・バージョン
 ```bash
@@ -222,3 +242,5 @@ curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas
 - SUID 発見 → `SUID_SGID.md`
 - sudo 権限 → `Sudo_Misconfig.md`
 - staff グループ / PAM 経由の昇格 → `PAM_Misconfig.md`
+- カーネルバージョンが古い / システムメールに脆弱性の言及あり → `Kernel_Exploits.md`
+- リバースシェル取得直後の安定化 → `Shell_Stabilization.md`
