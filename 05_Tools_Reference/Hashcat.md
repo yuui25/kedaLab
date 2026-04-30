@@ -99,6 +99,136 @@ cat ~/.hashcat/hashcat.potfile
 
 ---
 
+## ハッシュ形式の特定方法
+
+### 形式を「読む」
+
+多くのWebフレームワークはハッシュの先頭にアルゴリズム名を埋め込む。**接頭辞を見れば形式がほぼわかる。**
+
+| ハッシュの形式 | アルゴリズム | 対応 hashcat モード |
+|----------------|-------------|---------------------|
+| `$2y$...` / `$2b$...` | bcrypt | `3200` |
+| `sha256:ITER:SALT:HASH` | PBKDF2-HMAC-SHA256（Grafana等） | `10900` |
+| `pbkdf2_sha256$ITER$SALT$HASH` | Django PBKDF2-SHA256 | `10000` |
+| `pbkdf2:sha256:ITER$SALT$HASH` | Flask / Werkzeug PBKDF2 | `10000`（変換が必要） |
+| `md5crypt` / `$1$...` | MD5-crypt | `500` |
+| `$6$...` | SHA-512-crypt（Linux /etc/shadow 等） | `1800` |
+| 32文字の16進数のみ | MD5（ソルトなし） | `0` |
+| 40文字の16進数のみ | SHA1（ソルトなし） | `100` |
+| 64文字の16進数のみ | SHA256（ソルトなし） | `1400` |
+
+### 形式から読めないときは `hashid` を使う
+
+```bash
+# [Kali] hashid は Kali 標準搭載
+hashid '[ハッシュ文字列]'
+
+# 例
+hashid 'pbkdf2:sha256:600000$AMtzteQIG7yAbZIa$0673ad90a0b4...'
+```
+
+### kedalab に記載のないモードに当たったときの調べ方
+
+```bash
+# hashcat の全モード例を検索（キーワードで絞る）
+hashcat --example-hashes | grep -i "pbkdf2"
+hashcat --example-hashes | grep -i "django"
+hashcat --example-hashes | grep -B2 "pbkdf2_sha256"
+# → 対応するモード番号と、hashcat に渡す形式例が確認できる
+```
+
+Webでの確認：`https://hashcat.net/wiki/doku.php?id=hashcat`（Example Hashes のページ）
+
+---
+
+## Flask / Werkzeug PBKDF2-SHA256（mode 10000）— Pythonベース Webアプリ
+
+### 着火条件
+- WebアプリのDBから `pbkdf2:sha256:ITERATIONS$SALT$HASH_HEX` 形式のハッシュを取得した
+- アプリが Python + Flask / Werkzeug で実装されている（`app.py` 等のソースコードから確認できることがある）
+
+### ハッシュ形式の識別
+
+Werkzeug の形式は Django と似ているが**区切り文字が異なる**。
+
+| フレームワーク | 形式 |
+|----------------|------|
+| Flask / Werkzeug | `pbkdf2:sha256:600000$SALT$HASH_HEX`（ドルマーク2個、ハッシュが16進数） |
+| Django | `pbkdf2_sha256$600000$SALT$HASH_B64`（ドルマーク3個、ハッシュがBase64） |
+
+Werkzeug 形式を hashcat に渡す場合は Django 形式（mode 10000）に変換する必要がある。
+
+### Django 形式への変換（mode 10000 で使うため）
+
+```python
+# [Kali] Python で変換する
+import base64, binascii
+
+# DBから取得したハッシュ文字列（例）
+werkzeug_hash = "pbkdf2:sha256:600000$AMtzteQIG7yAbZIa$0673ad90a0b4afb19d662336f0fce3a9edd0b7b19193717be28ce4d66c887133"
+
+# パースして変換
+parts = werkzeug_hash.split("$")
+# parts[0] = "pbkdf2:sha256:600000"
+# parts[1] = "SALT"
+# parts[2] = "HASH_HEX"
+
+alg_parts   = parts[0].split(":")   # ["pbkdf2", "sha256", "600000"]
+iterations  = alg_parts[2]          # "600000"
+salt        = parts[1]              # "AMtzteQIG7yAbZIa"
+hash_hex    = parts[2]              # "0673ad90..."
+
+hash_b64    = base64.b64encode(bytes.fromhex(hash_hex)).decode()
+
+django_fmt  = f"pbkdf2_sha256${iterations}${salt}${hash_b64}"
+print(django_fmt)
+# → pbkdf2_sha256$600000$AMtzteQIG7yAbZIa$BnOt...
+```
+
+### クラックコマンド
+
+```bash
+# 変換結果をファイルに保存してから実行
+echo 'pbkdf2_sha256$600000$[SALT]$[HASH_B64]' > hash.txt
+hashcat -m 10000 hash.txt /usr/share/wordlists/rockyou.txt
+```
+
+### 反復回数が多くて極端に遅い場合の対処
+
+PBKDF2 の反復回数（iterations）が多いほどクラックは遅くなる。**10000回でも遅いが、600000回はさらに60倍遅い。** CPU のみの環境では2日以上かかることがある。
+
+**まず試すべき代替手段（クラックをあきらめる前に）：**
+
+```bash
+# 1. 辞書を絞ってスピードを稼ぐ（よく使われるパスワード上位1000件）
+head -n 1000 /usr/share/wordlists/rockyou.txt > top1000.txt
+hashcat -m 10000 hash.txt top1000.txt
+
+# 2. 同じDBの別ユーザー（一般ユーザー）のハッシュを試す
+#    管理者より一般ユーザーのパスワードが弱い可能性がある
+SELECT username, password_hash FROM users;   -- 全ユーザーのハッシュを取得
+
+# 3. クラックできなければ別の侵入経路を探す
+#    「ハッシュがクラックできない = 詰まり」ではない
+```
+
+**速度の目安（CPU のみ環境の場合）：**
+
+| 反復回数 | 目安速度（CPU5コア） | rockyou.txt 全件の推定時間 |
+|----------|---------------------|--------------------------|
+| 10,000   | 約 700 H/s          | 約 6 時間 |
+| 100,000  | 約 70 H/s           | 約 2.5 日 |
+| 600,000  | 約 12 H/s           | 約 14 日 |
+
+> GPU 環境では10〜100倍程度速くなる。VMではなく物理GPUが使える環境があれば使う。
+
+### 注意点
+- `Separator unmatched` エラーが出た場合、hashcat に渡しているハッシュ形式がモードに合っていない（変換が必要）
+- mode 10900 と mode 10000 は似ているが**形式が異なる**。Werkzeug ハッシュに 10900 を使っても `No hashes loaded` になる
+- 反復回数が多すぎてクラックを断念した場合は Webアプリへのログイン以外の経路（パスワードスプレー・別サービス）を探す
+
+---
+
 ## MD5+Salt（mode 20）— CMS 等のWebアプリ
 
 ### 着火条件
@@ -223,3 +353,4 @@ hashcat -m 10900 hashes.txt /usr/share/wordlists/rockyou.txt --force
 - Grafana DB からのハッシュ取得 → `../02_Initial_Access/Credential_Discovery.md`（パターン5）
 - Grafana パストラバーサルでの DB 取得 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
 - CMS Made Simple SQLi からのハッシュ取得 → `../02_Initial_Access/Web_Vulnerabilities/SQLi.md`（タイムベースブラインドSQLi）
+- MSSQL DB からの Werkzeug/Django PBKDF2 ハッシュ取得 → `../02_Initial_Access/MSSQL_Exploitation.md`

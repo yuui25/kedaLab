@@ -55,6 +55,8 @@
 | タイムベースブラインドSQLi（時間遅延オラクル） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SQLi.md` |
 | CMS Made Simple SQLi（CVE-2019-9053）| Initial Access | `02_Initial_Access/Web_Vulnerabilities/SQLi.md` |
 | MD5+Salt ハッシュのクラック（mode 20） | Initial Access | `05_Tools_Reference/Hashcat.md` |
+| ハッシュ形式の特定（hashid / 形式文字列の読み方 / --example-hashes） | Initial Access | `05_Tools_Reference/Hashcat.md` |
+| Flask / Werkzeug PBKDF2 ハッシュのクラック（mode 10000 変換） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | SSRF（サーバーサイドリクエストフォージェリ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
 | PCAPからの平文認証情報抽出 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | WebアプリDB（SQLite等）からのハッシュ取得 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
@@ -75,6 +77,9 @@
 | WinRM Pass-The-Hash | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | RPC / rpcclient ユーザー列挙 | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | impacket-lookupsid による RID bruteforce | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
+| MSSQL 列挙・悪用（impacket-mssqlclient / DB列挙・ハッシュ取得） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| MSSQL ユーザーなりすまし（enum_impersonate / EXECUTE AS LOGIN） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| MSSQL xp_cmdshell による OS コマンド実行 | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 
 ---
 
@@ -106,6 +111,10 @@
 |--------|---------|------------|
 | AD 侵入後列挙チェックリスト | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | 特権トークン（SeXxxPrivilege）の確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| Get-ComputerInfo による OS バージョン・ビルド番号確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| inetpub（IIS Webルート）のソースコード・設定ファイル確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| Windows PoC 取得・転送・実行（evil-winrm upload / IWR / certutil） | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| netexec RID bruteforce によるドメインユーザー列挙 | Reconnaissance | `05_Tools_Reference/Netexec.md` |
 | BloodHound による権限チェーン可視化 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | GenericAll によるパスワードリセット | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | GenericAll による Shadow Credentials | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |

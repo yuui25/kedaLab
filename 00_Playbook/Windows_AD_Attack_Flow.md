@@ -101,9 +101,11 @@ smbclient -N //[IP]/Replication -c "recurse ON; ls" 2>/dev/null
 | SYSVOL に .bat / .ps1 がある | 平文パスワードを探す |
 | .NET バイナリが取得できた | 逆コンパイル→ハードコード認証情報の確認 |
 | Webアプリがある | Webの脆弱性から認証情報取得 |
+| 1433 番ポート（MSSQL）が開いている | MSSQL 経由でDB内ハッシュ取得 → クラック または スプレー |
 
 → バイナリ解析: `../02_Initial_Access/Binary_Analysis.md`
 → 認証情報発見: `../02_Initial_Access/Credential_Discovery.md`
+→ MSSQL 経由の詳細手順: `../02_Initial_Access/MSSQL_Exploitation.md`
 → Web脆弱性の探索手順は `Linux_Attack_Flow.md` の Step 2〜3 を参照
 
 ---
