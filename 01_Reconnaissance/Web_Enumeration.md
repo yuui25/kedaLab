@@ -65,7 +65,7 @@ curl -s http://[TARGET]/robots.txt | grep -i "disallow\|allow"
 **ディレクトリ列挙（gobuster）**
 ```bash
 gobuster dir -u http://[IP] -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
-  -o gobuster_root.txt
+  -o gobuster_root_dir.txt
 ```
 
 **拡張子を指定したファイル探索**
