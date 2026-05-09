@@ -150,13 +150,17 @@ sqlite3 [FILE].db "PRAGMA table_info(user);"
 #### Grafana（PBKDF2-HMAC-SHA256）の場合
 
 ```bash
-# ユーザー情報の取得
+# ユーザー情報の取得（CLI）
 sqlite3 grafana.db "SELECT id, name, login, email, password, salt FROM user;"
 
 # 出力例:
 # 1||admin|admin@localhost|[HEX_HASH]|[SALT]
 # 2|username|username|user@domain.local|[HEX_HASH]|[SALT]
 ```
+
+> **GUI ツールを使う場合：** `sqlitebrowser`（DB Browser for SQLite）でも同様にデータを確認できる。Table: `user` を開き Browse Data タブで全カラムを表示する（`sqlitebrowser` は別途インストールが必要；ペネトレ用Linuxディストリ非標準）。オフライン環境では `sqlite3` CLI を使う。
+
+> **`rands` カラムについて：** Grafana の user テーブルには `password`（HEXハッシュ）・`salt`・`rands` の 3 カラムがある。PBKDF2-HMAC-SHA256 の変換には `password`（HEX）と `salt` のみ使用する。`rands` は別用途（セッション関連）のため Hashcat 変換には不要。
 
 取得したハッシュを Hashcat (mode 10900) 形式に変換する：
 

