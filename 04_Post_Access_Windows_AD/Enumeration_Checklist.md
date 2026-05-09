@@ -1,28 +1,40 @@
-# Windows AD 侵入後 列挙チェックリスト
+# Windows 侵入後 列挙チェックリスト（AD・スタンドアロン共通）
 
-初期シェル（WinRM / SMB / RDP 等）を取得したら、次の権限昇格・横断移動のために以下を確認する。**BloodHound による全体把握が最優先。**
+初期シェル（WinRM / SMB / RDP / Webシェル等）を取得したら、次の権限昇格・横断移動のために以下を確認する。
+
+> **AD 環境か スタンドアロンかで優先度が変わる。**
+> シェル取得直後の4手を打ち終えた後、`Get-ComputerInfo` の `Domain` 欄を確認する。
+> - `Domain: WORKGROUP` → スタンドアロン。BloodHound（Step 2）はスキップ。Step 1.5 のローカルサービス確認を最優先にする。
+> - `Domain: [ドメイン名]` → AD 参加済み。BloodHound による全体把握が最優先。
 
 ---
 
-## 接続直後に打つコマンド（最初の3手）
+## 接続直後に打つコマンド（最初の4手）
 
-シェルを取ったら何より先にこの3つを実行する。後続のステップ選択（CVE選択・BloodHound優先度）に直結する。**この3つを打てば Step 0・Step 1 のコマンド実行は完了している。** 以降の Step 0・Step 1 は「出力をどう読むか」に専念する。
+シェルを取ったら何より先にこの4つを実行する。後続のステップ選択（CVE選択・BloodHound優先度・内部サービスの有無）に直結する。
 
 ```powershell
 # 1. 自分が誰か・どの権限を持っているか（特権トークンの確認）
 whoami /all
 
-# 2. OSバージョン・ビルド番号（CVE選択に直結）
-Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OSDisplayVersion, WindowsBuildLabEx
+# 2. OSバージョン・ビルド番号（CVE選択に直結）・Domain欄でAD/スタンドアロン判定
+Get-ComputerInfo | Select-Object WindowsProductName, WindowsVersion, OSDisplayVersion, WindowsBuildLabEx, CsDomain
 
 # 3. ネットワーク構成（他ホストへの経路・DNSサーバーの確認）
 ipconfig /all
+
+# 4. ローカルにしか公開されていないサービスの確認
+# 【発想の起点】nmap が見えるのは「外から届くポート」だけ。
+# シェルを取って初めて「内部でしかリスニングしていないサービス」が見える。
+# このサービスがバージョンの古い脆弱なプロセスであれば、権限昇格の経路になる。
+netstat -ano | findstr TCP | findstr ":0"
 ```
 
 打ち終わったら：
-1. Step 0 で `Get-ComputerInfo` の出力を読む（CVE 選定の起点）
+1. Step 0 で `Get-ComputerInfo` の出力を読む（CVE 選定の起点・AD/スタンドアロン判定）
 2. Step 1 で `whoami /all` の Privileges を読む（即昇格できる特権がないか）
-3. Step 2 で BloodHound を **Linux 側から** 1回実行する（最優先）
+3. Step 1.5 で `netstat` の出力を読む（`127.0.0.1:[PORT]` が LISTENING なら内部サービス確認）
+4. **AD 環境の場合のみ** Step 2 で BloodHound を Linux 側から実行する
 
 ---
 
@@ -83,6 +95,55 @@ net user [USERNAME] /domain   # ドメイン上のユーザー情報・最終ロ
 | `SeMachineAccountPrivilege` | ドメインにコンピューターアカウントを追加可能 → **RBCD 攻撃** |
 | `SeEnableDelegationPrivilege` | Unconstrained Delegation を設定可能 |
 | `SeDebugPrivilege` | プロセスメモリへのアクセス → LSASS ダンプ |
+
+---
+
+## Step 1.5: ローカルにしか公開されていないサービスの発見
+
+nmap では外部から見えなかったサービスが、内部ではリスニングしている場合がある。
+**`netstat` で確認し、ポート番号から何のサービスか特定する。**
+
+**攻撃者の思考トレース：** 初期アクセスで露出していたポートは「外に公開している部分」にすぎない。
+内部にしか繋がれていないサービス（バージョンが古い管理ツール・開発環境・内部DB等）を
+ポートフォワーディングで手元に引き込むことで追加の攻撃面が生まれる。
+
+```powershell
+# [Target] ローカルでリスニングしているTCPポートを確認
+netstat -ano | findstr TCP | findstr ":0"
+# 出力例：
+# TCP    127.0.0.1:8888    0.0.0.0:0    LISTENING    8856
+#                ^^^^                                  ^^^
+#          ローカルのみリスニング中              プロセスID (PID)
+
+# PIDからプロセス名を特定
+tasklist /FI "PID eq [PID]"
+# 例：PID 8856 → [SERVICE_NAME].exe
+```
+
+**出力の読み方：**
+
+| 出力パターン | 意味 | 次のアクション |
+|------------|------|--------------|
+| `127.0.0.1:[PORT]` が LISTENING | ローカルにのみ公開。外部から直接アクセス不可 | `tasklist` で PID を特定 → サービス名を検索 → 脆弱なバージョンなら searchsploit |
+| `0.0.0.0:[PORT]` が LISTENING | 全インターフェース公開。nmap で既に見えているはず | nmap スキャン結果と照合して抜け漏れを確認 |
+| `[::]:PORT` が LISTENING | IPv6 で全インターフェース公開 | 同上 |
+
+**インストール済みソフトウェアの確認（バージョン特定）：**
+
+```powershell
+# [Target] インストール済みソフトウェアの一覧
+Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* |
+  Select-Object DisplayName, DisplayVersion, Publisher | Format-Table -AutoSize
+
+# または Downloads・Program Files を直接確認
+dir C:\Users\[USER]\Downloads
+dir "C:\Program Files"
+dir "C:\Program Files (x86)"
+```
+
+ローカルにしか公開されていないサービスに脆弱なバージョンがある場合 → **ポートフォワーディングで手元に引き込んで攻撃する**
+→ Chisel を使ったポートフォワーディング: `../../05_Tools_Reference/Chisel.md`
+→ Exploit-DB PoC を使った Buffer Overflow: `Buffer_Overflow_LocalService.md`
 
 ---
 

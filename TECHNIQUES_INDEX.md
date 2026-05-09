@@ -36,6 +36,8 @@
 
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
+| Webアプリフレームワーク・アプリ名の特定（フッター・contactページ・HTMLソース・ヘッダー） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
+| 未認証ファイルアップロード RCE（二重拡張子・マジックバイト・Content-Type 偽装） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/File_Upload.md` |
 | 難読化JavaScript解析（eval/Packer形式・console.log置換・de4js） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | ROT13 / Base64 APIレスポンスのデコード | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | OSコマンドインジェクション（セミコロン・パイプ・バッククォート） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
@@ -117,6 +119,8 @@
 | 技術名 | カテゴリ | ファイルパス |
 |--------|---------|------------|
 | AD 侵入後列挙チェックリスト | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| Windows ローカルサービス発見（netstat -ano + tasklist による内部ポート特定） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| 既知 Buffer Overflow PoC 悪用（Exploit-DB PoC + msfvenom シェルコード差し替え） | Post Access AD/Win | `04_Post_Access_Windows_AD/Buffer_Overflow_LocalService.md` |
 | 特権トークン（SeXxxPrivilege）の確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | Get-ComputerInfo による OS バージョン・ビルド番号確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | inetpub（IIS Webルート）のソースコード・設定ファイル確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
@@ -159,6 +163,7 @@
 
 | ツール | ファイルパス |
 |--------|------------|
+| Chisel（リバーストンネル・ポートフォワーディング） | `05_Tools_Reference/Chisel.md` |
 | nmap（-sC 出力の読み方・AD環境向け） | `05_Tools_Reference/Nmap.md` |
 | BloodHound / bloodhound-python | `05_Tools_Reference/BloodHound.md` |
 | Impacket スイート全般 | `05_Tools_Reference/Impacket_Suite.md` |
@@ -176,6 +181,7 @@
 
 | 原理 | 参照元の作業ファイル | ファイルパス |
 |------|-----------------|------------|
+| Windows AD 環境とスタンドアロンの違い（ポート・認証・攻撃軸・BloodHound 有効性・各 Step の適用可否） | `00_Playbook/Windows_AD_Attack_Flow.md` / `00_Playbook/00_OS_Identification.md` | `06_Concepts/Windows_Standalone_vs_AD.md` |
 | OS フィンガープリンティング（TTL 初期値の由来・FS の大文字小文字区別の仕様差） | `00_Playbook/00_OS_Identification.md` | `06_Concepts/OS_Fingerprinting_Principles.md` |
 | XSLT・XXEの動作原理（外部エンティティ解決の仕組み・libxslt の制限・パラメータエンティティ vs 一般エンティティ） | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` / `02_Initial_Access/Web_Vulnerabilities/XXE.md` | `06_Concepts/XSLT_XML_Processing.md` |
 | YAML.load 任意デシリアライゼーション（Psych の !ruby/object タグ・Gadget Chain 原理・Ruby バージョン差異） | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン5） | `06_Concepts/YAML_Deserialization.md` |

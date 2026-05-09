@@ -119,6 +119,71 @@ gobuster dir -u http://[IP] -w [WORDLIST] -t 5 --delay 200ms -o gobuster_lowrate
 
 ---
 
+## Webアプリのフレームワーク・アプリ名の特定
+
+### 着火条件
+Webポートが開いており、どのアプリ・フレームワークで動いているかを判断したい場合。
+**ディレクトリ列挙の前に、手動でサイトを一通り閲覧して行う。**
+
+### 観点・着眼点
+
+「Webアプリの名前＝フレームワーク名ではない」という前提を持つ。
+「フィットネス管理ソフト X」「ERP製品 Y」のような **製品名（固有名詞）** が
+フレームワーク扱いで searchsploit にヒットすることが多い。見落としがちなパターンを意識する。
+
+**攻撃者の思考トレース：** ヘッダーに出ない場合でも、ページの「どこかにアプリ名は必ず書いてある」と考えて探す。
+「Made using」「Powered by」「Copyright © [製品名]」などは作者・開発元が無意識に露出させていることが多い。
+
+**確認する場所（優先順位順）：**
+
+| 確認場所 | 見つかりやすい情報 |
+|---------|----------------|
+| ページ下部フッター | 「Powered by X」「Made using X v1.0」「© X Software」 |
+| `/about`・`/contact`・`/info` 等のページ | アプリ名・バージョン・開発元の記載 |
+| ログインページ | アプリ名・バージョン（フッターまたはタイトル）|
+| HTTPレスポンスヘッダー | `Server:`・`X-Powered-By:`・`X-Generator:` |
+| HTMLソース（`<meta name="generator">`） | CMS・フレームワーク名 |
+| エラーページ | スタックトレースからフレームワーク・言語が判明 |
+| `/api/health`・`/version`・`/info` | APIバージョン情報 |
+
+```bash
+# robots.txt 確認（nmap -sC スキャンで自動取得される場合あり）
+curl -s http://[TARGET]/robots.txt
+
+# アプリ名候補を手動で調査するページを確認
+curl -s http://[TARGET]/about
+curl -s http://[TARGET]/contact
+curl -s http://[TARGET]/login | grep -i "powered\|version\|copyright\|made"
+
+# HTTP ヘッダーの確認
+curl -sI http://[TARGET]/ | grep -i "server\|x-powered-by\|x-generator\|x-version"
+
+# HTML ソースの meta タグ確認
+curl -s http://[TARGET]/ | grep -i "generator\|framework\|powered"
+```
+
+**アプリ名が判明したら即 searchsploit で検索する：**
+
+```bash
+searchsploit "アプリ名"
+searchsploit "アプリ名" [バージョン番号]
+```
+
+**シグナルと次のアクション：**
+
+| 出力・観測内容 | 次のアクション |
+|--------------|--------------|
+| 「Made using [製品名] [バージョン]」等の文字列 | 製品名そのままを `searchsploit` に渡す |
+| 「Powered by WordPress」等 | バージョンも確認してから `searchsploit wordpress [バージョン]` |
+| ヘッダーに `X-Powered-By: ASP.NET` | Windows 確定 → Windows 攻撃手法へ |
+| フッターに著作権年のみ（製品名なし） | ページソース全体を `grep` してフレームワーク痕跡を探す |
+
+### 刺さらなかったとき
+- アプリ名がどこにも見つからない → ディレクトリ列挙で `/wp-admin`・`/admin`・`/phpmyadmin` 等の CMS 固有パスが見つかればそこから推定する
+- searchsploit にヒットしない → Google で `"[製品名] exploit"` または `"[製品名] CVE"` を検索する
+
+---
+
 ## Webアプリのバージョン特定と CVE 検索
 
 ### 着火条件
