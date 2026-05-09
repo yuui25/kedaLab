@@ -163,6 +163,19 @@ cat ~/.ssh/
 **着眼点：**
 - `.bash_history` に平文パスワードが残っていることがある
 - `.ssh/id_rsa` がある場合は他ホストへのSSH接続に使える
+- **Ruby アプリのプロセス（ruby / unicorn / puma）として侵入した場合は `.bundle/config` を確認する**
+
+```bash
+# [Target] Bundler の設定ファイル（RubyGems 認証情報が平文で入っていることがある）
+cat ~/.bundle/config
+# 出力例: BUNDLE_HTTPS://RUBYGEMS__ORG/: "henry:Q3c1AqGHtoI0aXAYFH"
+#   → "henry:Q3c1AqGHtoI0aXAYFH" のうち前半がユーザー名、後半がパスワード
+
+# 全ユーザーのホームディレクトリを一括確認
+for u in $(ls /home/); do echo "=== $u ==="; cat /home/$u/.bundle/config 2>/dev/null; done
+```
+
+→ 取得した認証情報の確認手順: `../02_Initial_Access/Credential_Discovery.md`（パターン8 と「認証情報を取得したら必ず試すこと」）
 
 ### 設定ファイル・パスワードファイルの探索
 ```bash

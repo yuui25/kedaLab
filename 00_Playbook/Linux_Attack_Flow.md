@@ -66,6 +66,9 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 ## Step 2 — サービス別の列挙
 
 ### Webサービス（80/443）が開いている場合
+
+> **80/443 のみ開いていてSSH等が開いていない場合も、この節のフローを進める。** Web脆弱性を通じたシェル取得が主経路になる。
+
 1. ブラウザでトップページを確認 → 使用技術・フレームワーク・エンドポイントの把握
 2. **`/robots.txt` を確認する（最初の一手）**
    - `Disallow:` エントリが「隠しパス」の地図になる
@@ -87,6 +90,13 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
    - まず管理者APIへの権限昇格（`is_admin=1` 等のパラメータ改ざん）を確認
    - `; id` で注入テスト → リバースシェルへ
    → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
+9. **URL を入力して何かを生成・取得するフォームがある場合（PDF 生成・プレビュー・スクリーンショット等）**
+   - レスポンスヘッダーで使用言語・ライブラリを確認（`X-Runtime: Ruby` / `X-Powered-By` 等）
+   - 生成物（PDF・画像等）のメタデータからライブラリ名・バージョンを確認（`exiftool` / strings）
+   - バージョンが特定できたら即 `searchsploit [ライブラリ名] [バージョン]` で CVE を検索
+   - **PDFKit 0.8.6 以下なら CVE-2022-25765（バックティック URL 注入 → RCE）が有効**
+   - SSRF として内部ネットワーク探索にも使える可能性がある
+   → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（PDFKit セクション）
 
 → 詳細: `../01_Reconnaissance/Web_Enumeration.md`
 → CVE 検索: `../05_Tools_Reference/Searchsploit.md`
@@ -250,6 +260,16 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 → 詳細: `../03_Post_Access_Linux/SUID_SGID.md`
 
 ### sudo -l で特定コマンドが許可されている場合
+
+**シグナル → 次アクション（sudo -l 出力パターン別）：**
+
+| `sudo -l` に見える要素 | 次のアクション |
+|----------------------|-------------|
+| `NOPASSWD: /usr/bin/vim` / `python3` / `find` 等のバイナリ | GTFOBins で「Sudo」セクションを確認 |
+| `NOPASSWD: /usr/bin/ruby [スクリプトパス]` | スクリプトを `cat` して `YAML.load` を使っているか確認 → パターン5 |
+| `NOPASSWD: /usr/bin/python3 [スクリプトパス]` | スクリプトを `cat` して `pickle.load` / `eval` を使っているか確認 → パターン5 |
+| スクリプトが `YAML.load` + ユーザー書き込み可能なファイルを読む | **Psych Gadget Chain で任意コード実行が可能** |
+| スクリプトが `YAML.safe_load` を使っている | Gadget Chain は使えない。他の手法（PATH ハイジャック等）を探す |
 
 → 詳細: `../03_Post_Access_Linux/Sudo_Misconfig.md`
 

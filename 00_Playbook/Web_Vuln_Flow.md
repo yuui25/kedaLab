@@ -33,7 +33,26 @@ nmap -sC -sV -oN nmap_initial.txt TARGET_IP   # [Kali]
 ### ディレクトリ列挙
 
 ```bash
+# gobuster（Kali標準）
 gobuster dir -u http://TARGET -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x php,html,js,txt   # [Kali]
+
+# wfuzz（Kali標準。レスポンスコードや文字数でフィルタリングしやすい）
+wfuzz -c -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  --hc 404 \
+  http://TARGET/FUZZ   # [Kali]
+
+# wfuzz でファイル拡張子も含めて列挙する場合
+wfuzz -c -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  --hc 404 \
+  -z list,php-html-js-txt \
+  "http://TARGET/FUZZ.FUZ2Z"   # [Kali]
+
+# wfuzz の主なフィルタオプション
+#   --hc [code]   : 指定コードのレスポンスを非表示（--hc 404,403 のようにカンマ区切り）
+#   --sc [code]   : 指定コードのレスポンスのみ表示
+#   --hl [lines]  : 指定行数のレスポンスを非表示（同じ行数 = 同じエラーページを除外）
+#   --hw [words]  : 指定ワード数のレスポンスを非表示
+#   -t [threads]  : スレッド数（デフォルト 10）
 ```
 
 - robots.txt・sitemap.xml も手動確認する
@@ -62,6 +81,7 @@ gobuster vhost -u http://TARGET -w /usr/share/seclists/Discovery/DNS/subdomains-
 | ファイルダウンロード機能 | パストラバーサル・IDOR | `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | ユーザー入力がページに反映される | XSS（反射型・格納型） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
 | 外部URLを受け付けるパラメータ | SSRF | `../02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
+| **URLを入力するフォームがある（PDF生成・プレビュー・スクリーンショット等）** | コマンドインジェクション（バックティック注入）または SSRF。レスポンスヘッダーで言語・ライブラリを確認し searchsploit でCVE検索 | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（PDFKit セクション） |
 | APIが `host`/`ip`/`cmd` 等を受け取る | OSコマンドインジェクション | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | JSソースが難読化されている | JS解析 → 隠しAPIの発見 | `../02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | XMLファイルのアップロード機能がある | XXE（ファイル読み込み・SSRF転用・Blind OOB） | `../02_Initial_Access/Web_Vulnerabilities/XXE.md` |

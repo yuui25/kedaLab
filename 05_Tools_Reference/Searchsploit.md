@@ -107,11 +107,51 @@ searchsploit -m multiple/webapps/50581.py
 ## Nmap XML との連携（自動スキャン）
 
 ```bash
-# Nmap の XML 出力ファイルを読み込んで自動検索
-searchsploit --nmap nmap_allports.xml
+# Nmap スキャン時に XML を出力（-oA で .xml/.nmap/.gnmap を同時出力）
+nmap -sC -sV -oA nmap_initial TARGET_IP   # [Kali]
 
-# 発見されたサービスに対する既知エクスプロイトを一括表示
+# 出力した XML に対して searchsploit を実行
+searchsploit --nmap nmap_initial.xml   # [Kali]
 ```
+
+**`--nmap` の出力例（80/22 のみ開いている環境の場合）：**
+
+```
+[i] SearchSploit's XML mode (without verbose enabled).   To enable: searchsploit -v --xml...
+[i] Reading: 'nmap_initial.xml'
+
+[-] Skipping term: ssh   (Term is too general. Please re-search manually: /usr/bin/searchsploit -t ssh)
+
+[i] /usr/bin/searchsploit -t openssh
+----------------------------------- ---------------------------------
+ Exploit Title                     |  Path
+----------------------------------- ---------------------------------
+OpenSSH 2.3 < 7.7 - Username Enume | linux/remote/45210.py
+OpenSSH 7.2p2 - Username Enumerati | linux/remote/40136.py
+OpenSSH < 6.6 SFTP - Command Execu | linux/remote/45001.py
+...
+----------------------------------- ---------------------------------
+
+[-] Skipping term: http   (Term is too general. Please re-search manually: /usr/bin/searchsploit -t http)
+
+[i] /usr/bin/searchsploit -t nginx
+----------------------------------- ---------------------------------
+ Exploit Title                     |  Path
+----------------------------------- ---------------------------------
+Nginx 1.4.0 (Generic Linux x64) -  | linux_x86-64/remote/32277.txt
+PHP-FPM + Nginx - Remote Code Exec | php/webapps/47553.md
+...
+----------------------------------- ---------------------------------
+```
+
+**出力の読み方：**
+
+| 出力内容 | 意味 | 対応 |
+|---------|------|------|
+| `[-] Skipping term: ssh` | "ssh" は一般的すぎてスキップ | `searchsploit -t openssh 8.4` のように具体的なバージョン付きで手動検索 |
+| `[-] Skipping term: http` | "http" も同様にスキップ | `searchsploit nginx 1.18` のように Web サーバー名で検索 |
+| `[i] /usr/bin/searchsploit -t openssh` | openssh として検索中 | バージョン文字列が長い場合は完全一致しないこともある |
+| 結果が大量に出る | バージョン範囲が広いヒット | NVD でバージョン一致確認が必要 |
 
 **`--nmap` の出力が大量に出たときの絞り込み：**
 
@@ -120,6 +160,7 @@ searchsploit --nmap nmap_allports.xml
 1. **現在のシェルアクセス状況と一致するカテゴリだけ見る**：シェルを持っていないなら Local系（Local Privilege Escalation）より Remote系（Remote Code Execution・WebApp）を優先
 2. **バージョンが完全に一致するものだけ残す**：`8.x` のように幅広くヒットしているものはバージョン不一致の可能性が高い。NVD で正確な影響範囲を確認する（「複数の候補が出た場合の絞り込み基準」参照）
 3. **DoS は除外する**：ペンテスト中のサービス停止は原則禁止。`DoS` / `Denial of Service` のタイトルはスキップする
+4. **`--nmap` がスキップした "too general" なサービス（ssh・http）は手動で個別検索する**
 
 ---
 
