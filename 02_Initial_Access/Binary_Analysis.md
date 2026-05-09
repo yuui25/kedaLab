@@ -253,16 +253,200 @@ tshark -r /tmp/capture.pcap -Y "ldap.bindRequest" -T fields \
 
 ---
 
+---
+
+## パターン5: OLE2 / .msg ファイルの解析
+
+### 着火条件
+
+SMB 共有・FTP 等から **`.msg` 拡張子のファイル**（Outlook メッセージ形式）を取得した場合。内部にメール本文・添付ファイル・送受信情報が格納されている。`file` コマンドで `Composite Document File V2 Document` と出れば OLE2 形式。
+
+**攻撃者の思考トレース：** `.msg` ファイルは単なる電子メールのバックアップだが、業務用途で使われる場合、**設定変更通知・サービスアカウント情報・接続情報**が書かれていることがある。
+
+### 環境前提
+
+- 実行環境: テスター端末
+- 必要なツール:
+  - `libemail-outlook-message-perl`（`msgconvert` コマンドを提供。`sudo apt install libemail-outlook-message-perl`）または
+  - `extract-msg`（Python 製。`pip install extract-msg --break-system-packages`）
+  - `strings`（ペネトレ用Linuxディストリ標準搭載）
+- オフライン代替: `strings [file.msg]` でテキスト部分を強引に抽出（書式は崩れる）
+
+### 手順
+
+```bash
+# [Attacker] Step 1: ファイル形式の確認
+file [filename.msg]
+# → "Composite Document File V2 Document" なら OLE2
+
+# [Attacker] Step 2a: msgconvert で .eml 形式に変換（テキスト閲覧）
+msgconvert [filename.msg]
+cat [filename.eml]
+
+# [Attacker] Step 2b: extract-msg で本文・添付を個別展開
+python3 -m extract_msg [filename.msg]
+# → カレントディレクトリにフォルダが作成され、本文(.txt)・添付ファイルが展開される
+ls ./[展開されたフォルダ]/
+
+# [Attacker] Step 3: strings での強引な抽出（インストール不要の代替）
+strings [filename.msg] | grep -iE "password|user|smtp|server|from:|to:|subject:|http"
+```
+
+**何が出たら次に何をするか：**
+
+| 出力 | 示唆 | 次のアクション |
+|------|------|--------------|
+| サービス名・接続先・ユーザー名が本文に記載 | 内部システム構成の手掛かり | 記載されたサービスへのアクセスを試みる |
+| 「サービスを Oracle から MSSQL に変更」等のメッセージ | サービスアカウント名・パスワードの命名パターンが推測できる | サービス名・年号を変えたパスワードパターンを試す（下記参照）|
+| 添付ファイルが展開された | バイナリ・スクリプト等の可能性 | `file` → 該当する解析パターンへ |
+| `From:` / `To:` にメールアドレス | 内部ユーザー名の候補 | sAMAccountName として LDAP / Kerbrute で検証 |
+
+**パスワード命名パターン推測（サービス名 + 年号型）：**
+
+業務システムでは、サービス名と年号を組み合わせた単純なパスワード命名規則を採用していることがある。サービス移行に伴いパスワードも機械的に更新されているケースが多い。
+
+```
+# 命名パターンの例（プレースホルダー）:
+# [service_prefix]_[type][year]   → 例: #[SVC]_s3rV1c3![YEAR]
+# [ServiceName][Year]!            → 例: [Service][Year]!
+#
+# サービス名が変わったら → 新しいサービス名で同じパターンを試す
+# 年号が変わったら       → 新しい年号で同じパターンを試す
+# svc_[oracle] → svc_[mssql] のようにサービスアカウント名も変わる可能性がある
+```
+
+### 刺さらなかったとき
+
+| 状況 | 対処 |
+|------|------|
+| `msgconvert` が文字化けする | `strings -e l [file.msg]` で UTF-16LE として再試行 |
+| `extract-msg` がエラーになる | ファイルが破損しているか別の OLE2 ファイル形式の可能性。`strings` で直接抽出 |
+
+---
+
+## パターン6: RC4 暗号化されたパスワードの復号（.NET バイナリ）
+
+### 着火条件
+
+.NET バイナリを逆コンパイル（パターン2）した結果、**`RC4`（キーストリーム暗号）を使った暗号化ロジック**がソースコードに含まれている場合。`Encrypt` / `Decrypt` メソッドが同一ロジックを使い（RC4 の特性：Encrypt = Decrypt）、`byte[] password_cipher` と `byte[] key` がソースコード内に定義されているときに発火する。
+
+**攻撃者の思考トレース：** RC4 は暗号化と復号が同じ操作のため、暗号化バイト列とキーさえ分かれば Python で即復号できる。バイナリを実行しなくても、逆コンパイルしてコード内の定数を抽出するだけで復号できる。
+
+### 環境前提
+
+- 実行環境: テスター端末（Python）
+- 必要なツール: Python 3（標準搭載）
+
+### 観点・着眼点
+
+**何が出たら次に何をするか：**
+
+| 逆コンパイル結果の観察 | 示唆 | 次のアクション |
+|---------------------|------|--------------|
+| `RC4.Encrypt` / `RC4.Decrypt` が同一メソッド | RC4 実装（暗号化=復号） | キーと暗号化済みバイト列を抽出してPythonで復号 |
+| `byte[] key = Encoding.ASCII.GetBytes("[キー文字列]")` | 平文キーがソースコードに埋め込まれている | そのままキーとして使う |
+| `byte[] password_cipher = { 0x??, 0x??, ... }` | 暗号化済みパスワードが定数配列 | バイト列を Python に貼り付けて復号 |
+| キーが空文字 `""` や定数のみ | キーが実行時に動的決定されている可能性 | デバッガ（x64dbg / dnSpy）で実行時の値をキャプチャ |
+
+### 手順
+
+```python
+# [Attacker] RC4 復号スクリプト（Python 3）
+def rc4_decrypt(key_bytes, cipher_bytes):
+    key = list(key_bytes)
+    box = list(range(256))
+    j = 0
+    for i in range(256):
+        j = (j + box[i] + key[i % len(key)]) % 256
+        box[i], box[j] = box[j], box[i]
+    a = j = 0
+    result = []
+    for byte in cipher_bytes:
+        a = (a + 1) % 256
+        j = (j + box[a]) % 256
+        box[a], box[j] = box[j], box[a]
+        k = box[(box[a] + box[j]) % 256]
+        result.append(byte ^ k)
+    return bytes(result)
+
+# 逆コンパイルで得た値を貼り付ける
+key_str   = "[KEY_STRING]"          # Encoding.ASCII.GetBytes のキー文字列
+cipher    = bytes([0x??, 0x??, ...]) # password_cipher 配列の値
+
+key_bytes = key_str.encode('ascii')
+plain     = rc4_decrypt(key_bytes, cipher)
+print("復号結果:", plain.decode('utf-8', errors='replace'))
+```
+
+---
+
+## パターン7: dnSpy コード編集・再コンパイルによるパスワード取得
+
+### 着火条件
+
+パターン2（.NET 逆コンパイル）でソースコードを取得済みだが、パスワードが **実行時に動的生成・暗号化・SecureString 変換** されており、静的解析だけでは平文が取れない場合。dnSpy はコードを編集して再コンパイルできるため、パスワードを使う直前に `Console.WriteLine` を差し込むだけで平文が取れる。
+
+**攻撃者の思考トレース：** 「デバッガで追うより、コードを書き換えて自分から吐かせる方が速い」。バイナリを再コンパイルして実行するだけで済む。
+
+### 環境前提
+
+- 実行環境: Windows 環境（テスター側 Windows マシン or ターゲット内部）
+- 必要なツール:
+  - `dnSpy`（.NET アセンブリの逆コンパイル・編集・再コンパイルツール。GitHub から入手、インターネットアクセス要）
+  - `de4dot`（難読化された .NET バイナリを事前に平文化するツール。dnSpy 適用前に使う）
+
+### 手順
+
+**Step 1: 難読化解除（必要な場合）**
+
+```bash
+# [Attacker/Windows] de4dot でコードの難読化を解除してから dnSpy で開く
+de4dot.exe [obfuscated.exe] -o [cleaned.exe]
+```
+
+**Step 2: dnSpy でパスワード使用箇所を特定してコードを編集**
+
+1. dnSpy で対象バイナリを開く
+2. 左ペインのクラスツリーからエントリポイント（`Main` メソッド）を探す
+3. パスワード文字列が渡されている行を右クリック → 「Edit Method（C#）」
+4. パスワード変数の直前に `Console.WriteLine(password);` を挿入する
+5. 右下の「Compile」ボタンをクリック → エラーがなければ成功
+
+**Step 3: 再コンパイル済みバイナリを保存して実行**
+
+```
+dnSpy メニュー: File → Save Module → 保存先を指定
+```
+
+```bash
+# [Target/Windows または Attacker] 保存した実行ファイルを実行
+[saved_binary.exe]
+# → Console.WriteLine で挿入した行にパスワードが表示される
+```
+
+### 刺さらなかったとき
+
+| 状況 | 対処 |
+|------|------|
+| `Compile` でエラーになる | 削除・変更した行が多すぎる。`Console.WriteLine` を追加する最小変更に絞る |
+| 実行しても `Console.WriteLine` が表示されない | 実行パスが別の条件分岐に入っている。条件分岐前にも挿入する |
+| バイナリが難読化されており逆コンパイル結果が読めない | de4dot を先に通してから再度 dnSpy で開く |
+
+---
+
 ## 注意点・落とし穴
 
 - `strings` だけでは UTF-16LE エンコードの文字列を見逃すことが多い（Windowsバイナリは UTF-16LE を多用）
 - `.NET` バイナリかどうかは `file` コマンドや PE ヘッダーの確認（`strings` 結果に `.NETFramework` が含まれるか）で判断
-- 暗号化ロジックが複数層になっている場合もある（Base64 → XOR → Base64 など）
+- 暗号化ロジックが複数層になっている場合もある（Base64 → XOR → RC4 → Base64 など）
+- RC4 は「暗号化と復号が同じ操作」なので、Encrypt メソッドと Decrypt メソッドが同一実装でも正常（仕様通り）
 
 ---
 
 ## 関連技術
-- 前：SMB共有からバイナリを取得した → `../../01_Reconnaissance/SMB_Enumeration.md`
+- 前：SMB 共有からバイナリを取得した → `../../01_Reconnaissance/SMB_Enumeration.md`
+- 前：FTP からファイルを取得した → `../Protocol_Exploitation.md`（FTP セクション）
+- 前：取得ファイルのメタデータ確認 → `../../01_Reconnaissance/Metadata_Analysis.md`
 - 復号・キャプチャした認証情報の使い回し確認 → `../Credential_Discovery.md`
 - LDAP接続先が判明した → `../../01_Reconnaissance/LDAP_Enumeration.md`
 - 後：取得した認証情報でパスワードスプレー → `../../05_Tools_Reference/Netexec.md`

@@ -29,6 +29,9 @@
 | LDAP カスタム属性の確認（info / description） | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP 経由の Kerberoast / AS-REP Roast 候補抽出（SPN・DONT_REQ_PREAUTH） | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP 匿名バインド / namingcontexts 確認 | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
+| ファイルメタデータ解析（exiftool / docProps/core.xml）によるユーザー名・ドメイン名取得 | Reconnaissance | `01_Reconnaissance/Metadata_Analysis.md` |
+| FTP 匿名アクセス・再帰ダウンロード（wget -m ftp://）| Reconnaissance | `02_Initial_Access/Protocol_Exploitation.md` |
+| OLE2 / .msg ファイル解析・変換（msgconvert / extract-msg）| Reconnaissance | `02_Initial_Access/Binary_Analysis.md` |
 
 ---
 
@@ -75,9 +78,13 @@
 | LDAPカスタム属性への平文パスワード | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | パスワードの使い回し確認 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | strings コマンドによる文字列抽出 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
-| .NET バイナリ逆コンパイル（ILSpy / ilspycmd） | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| .NET バイナリ逆コンパイル（ILSpy / ilspycmd / dnSpy）| Initial Access | `02_Initial_Access/Binary_Analysis.md` |
 | XOR暗号化パスワードの復号 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| RC4暗号化パスワードの復号（.NETバイナリ） | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| dnSpy コード編集・再コンパイルによるパスワード取得（SecureString / 動的生成パスワードの抽出）| Initial Access | `02_Initial_Access/Binary_Analysis.md` |
 | バイナリ実行（Wine）＋ネットワークキャプチャ（tcpdump）によるクレデンシャル取得 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| KeePass データベース（.kdbx）のクラック（keepass2john + hashcat / john）| Initial Access | `02_Initial_Access/Credential_Discovery.md` |
+| パスワード命名パターン推測（サービス名＋年号型）| Initial Access | `02_Initial_Access/Binary_Analysis.md` |
 | FTP匿名ログイン | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | FTP平文通信からの認証情報取得 | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | SSH バージョンユーザー列挙（CVE-2018-15473） | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
@@ -133,6 +140,9 @@
 | GenericAll による Shadow Credentials | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | GenericAll によるグループメンバー追加 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | GenericAll によるRBCD設定 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
+| ForcePasswordChange（パスワードリセット専用ACE）| Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/ForcePasswordChange.md` |
+| PSSession（New-PSSession / Enter-PSSession / Invoke-Command）による別ユーザーへの横断移動 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| LAPS 管理者パスワード取得（laps.py / nxc --laps / Get-ADComputer）| Post Access AD | `04_Post_Access_Windows_AD/LAPS_Dump.md` |
 | GenericWrite による Targeted Kerberoasting | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
 | GenericWrite による logon script 設定 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
 | WriteDACL による GenericAll 付与 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
@@ -143,7 +153,7 @@
 | Unconstrained Delegation + Printer Bug | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
 | Kerberoasting | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
 | Targeted Kerberoasting（SPN付与→ハッシュ取得） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
-| ASREPRoasting | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md` |
+| ASREPRoasting（ユーザーリストなし・単一ユーザー名からの発火を含む） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md` |
 | Pass-The-Ticket（PTT） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | Golden Ticket | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | Silver Ticket | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |

