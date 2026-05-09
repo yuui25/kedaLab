@@ -22,6 +22,8 @@
 | Webアプリバージョン特定（/api/health 等） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | searchsploit による CVE 検索 | Reconnaissance | `05_Tools_Reference/Searchsploit.md` |
 | SMB匿名アクセス | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
+| SMB ゲストアカウント有効確認（netexec smb -u 'guest' -p ''） | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
+| NETLOGON 共有のログオンスクリプト確認（平文パスワード埋め込み検出） | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
 | SYSVOL / Replication 内部ナビゲーション観点（GPO構造・フォルダ優先度） | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
 | SYSVOL列挙 | Reconnaissance | `01_Reconnaissance/SMB_Enumeration.md` |
 | GPP 認証情報取得（Groups.xml / cpassword / gpp-decrypt） | Reconnaissance → Initial Access | `01_Reconnaissance/SMB_Enumeration.md` |
@@ -143,14 +145,18 @@
 | ForcePasswordChange（パスワードリセット専用ACE）| Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/ForcePasswordChange.md` |
 | PSSession（New-PSSession / Enter-PSSession / Invoke-Command）による別ユーザーへの横断移動 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | LAPS 管理者パスワード取得（laps.py / nxc --laps / Get-ADComputer）| Post Access AD | `04_Post_Access_Windows_AD/LAPS_Dump.md` |
-| GenericWrite による Targeted Kerberoasting | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
+| GenericWrite による Targeted Kerberoasting（targetedKerberoast.py 自動方式） | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
+| GenericWrite による Targeted Kerberoasting（bloodyAD + GetUserSPNs 手動2ステップ方式） | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
 | GenericWrite による logon script 設定 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
 | WriteDACL による GenericAll 付与 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
 | WriteDACL による DCSync 権限付与 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
 | RBCD（Impacketベース：Linux側から実行） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
 | RBCD（PowerMad + Rubeus S4U：Windowsシェル内から実行） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
 | Rubeus S4U → kirbi→ccache変換（impacket-ticketConverter）→ psexec | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
-| Unconstrained Delegation + Printer Bug | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
+| Unconstrained Delegation + Printer Bug（MS-RPRN coercion） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
+| Unconstrained Delegation + PetitPotam（MS-EFSRPC coercion。Printer Bug の代替） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
+| bloodyAD による UAC TRUSTED_FOR_DELEGATION 設定（Linux 側から Unconstrained Delegation 付与） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
+| 平文パスワード → NT ハッシュ変換（python3 hashlib md4 / krbrelayx 事前準備） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
 | Kerberoasting | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
 | Targeted Kerberoasting（SPN付与→ハッシュ取得） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
 | ASREPRoasting（ユーザーリストなし・単一ユーザー名からの発火を含む） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md` |

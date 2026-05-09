@@ -7,15 +7,36 @@
 
 ### 観点・着眼点
 
+**先に確認すること — ゲストアカウントの有効状態を確認する**
+
+まず NetExec（`nxc`。NetExec の CLI ラッパー。SMB/WinRM/MSSQL への認証テストを一括で行うツール、ペネトレ用 Linux ディストリ標準搭載）で Guest アカウントが有効かどうかを確認する。
+
+```bash
+# [Attacker]
+nxc smb [IP] -u 'guest' -p ''
+```
+
+| 出力 | 意味 | 次のアクション |
+|------|------|--------------|
+| `[+] ...\guest:` | Guest アカウント有効 → 認証情報なしで SMB 共有を列挙できる可能性あり | 続けて共有列挙へ |
+| `[-] STATUS_ACCOUNT_DISABLED` | Guest 無効 | Null 認証（`-N`）でも試す。ともに失敗なら認証情報が必要 |
+
+**Guest 有効時は `impacket-smbclient`（Impacket スイート同梱、ペネトレ用 Linux ディストリ標準搭載）でも接続できる：**
+
+```bash
+# [Attacker]
+impacket-smbclient -no-pass guest@[IP]
+```
+
 **標準共有と非標準共有を区別する：**
 
-| 標準共有名 | 用途 |
-|-----------|------|
-| `ADMIN$` | リモート管理 |
-| `C$` | Cドライブ（管理者のみ） |
-| `IPC$` | プロセス間通信 |
-| `NETLOGON` | ログオンスクリプト |
-| `SYSVOL` | グループポリシー・スクリプト |
+| 標準共有名 | 用途 | 確認優先度 |
+|-----------|------|-----------|
+| `ADMIN$` | リモート管理 | 低（通常アクセス不可） |
+| `C$` | Cドライブ（管理者のみ） | 低（通常アクセス不可） |
+| `IPC$` | プロセス間通信 | 低 |
+| `NETLOGON` | ログオンスクリプト | **必ず確認**（認証情報が平文で埋め込まれたスクリプトが置かれることがある） |
+| `SYSVOL` | グループポリシー・スクリプト | **必ず確認**（GPP 認証情報・スクリプト） |
 
 → **上記以外の共有名が存在する場合は必ずアクセスを試みる**
 
@@ -42,6 +63,45 @@ smbclient //[IP]/[SHARE_NAME] -U '[USER]%[PASSWORD]'
 ```bash
 smbclient //[IP]/[SHARE_NAME] -N -c "get [FILENAME] /tmp/[FILENAME]"
 ```
+
+## NETLOGON 共有の確認
+
+### 着火条件
+
+NETLOGON 共有が存在し、匿名またはゲストでアクセスできる場合。
+
+### 観点・着眼点
+
+NETLOGON はドメインのログオンスクリプト置き場。管理者が作成した `.bat` / `.ps1` ファイルに**平文パスワードが埋め込まれている**ことがある。特に以下のパターンが頻出：
+
+- `net use` コマンドの `/user:[USER] [PASSWORD]` オプション
+- `if %USERNAME%==[USER] ...` 条件付きの認証情報分岐
+
+**着眼点：** スクリプト内の `net use`・`/user:`・`-p`・`-password`・`PASSWORD=` を探す。
+
+### 手順
+
+```bash
+# [Attacker] NETLOGON 共有にアクセス
+smbclient -N //[IP]/NETLOGON -c "ls"
+# または
+impacket-smbclient -no-pass guest@[IP]
+# → shares で共有一覧 → use NETLOGON → ls → cat [script_name].bat
+
+# ファイルをダウンロードして確認
+smbclient -N //[IP]/NETLOGON -c "get [SCRIPT_NAME] /tmp/[SCRIPT_NAME]"
+cat /tmp/[SCRIPT_NAME]
+```
+
+**取得した認証情報を即確認する：**
+```bash
+# [Attacker] 取得した認証情報を検証
+nxc smb [IP] -u '[USER]' -p '[PASSWORD]'
+```
+
+→ 認証情報が取れたら `../02_Initial_Access/Credential_Discovery.md`（スクリプトへの平文パスワード埋め込みパターン）へ
+
+---
 
 ## SYSVOL の確認
 
@@ -169,7 +229,7 @@ enum4linux -a -u '[USER]' -p '[PASSWORD]' [IP] | tee enum4linux_auth.txt
 
 ## 注意点・落とし穴
 
-- `-N`（Null認証）が拒否されても、`guest`ユーザーでの認証 (`-U guest%`) が通ることがある
+- Null 認証（`-N`）が拒否されても、Guest アカウントが有効な場合は `-u 'guest' -p ''` で認証が通ることがある。`nxc smb [IP] -u 'guest' -p ''` で事前に確認すること
 - SMB署名が有効（必須）な場合は中間者攻撃（NTLM リレー）は使えない
 - ファイルに `.exe` や `.zip` がある場合は必ずダウンロードして内容を確認する（→ バイナリ解析）
 - `{GUID}` 形式のフォルダ名は複数存在することがある。すべてのGUID配下を確認すること

