@@ -57,10 +57,10 @@
 2. **有効ユーザーの資産を読む**：
    - `file:///home/USERNAME/.ssh/id_rsa` — SSH 秘密鍵（あれば直接ログインへ）
    - `file:///home/USERNAME/.bash_history` — 過去コマンドに認証情報が残ることがある
-3. **Webアプリ設定ファイルを読む**：アプリのドキュメントルート・設定ディレクトリはアプリ名で検索して特定する（`../../../05_Tools_Reference/Searchsploit.md` の「製品構造調査」参照）
-4. **`/etc/shadow` が読める場合**はユーザーのハッシュを取得してクラック → `../../../05_Tools_Reference/Hashcat.md`
+3. **Webアプリ設定ファイルを読む**：アプリのドキュメントルート・設定ディレクトリはアプリ名で検索して特定する（`../../05_Tools_Reference/Searchsploit.md` の「製品構造調査」参照）
+4. **`/etc/shadow` が読める場合**はユーザーのハッシュを取得してクラック → `../../05_Tools_Reference/Hashcat.md`
 
-→ 取得した認証情報の確認手順 → `../../../02_Initial_Access/Credential_Discovery.md`（パスワード使い回し確認の表）
+→ 取得した認証情報の確認手順 → `../Credential_Discovery.md`（パスワード使い回し確認の表）
 
 **② パスのバリエーション**
 
@@ -132,7 +132,7 @@ python3 -m http.server 8000
 <root><data>trigger</data></root>
 ```
 
-> コールバック受信の詳細 → `../../../06_Concepts/Reverse_Shell.md`（攻撃側の準備①②）
+> コールバック受信の詳細 → `../../06_Concepts/Reverse_Shell.md`（攻撃側の準備①②）
 
 **⑥ PHP環境での Base64 エンコード取得**
 
@@ -148,7 +148,7 @@ python3 -m http.server 8000
 echo "BASE64_STRING" | base64 -d   # [Attacker]
 ```
 
-> 原理 → `../../../06_Concepts/XSLT_XML_Processing.md`
+> 原理 → `../../06_Concepts/XSLT_XML_Processing.md`
 
 ### 刺さらなかったとき
 
@@ -166,7 +166,7 @@ echo "BASE64_STRING" | base64 -d   # [Attacker]
 - パラメータエンティティ（`%xxe;`）と一般エンティティ（`&xxe;`）を混同すると動作しない。コンテンツ内の参照には `&` を使う
 
 ### 関連技術
-- 前：XMLアップロード機能の発見・リクエストのContent-Type確認 → `../../../01_Reconnaissance/Web_Enumeration.md`
-- 後：ファイル読み込みで認証情報取得 → `../../../02_Initial_Access/Credential_Discovery.md`
+- 前：XMLアップロード機能の発見・リクエストのContent-Type確認 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 後：ファイル読み込みで認証情報取得 → `../Credential_Discovery.md`
 - 後：XSLT処理が存在する場合はXSLTインジェクションも試す → `XSLT_Injection.md`
 - 後：内部ネットワーク探索（SSRF） → `SSRF.md`

