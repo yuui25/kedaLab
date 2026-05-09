@@ -75,8 +75,9 @@
 | LDAPカスタム属性への平文パスワード | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | パスワードの使い回し確認 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | strings コマンドによる文字列抽出 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
-| .NET バイナリ逆コンパイル | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| .NET バイナリ逆コンパイル（ILSpy / ilspycmd） | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
 | XOR暗号化パスワードの復号 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
+| バイナリ実行（Wine）＋ネットワークキャプチャ（tcpdump）によるクレデンシャル取得 | Initial Access | `02_Initial_Access/Binary_Analysis.md` |
 | FTP匿名ログイン | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | FTP平文通信からの認証情報取得 | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | SSH バージョンユーザー列挙（CVE-2018-15473） | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
@@ -126,7 +127,8 @@
 | inetpub（IIS Webルート）のソースコード・設定ファイル確認 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | Windows PoC 取得・転送・実行（evil-winrm upload / IWR / certutil） | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | netexec RID bruteforce によるドメインユーザー列挙 | Reconnaissance | `05_Tools_Reference/Netexec.md` |
-| BloodHound による権限チェーン可視化 | Post Access AD | `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
+| BloodHound による権限チェーン可視化（bloodhound-python / Linux側） | Post Access AD | `05_Tools_Reference/BloodHound.md` |
+| SharpHound.exe による AD データ収集（Windowsシェル内） | Post Access AD | `05_Tools_Reference/BloodHound.md` |
 | GenericAll によるパスワードリセット | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | GenericAll による Shadow Credentials | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | GenericAll によるグループメンバー追加 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
@@ -135,7 +137,9 @@
 | GenericWrite による logon script 設定 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md` |
 | WriteDACL による GenericAll 付与 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
 | WriteDACL による DCSync 権限付与 | Post Access AD | `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
-| RBCD（Resource-Based Constrained Delegation） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
+| RBCD（Impacketベース：Linux側から実行） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
+| RBCD（PowerMad + Rubeus S4U：Windowsシェル内から実行） | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
+| Rubeus S4U → kirbi→ccache変換（impacket-ticketConverter）→ psexec | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
 | Unconstrained Delegation + Printer Bug | Post Access AD | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md` |
 | Kerberoasting | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
 | Targeted Kerberoasting（SPN付与→ハッシュ取得） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |

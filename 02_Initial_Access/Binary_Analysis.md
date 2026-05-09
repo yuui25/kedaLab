@@ -142,6 +142,117 @@ for magic in range(256):
 
 ---
 
+## パターン4: バイナリ実行 + ネットワークキャプチャによるクレデンシャル取得
+
+### 着火条件
+
+以下のどちらかが当てはまる場合に試す：
+
+- 逆コンパイルで暗号化ロジックが複雑すぎて復号が難しい
+- バイナリが外部サービス（LDAP・SMB・HTTP 等）に接続する動作を確認した
+
+**攻撃者の思考トレース：** 「解読できなくても、実際に動かしてネットワークを見れば認証情報が流れる」。
+バイナリは接続の際に認証情報を送信しなければサービスと通信できない。
+暗号化していない LDAP Simple Authentication（平文バインド）や HTTP Basic 認証はパケット上にそのまま現れる。
+逆コンパイルと並行して、または逆コンパイルが難しい場合の代替として試す。
+
+### 環境前提
+
+- 実行環境: テスター端末（Linux）
+- 必要なツール:
+  - `wine`（Linux上でWindowsバイナリを実行するエミュレーター。別途インストール要）
+  - `tcpdump`（ペネトレ用Linuxディストリ標準搭載）または WireShark（GUI。別途インストール可）
+- ネットワーク: バイナリが接続しようとするサービス（LDAP 389等）がテスター端末から到達可能であること
+
+### 観点・着眼点
+
+**何が出たら次に何をするか：**
+
+| 観測される出力 | 示唆 | 次のアクション |
+|------------|-----|------------|
+| LDAP `bindRequest` パケットが見える | 認証情報が平文で流れている | `authentication` フィールドからパスワードを取得 |
+| LDAP `bindResponse resultCode: success` | バインド成功。認証情報が正しい | 取得したユーザー名・パスワードで LDAP 列挙へ |
+| SMB `NTLMSSP_AUTH` パケットが見える | NTLMハッシュが流れている | Responder / impacket-ntlmrelayx でリレー攻撃も検討 |
+| HTTP `Authorization: Basic` ヘッダーが見える | Base64エンコードの平文認証 | `echo '[BASE64]' \| base64 -d` で復号 |
+| ツールが `Connect error` / 名前解決失敗 | 接続先のホスト名を解決できていない | バイナリ内のホスト名を確認し `/etc/hosts` に登録してから再試行 |
+| バイナリが即終了・無応答 | Wine非対応の依存DLLが不足している可能性 | `wine [binary] 2>&1 \| grep -i err` でエラーを確認。不足DLLをインストール |
+
+**先に確認すること：**
+バイナリが接続先に実際に到達できる状態になっているかを先に確認する（`/etc/hosts` への登録、対象サービスへの疎通）。
+到達できない状態でキャプチャしてもパケットは流れない。
+
+### 手順
+
+**Step 1: バイナリの接続先ホスト名を特定して登録する**
+
+```bash
+# [Attacker] strings またはパターン1・2の逆コンパイル結果から接続先ホスト名を確認
+strings [binary_file] | grep -iE "ldap://|smb://|://[a-z]"
+
+# [Attacker] 判明したホスト名を登録（案件識別子マーカー付き）
+echo "192.0.2.10  [HOSTNAME]  # kedalab-[CASE_ID]" | sudo tee -a /etc/hosts
+```
+
+**Step 2: キャプチャを開始してからバイナリを実行する**
+
+```bash
+# [Attacker] tcpdump でキャプチャ開始（別ターミナルで）
+# インターフェース名は環境により異なる。`ip a` で到達可能なインターフェースを確認する
+sudo tcpdump -i [INTERFACE] -w /tmp/capture.pcap port 389 or port 445 or port 80 or port 443
+
+# [Attacker] Wine でバイナリを実行（上記と別ターミナルで）
+wine [binary_file] [options]
+```
+
+> **`[INTERFACE]` について：** テスター端末から対象サービスに到達できるインターフェース（環境によって物理 NIC・VPN アダプター・専用線インターフェース等が異なる）。`ip a` で全インターフェースを確認してから指定する。
+
+**Step 3: pcap を解析する**
+
+```bash
+# [Attacker] tshark でクイック解析（WireShark の CLI 版。別途インストール要）
+tshark -r /tmp/capture.pcap -Y "ldap.bindRequest" -T fields \
+  -e ldap.name -e ldap.simple
+
+# または WireShark GUI で開いて以下を確認
+# LDAP の場合：
+#   Lightweight Directory Access Protocol → protocolOp → bindRequest → authentication
+# HTTP Basic の場合：
+#   Authorization: Basic [BASE64] を右クリック → Follow HTTP Stream
+```
+
+**LDAP Simple Authentication の例（tcpdump の出力イメージ）：**
+
+```
+# WireShark での表示例：
+# Lightweight Directory Access Protocol
+#   └─ LDAPMessage bindRequest(1) "[DOMAIN]\[USER]" simple
+#        ├─ messageID: 1
+#        └─ protocolOp: bindRequest (0)
+#             └─ authentication: simple (0)
+#                  └─ simple: [PASSWORD]
+```
+
+### 刺さらなかったとき
+
+| 状況 | 原因・対処 |
+|------|-----------|
+| パケットが一切流れない | バイナリが接続に失敗している。`/etc/hosts` の登録・疎通確認を先に行う |
+| LDAP パケットが見えるが authentication が暗号化されている | `SASL/GSSAPI` 等の暗号化バインドが使われている。パターン2（逆コンパイル）での鍵取得が必要 |
+| Wine がクラッシュ・依存DLLエラー | 特定の Windows ランタイムが必要。`winetricks` で依存コンポーネントを追加するか、実 Windows 環境で実行する |
+| バイナリが64bit でWineが32bitモード | `WINEARCH=win64 wine [binary]` で64bitモードを指定する |
+
+### 注意点・落とし穴
+
+- LDAP over TLS（LDAPS / ポート636）や Kerberos 認証を使っている場合は平文パケットが得られない。その場合はパターン2（逆コンパイル）でクレデンシャルを復元する
+- Wine はWindowsバイナリの完全エミュレーターではないため、一部のバイナリは動作が異なることがある（ネットワーク送信前の処理が途中で止まる等）。パターン2との並行実施を推奨する
+- キャプチャには root 権限が必要（sudo tcpdump）。書き込み先（`/tmp/capture.pcap`）の権限も確認する
+- 原状回復：`/etc/hosts` に追記した行を削除する
+  ```bash
+  sudo sed -i.bak '/# kedalab-\[CASE_ID\]/d' /etc/hosts
+  ```
+
+---
+
 ## 注意点・落とし穴
 
 - `strings` だけでは UTF-16LE エンコードの文字列を見逃すことが多い（Windowsバイナリは UTF-16LE を多用）
@@ -151,5 +262,7 @@ for magic in range(256):
 ---
 
 ## 関連技術
-- 復号した認証情報 → `../Credential_Discovery.md`（使い回し確認）
+- 前：SMB共有からバイナリを取得した → `../../01_Reconnaissance/SMB_Enumeration.md`
+- 復号・キャプチャした認証情報の使い回し確認 → `../Credential_Discovery.md`
 - LDAP接続先が判明した → `../../01_Reconnaissance/LDAP_Enumeration.md`
+- 後：取得した認証情報でパスワードスプレー → `../../05_Tools_Reference/Netexec.md`
