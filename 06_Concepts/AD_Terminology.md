@@ -31,8 +31,8 @@
 | **Pass-The-Hash（PTH）** | クラックせずに NTLM ハッシュをそのまま認証に使う手法。平文パスワードが不要 | — |
 | **Pass-The-Ticket（PTT）** | Kerberos チケット（TGT/TGS）をそのまま認証に使う手法 | — |
 | **RBCD（Resource-Based Constrained Delegation）** | 特定の条件下でサービスへの委任を設定し、任意のユーザーに成りすましてアクセスする攻撃手法 | `../04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md` |
-| **evil-winrm** | WinRM 経由でリモートシェルを取るツール。Kali標準搭載。`evil-winrm -i [IP] -u [USER] -p [PASS]` | — |
-| **nxc（NetExec）** | SMB・WinRM・MSSQL 等への認証テストを一括で行うツール（旧 CrackMapExec）。Kali標準搭載 | `../05_Tools_Reference/Netexec.md` |
+| **evil-winrm** | WinRM 経由でリモートシェルを取るツール。ペネトレ用Linuxディストリ標準搭載。`evil-winrm -i [IP] -u [USER] -p [PASS]` | — |
+| **nxc（NetExec）** | SMB・WinRM・MSSQL 等への認証テストを一括で行うツール（旧 CrackMapExec）。ペネトレ用Linuxディストリ標準搭載 | `../05_Tools_Reference/Netexec.md` |
 | **RID（Relative Identifier）** | ドメイン内のオブジェクトに付く一意の番号。RID bruteforce でユーザーリストを作成できる | `../05_Tools_Reference/Netexec.md` |
 | **SPN（Service Principal Name）** | Kerberos でサービスを識別するための識別子。SPN 付きアカウントは Kerberoasting の対象になる | `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` |
 

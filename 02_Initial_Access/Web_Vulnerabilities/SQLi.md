@@ -136,7 +136,7 @@ curl -s "http://[TARGET]/moduleinterface.php?mact=News,m1_,default,0&m1_idlist=a
 
 **Python でのパスワードクラック（ソルト付きMD5）：**
 ```python
-# [Kali] 以下はKali（攻撃側）のマシンで実行する
+# [Attacker] 以下はテスター端末で実行する
 import hashlib
 
 salt   = "[取得したソルト]"

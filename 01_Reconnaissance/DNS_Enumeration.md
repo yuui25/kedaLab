@@ -5,8 +5,8 @@
 - IP は判明しているが、同一サーバー上の他のドメイン・サブドメインを探したい場合
 
 ### 環境前提
-- 実行環境: Kali
-- 必要なツール: `nslookup`・`dig`（Kali標準搭載）、`gobuster`（Kali標準搭載）
+- 実行環境: テスター端末
+- 必要なツール: `nslookup`・`dig`（ペネトレ用Linuxディストリ標準搭載）、`gobuster`（ペネトレ用Linuxディストリ標準搭載）
 - インターネットアクセス: 外部DNSに問い合わせる場合は必要。内部 DNS サーバー指定なら不要
 
 ### 観点・着眼点
@@ -33,10 +33,10 @@
 #### ① A レコードで IP を特定する
 
 ```bash
-# [Kali] nslookup で確認（シンプル）
+# [Attacker] nslookup で確認（シンプル）
 nslookup [ドメイン]
 
-# [Kali] dig で確認（フィールドが明確）
+# [Attacker] dig で確認（フィールドが明確）
 dig [ドメイン] A
 ```
 
@@ -48,14 +48,14 @@ Address:  8.8.8.8#53
 
 Non-authoritative answer:
 Name:     target.example.com
-Address:  10.10.10.100     ← ここが対象 IP
+Address:  192.0.2.100     ← ここが対象 IP
 ```
 
 **dig の出力例と読み方：**
 
 ```
 ;; ANSWER SECTION:
-target.example.com.  300  IN  A  10.10.10.100
+target.example.com.  300  IN  A  192.0.2.100
                                ↑          ↑
                                レコード種別   IP アドレス
 ```
@@ -67,22 +67,22 @@ target.example.com.  300  IN  A  10.10.10.100
 #### ② 内部 DNS サーバーを指定して解決する（VPN環境・内部ドメインの場合）
 
 ```bash
-# [Kali] @[DNS_IP] で問い合わせ先を指定する
+# [Attacker] @[DNS_IP] で問い合わせ先を指定する
 dig [ドメイン] A @[内部DNSのIP]
 nslookup [ドメイン] [内部DNSのIP]
 ```
 
-VPN 接続後に `ip addr show tun0` で自分の IP を確認し、同じサブネットにある DNS を指定する。
+テスター側の到達可能インターフェース（環境によって物理LAN・VPN・専用線等が変わる）を `ip a` で確認し、同じサブネットにある DNS を指定する。
 
 ---
 
 #### ③ 主要レコードをまとめて確認する
 
 ```bash
-# [Kali] 全レコード種別を一括取得
+# [Attacker] 全レコード種別を一括取得
 dig [ドメイン] ANY
 
-# [Kali] レコード種別を個別に指定
+# [Attacker] レコード種別を個別に指定
 dig [ドメイン] MX    # メールサーバー
 dig [ドメイン] NS    # 権威 DNS サーバー
 dig [ドメイン] TXT   # SPF・DKIM・サービス認証情報等
@@ -107,7 +107,7 @@ dig [ドメイン] CNAME # 別名レコード
 設定ミスのある DNS サーバーは、全ドメインレコードを一括で返す（ゾーン転送）。
 
 ```bash
-# [Kali]
+# [Attacker]
 dig AXFR [ドメイン] @[NSサーバーのIP]
 ```
 
@@ -118,10 +118,10 @@ dig AXFR [ドメイン] @[NSサーバーのIP]
 #### ⑤ サブドメイン列挙（ブルートフォース）
 
 ```bash
-# [Kali] gobuster でサブドメインを総当たり
+# [Attacker] gobuster でサブドメインを総当たり
 gobuster dns -d [ドメイン] -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -t 50
 
-# [Kali] ffuf（gobuster が使えない環境の代替）
+# [Attacker] ffuf（gobuster が使えない環境の代替）
 ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -u http://[ドメイン] -H "Host: FUZZ.[ドメイン]" -fs [除外するサイズ]
 ```
 
@@ -142,25 +142,25 @@ Found: internal.target.example.com
 IP が判明したら `/etc/hosts` に登録する。Kerberos・LDAP・TLS の認証は IP ではなくドメイン名を要求する場合があるため、登録しておかないと後工程でエラーが出る。
 
 ```bash
-# [Kali]
+# [Attacker]
 echo "[IP]  [ドメイン] [ホスト名]" | sudo tee -a /etc/hosts
 
 # 例
-echo "10.10.10.100  target.example.com target" | sudo tee -a /etc/hosts
+echo "192.0.2.100  target.example.com target" | sudo tee -a /etc/hosts
 ```
 
 **原状回復：** 案件終了後は `/etc/hosts` から該当行を削除する。
 
 ```bash
-# [Kali] 登録した行を削除
-sudo sed -i '/10.10.10.100/d' /etc/hosts
+# [Attacker] 登録した行を削除
+sudo sed -i '/192.0.2.100/d' /etc/hosts
 ```
 
 ---
 
 ### 刺さらなかったとき
 
-- 外部 DNS で名前解決できない → VPN 接続後に内部 DNS を `@[IP]` で直接指定する
+- 外部 DNS で名前解決できない → テスト経路（環境による）から内部 DNS を `@[IP]` で直接指定する
 - ゾーン転送が `Transfer failed` → 正常。AXFR は無効化されているのが一般的
 - サブドメイン列挙の結果が 0 件 → ワードリストを変える（`subdomains-top1million-20000.txt` 等の大きめのリストに切り替え）
 - nslookup で IP が返るが nmap が通らない → ファイアウォールがある可能性。`-Pn` で ping スキップして強制スキャン

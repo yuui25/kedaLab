@@ -60,7 +60,7 @@ sudo nmap -sU --top-ports 50 --open -oA nmap_udp [IP]
 `-oA` で保存した XML ファイルを searchsploit に渡す。nmap が検出したすべてのサービス×バージョンに対して既知エクスプロイトを一括表示する。
 
 ```bash
-# [Kali] 初期スキャン結果を一括チェック
+# [Attacker] 初期スキャン結果を一括チェック
 searchsploit --nmap nmap_initial.xml
 
 # 全ポートスキャン結果も確認する場合
@@ -95,9 +95,9 @@ searchsploit --nmap nmap_allports.xml
 **172.17.0.x が示すもの：**
 - Nmap スキャン対象のホストが `172.17.0.x` → そのホスト自体はコンテナの可能性
 - パストラバーサル等で取得した `/etc/hosts` に `172.17.0.x` のエントリ → **Webアプリがコンテナ内で動いている**
-  - ホスト名がランダムな16進文字列（例: `172.17.0.2   e6ff5b1cbc85`）であればほぼ確実に Docker コンテナ
-  - このホスト名（`e6ff5b1cbc85`）がコンテナIDとして後で使える（`docker exec` 等）
-- 実際のターゲットホスト（例: `10.10.x.x`）とは別の IP → コンテナはホスト上で動作しており、SSHログイン後に `docker` コマンドが使える可能性がある
+  - ホスト名がランダムな16進文字列（例: `172.17.0.2   [CONTAINER_ID]`）であればほぼ確実に Docker コンテナ
+  - このホスト名（`[CONTAINER_ID]`）がコンテナIDとして後で使える（`docker exec` 等）
+- 実際のターゲットホスト（例: `192.0.2.x`）とは別の IP → コンテナはホスト上で動作しており、SSHログイン後に `docker` コマンドが使える可能性がある
 
 → コンテナ環境が判明したら侵入後に確認: `../03_Post_Access_Linux/Enumeration_Checklist.md`（Dockerコンテナ環境の確認）
 → sudo docker exec の悪用: `../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4）

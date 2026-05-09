@@ -41,14 +41,14 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 # Step 2: TERMを設定する
 export TERM=xterm
 
-# Step 3: Ctrl+Z でncをバックグラウンドに落とす（ローカルKali端末に戻る）
+# Step 3: Ctrl+Z でncをバックグラウンドに落とす（テスター端末に戻る）
 
-# Step 4: [Kali] ローカル端末のエコー設定を変更する（入力が二重表示されなくなる）
+# Step 4: [Attacker] ローカル端末のエコー設定を変更する（入力が二重表示されなくなる）
 # ⚠️  このコマンドを打った直後、画面が一切反応しなくなる（文字が表示されない）。
 #     正常な動作なので慌てない。そのまま "fg" とタイプして Enter を押す。
 stty raw -echo
 
-# Step 5: [Kali] バックグラウンドのncをフォアグラウンドに戻す
+# Step 5: [Attacker] バックグラウンドのncをフォアグラウンドに戻す
 fg
 # Enterを1〜2回押すとシェルプロンプトが戻ってくる
 ```

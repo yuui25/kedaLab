@@ -2,7 +2,7 @@
 
 ## 概要
 
-`searchsploit` は Exploit-DB のオフラインミラーを検索するコマンドラインツール。インターネット接続なしで既知のエクスプロイト・PoC を検索できる。Kali Linux / Parrot OS に標準搭載。
+`searchsploit` は Exploit-DB のオフラインミラーを検索するコマンドラインツール。インターネット接続なしで既知のエクスプロイト・PoC を検索できる。ペネトレ用Linuxディストリ（Kali Linux / Parrot OS 等）に標準搭載。
 
 ---
 
@@ -108,10 +108,10 @@ searchsploit -m multiple/webapps/50581.py
 
 ```bash
 # Nmap スキャン時に XML を出力（-oA で .xml/.nmap/.gnmap を同時出力）
-nmap -sC -sV -oA nmap_initial TARGET_IP   # [Kali]
+nmap -sC -sV -oA nmap_initial TARGET_IP   # [Attacker]
 
 # 出力した XML に対して searchsploit を実行
-searchsploit --nmap nmap_initial.xml   # [Kali]
+searchsploit --nmap nmap_initial.xml   # [Attacker]
 ```
 
 **`--nmap` の出力例（80/22 のみ開いている環境の場合）：**

