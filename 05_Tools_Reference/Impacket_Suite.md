@@ -138,6 +138,26 @@ impacket-smbexec '[DOMAIN]/[USER]:[PASSWORD]@[IP]'
 
 ## 調査・列挙
 
+### GetADUsers.py — ドメインユーザー一覧の高速取得
+
+```bash
+# [Attacker] ドメイン全ユーザーの一覧（メール・PasswordLastSet・LastLogon 含む）
+impacket-GetADUsers -all '[DOMAIN]/[USER]:[PASSWORD]' -dc-ip [DC_IP]
+
+# Pass-The-Hash 版
+impacket-GetADUsers -all -hashes :[NTLM_HASH] '[DOMAIN]/[USER]' -dc-ip [DC_IP]
+```
+
+**用途:** `ldapsearch` の生クエリより手軽にユーザー一覧を取得したいとき。`PasswordLastSet` / `LastLogon` カラムから「最近ログインしたアカウント = アクティブな攻撃対象」を判別できる。
+
+**`ldapsearch` との使い分け：**
+
+| 観点 | 使うツール |
+|------|----------|
+| 全ユーザーの基本属性をテーブル形式で素早く確認したい | `GetADUsers.py` |
+| 特定の属性（`info`, `description`, `userAccountControl` のビット）でフィルタしたい | `ldapsearch`（`../01_Reconnaissance/LDAP_Enumeration.md`）|
+| SPN / DONT_REQ_PREAUTH 等のセキュリティ属性で絞りたい | `ldapsearch`（OID `1.2.840.113556.1.4.803` ビット指定）|
+
 ### lookupsid.py — SID / RID ブルートフォース
 
 ```bash
