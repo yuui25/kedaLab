@@ -80,6 +80,9 @@ gobuster vhost -u http://[TARGET] -w /usr/share/seclists/Discovery/DNS/subdomain
 | URLに連番IDがある | IDOR | `../02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
 | ファイルダウンロード機能 | パストラバーサル・IDOR | `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | ユーザー入力がページに反映される | XSS（反射型・格納型） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| **フォーム入力に `<script>` を入れたら「不正検知」エラーページが返り、エラーページに自分のリクエストヘッダー（User-Agent / Referer / IP）が反射されている** | ヘッダー注入経由の XSS（フィルタが本文にしかかかっていない設計） + 「管理者にレポート送信」文言があれば Blind XSS の発火条件 | `../02_Initial_Access/Web_Vulnerabilities/XSS.md`（ヘッダー注入経路 + Blind XSS シグナル） |
+| 問い合わせ・サポート・苦情フォームなど、入力内容がその場では反射されないが「管理者がレビューします」旨の表示がある | Blind XSS（運用者ブラウザでロード時に発火） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md`（Blind XSS） |
+| **stolen cookie で管理画面に入れた → そこに新しい入力フォーム（日付・ホスト名・URL等）がある** | 管理者専用APIにコマンドインジェクションがある典型パターン | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | 外部URLを受け付けるパラメータ | SSRF | `../02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
 | **URLを入力するフォームがある（PDF生成・プレビュー・スクリーンショット等）** | コマンドインジェクション（バックティック注入）または SSRF。レスポンスヘッダーで言語・ライブラリを確認し searchsploit でCVE検索 | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（PDFKit セクション） |
 | APIが `host`/`ip`/`cmd` 等を受け取る | OSコマンドインジェクション | `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |

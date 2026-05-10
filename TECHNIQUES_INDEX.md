@@ -47,6 +47,7 @@
 |--------|---------|------------|
 | Webアプリフレームワーク・アプリ名の特定（フッター・contactページ・HTMLソース・ヘッダー） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | Cookie 名からの CMS / フレームワーク識別（CMSSESSID / wp-* / JSESSIONID 等） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
+| **Server ヘッダーからの Python WSGI 系識別（Werkzeug / gunicorn / uWSGI / Tornado / Django runserver）と非標準ポート観点** | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | HTML `<meta name="generator">` 著作権年範囲からのバージョン推定 | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | DoS 保護・自動 IP ブロック前提のディレクトリ列挙抑制（robots.txt・トップページの警告文を読む） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | 未認証ファイルアップロード RCE（二重拡張子・マジックバイト・Content-Type 偽装） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/File_Upload.md` |
@@ -58,10 +59,14 @@
 | APIパラメータ改ざんによる権限昇格（is_admin=1・Broken Function Level Authorization） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | リバースシェル（bash -c 'bash -i >& /dev/tcp/...'） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | curlシングルクォートエスケープ（'"'"'パターン） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
-| クロスサイトスクリプティング（XSS）— 反射型・格納型・DOM型 | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| クロスサイトスクリプティング（XSS）— 反射型・格納型・DOM型・Blind XSS | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
 | XSS セッショントークン窃取（Cookie スティーリング）| Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
 | XSS DOM偽装・フィッシングリダイレクト | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
 | 入力バイパス — エンコーディング・難読化によるフィルタ回避（HTML / URL / ダブルエンコーディング） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| **リクエストヘッダー（User-Agent / Referer / X-Forwarded-For）経由の XSS — フォーム本文がフィルタされる場合の代替注入面** | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| **Blind XSS の発火シグナル（「管理者にレポート送信」文言・問い合わせフォーム等）** | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| **Blind XSS の `new Image()` ステルス cookie exfil チャネル + base64 デコード受信** | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| **stolen cookie のブラウザ植え替え（DevTools Storage タブ・curl/Burp の Cookie ヘッダー差し替え）** | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSS.md` |
 | ソーシャルエンジニアリング（フィッシング・スピアフィッシング・BEC） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
 | プリテキスティング（IT サポート・監査員・ベンダーを装った認証情報詐取） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
 | ベイティング（感染USB放置・偽ダウンロードリンク） | Initial Access | `02_Initial_Access/Social_Engineering.md` |
@@ -126,6 +131,7 @@
 | sudo 設定不備による昇格 | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md` |
 | sudo docker exec ワイルドカード NOPASSWD | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md` |
 | Ruby YAML.load Psych Gadget Chain（sudo スクリプト経由 → root RCE） | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md` |
+| **sudo スクリプト内の相対パス呼び出し → CWD ハイジャック（secure_path で守られない経路）** | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン6） |
 | シェル安定化（TTYアップグレード・python3 pty.spawn・stty raw -echo） | Post Access Linux | `03_Post_Access_Linux/Shell_Stabilization.md` |
 | /var/mail/[USERNAME] 確認（システムメール・脆弱性ヒント） | Post Access Linux | `03_Post_Access_Linux/Enumeration_Checklist.md` |
 | カーネルエクスプロイト（CVE探索・PoC転送・Cソースコンパイル・2プロセス並行実行） | Post Access Linux | `03_Post_Access_Linux/Kernel_Exploits.md` |

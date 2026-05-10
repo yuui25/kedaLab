@@ -212,6 +212,11 @@ searchsploit "アプリ名" [バージョン番号]
 | 「Powered by WordPress」等 | バージョンも確認してから `searchsploit wordpress [バージョン]` |
 | ヘッダーに `X-Powered-By: ASP.NET` | Windows 確定 → Windows 攻撃手法へ |
 | フッターに著作権年のみ（製品名なし） | ページソース全体を `grep` してフレームワーク痕跡を探す |
+| **`Server: Werkzeug/x.x.x Python/x.x.x`** | **Python WSGI 系（典型は Flask）。デバッグモードのコンソール露出（`/console` PIN 認証バイパス）・任意ルート存在を確認。テストデプロイ・社内ツール・小規模 API でよく見られる** |
+| **`Server: gunicorn/x.x.x` / `Server: uWSGI`** | **Python WSGI 系（Django / Flask 等）。バックエンドを特定したら `/admin` `/static/admin/css/base.css` 等で Django 判定、Cookie 名（`csrftoken` / `sessionid`）でも識別可能** |
+| **`Server: Tornado/x.x.x`** | **Python 非同期 Web フレームワーク。WebSocket 系の機能・XSRF Cookie の確認** |
+| **`Server: WSGIServer/x.x Python/x.x`** | **Django 開発サーバー（`runserver`）。本番に上がっている場合は `DEBUG=True` で詳細スタックトレースが出ることがある → エラーページ叩いて環境変数・SECRET_KEY 漏洩を確認** |
+| **非標準ポート（5000 / 8000 / 8080 / 3000）に Python 系サーバー** | **開発・社内ツール・PoC 段階のアプリの可能性。認証薄め・入力検証ないことが多い → 入力フィールド全部に XSS / コマンドインジェクションを試す価値あり** |
 
 ### 刺さらなかったとき
 - アプリ名がどこにも見つからない → ディレクトリ列挙で `/wp-admin`・`/admin`・`/phpmyadmin` 等の CMS 固有パスが見つかればそこから推定する
