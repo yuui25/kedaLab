@@ -89,6 +89,20 @@ netexec ldap [IP] -u [USER] -p '[PASSWORD]' --asreproast asrep.out
 
 ---
 
+## 刺さらなかったとき
+
+| 観測される症状 | 推定原因 | 代替手段 |
+|--------------|---------|---------|
+| 匿名バインドで `operationsError` が返る | 匿名アクセスは拒否されている | 認証情報取得まで後回し。`../00_Playbook/Windows_AD_Attack_Flow.md` Step 3（初期認証情報の取得）へ戻る |
+| 認証ありで結果が空 | `-b "DC=..."` の DN を間違えている | `ldapsearch -x -H ldap://[IP] -s base namingcontexts` で正しい Naming Context を確認してから再実行 |
+| `objectClass=user` で何も返らないが他は通る | カスタムスキーマ / オブジェクトクラスが標準と異なる | `(objectClass=*)` で広く取得し、属性 `objectClass` を見て実際のクラス名を確認する |
+| 大量結果が `sizeLimitExceeded` で途中で切れる | デフォルト 1000 件上限 | `-E pr=500/noprompt` でページング、または `-l unlimited` を試す（サーバー側設定次第） |
+| `info` / `description` フィールドに何も書かれていない | 運用上メモ機能を使っていない組織 | `extensionAttribute1`〜`extensionAttribute15` 等のカスタム属性を確認、または属性指定なしで全属性取得して網羅 |
+| LDAPS（636）に接続できない | 証明書の Subject / SAN とアクセス先（IP）が不一致 | `/etc/hosts` にホスト名を登録してから `ldaps://[FQDN]` で再接続（`../06_Concepts/Hosts_File_For_AD.md` 参照） |
+| `ldapsearch` が `Can't contact LDAP server` | 389 / 636 が閉じている / FW でブロック | nmap で再確認、別 DC（複数ある場合）の IP を試す |
+
+---
+
 ## 注意点・落とし穴
 
 - `info` フィールドは GUI（Active Directory ユーザーとコンピューター）の「説明」欄とは別の、あまり目立たないフィールド。GUI 運用だと見落とされがち

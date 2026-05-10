@@ -230,6 +230,20 @@ enum4linux -a -u '[USER]' -p '[PASSWORD]' [IP] | tee enum4linux_auth.txt
 
 ユーザー一覧・グループ・共有・パスワードポリシーを一括取得。
 
+## 刺さらなかったとき
+
+| 観測される症状 | 推定原因 | 代替手段 |
+|--------------|---------|---------|
+| `nxc smb [IP] -u 'guest' -p ''` で `STATUS_ACCOUNT_DISABLED` | Guest 無効 | Null 認証（`smbclient -L //[IP] -N`）で再試行。両方失敗なら認証情報が必要 → 認証情報取得（`../00_Playbook/Windows_AD_Attack_Flow.md` Step 3）へ戻る |
+| `smbclient -N //[IP]` が `NT_STATUS_ACCESS_DENIED` | 匿名・Guest 共に閉じている | enum4linux / `nxc smb` で別プロトコル（RPC）経由を試す |
+| 共有が `IPC$` のみ表示される | 匿名で見える共有が実質ない | 認証情報取得後に再列挙する（`-u [USER] -p '[PASSWORD]'`） |
+| SMB 署名が必須（`Signing: True`）と表示される | NTLM リレー攻撃が使えない | リレー以外の経路（Kerberos 認証強制 / Coerce 系・Pass-The-Hash）を検討 |
+| `OS=[Unix]` / `OS=[Samba x.x.x]` が表示される | 対象は Linux 上の Samba | Windows 想定の SAM/LSA dump 等は適用外。Samba バージョンの CVE を searchsploit で確認 |
+| SYSVOL に降りても `Groups.xml` が見つからない | GPP 認証情報未配布 / すでに撤去済み（MS14-025 適用後の慣習） | `Services.xml` / `ScheduledTasks.xml` / `Drives.xml` / `DataSources.xml` / `Printers.xml` も `grep -ril cpassword` で横断確認 |
+| GPP の `cpassword` を `gpp-decrypt` で復号しても無効値（空・改行のみ） | パスワードが意図的に空、または既にローテーション済み | 他の SYSVOL 配下スクリプト（`.bat` / `.ps1`）の平文パスワード探索に切替 |
+
+---
+
 ## 注意点・落とし穴
 
 - Null 認証（`-N`）が拒否されても、Guest アカウントが有効な場合は `-u 'guest' -p ''` で認証が通ることがある。`nxc smb [IP] -u 'guest' -p ''` で事前に確認すること
