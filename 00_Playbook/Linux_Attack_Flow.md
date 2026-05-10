@@ -65,6 +65,14 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 - **スキャン後に `searchsploit --nmap nmap_initial.xml` で既知CVEを一括確認する**（`-oA` で保存した XML が必要）
   → `../01_Reconnaissance/Network_Scanning.md`（Step 5）
 
+**nmap 出力でバックエンド技術を読み取るシグナル：**
+
+| nmap 出力の文字列 | 意味 | 次のアクション |
+|----------------|------|-------------|
+| `http-server-header: nginx/x.x + Phusion Passenger(R) x.x` | **Ruby / Rails アプリがバックエンドで動いている** | Step 2.9 の PDF 生成フォーム確認・`X-Runtime: Ruby` チェックを優先 |
+| `http-title: Convert Web Page to PDF` 等のツール機能名 | URL 入力型の変換機能が存在する | Step 2.9 へ直行して生成物のメタデータ確認（`exiftool`）を実施 |
+| `X-Powered-By: Express` / `X-Generator: Drupal` 等 | フレームワーク・CMSが特定できる | バージョンを確認して `searchsploit [フレームワーク名] [バージョン]` |
+
 ---
 
 ## Step 2 — サービス別の列挙
