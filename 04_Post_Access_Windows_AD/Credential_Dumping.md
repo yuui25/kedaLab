@@ -140,7 +140,26 @@ impacket-secretsdump -sam sam.hive -system system.hive LOCAL
 
 ---
 
+## 昇格成功後に確認すること（横展開観点）
+
+**「DCSync で krbtgt を取得できた = ゴール」ではない。** ドメイン全体のハッシュを取得した時点で以下を確認し、横展開・証跡収集・業務影響評価を行う。
+
+- **krbtgt ハッシュ** → Golden Ticket 作成可能（事前合意がない限り原則作成しない）。取得した時点でクライアントへ「krbtgt パスワードの2回ローテーション」を依頼する案件報告事項を確定
+- **Domain Admin / Enterprise Admin の NTLM ハッシュ** → Pass-The-Hash でドメイン内任意ホストへ接続性確認（業務影響を避けるため非業務時間帯に行う）
+- **全ユーザーの NTLM ハッシュ** → hashcat でクラック → パスワード強度・使い回し状況の評価レポート用途
+- **サービスアカウントの NTLM ハッシュ** → SPN 付きアカウント・Linux 側 sssd 連携アカウントへの横展開
+- **マシンアカウントのハッシュ** → そのホストでのローカル管理者操作・Silver Ticket 作成可否
+- **SAM/LSA dump（メンバーサーバー側）取得時** → ローカル管理者ハッシュ → ドメイン内他ホストへの Pass-The-Hash 試行（同一ローカル管理者パスワード使い回し検出）
+- **保存資格情報（DPAPI / Credential Manager / RDP マネージャー）** → クラウド・SaaS・サードパーティへの横展開経路
+- **Kerberos チケットキャッシュ（lsass/ccache）** → 残存チケットによる権限借用
+- **LAPS の `ms-Mcs-AdmPwd` 属性** → 各ホストのローカル管理者パスワード（DCSync 後は読み取り権限を実質持つ）
+
+---
+
 ## 関連技術
-- RBCD で Admin TGS を取得後 → DCSync を実行
-- Unconstrained Delegation で DC$ TGT を取得後 → DCSync を実行
-- 取得したチケットの使用方法 → `Kerberos_Attacks/Pass_The_Ticket.md`
+- 前：RBCD で Admin TGS を取得 → `Delegation_Attacks/RBCD.md`
+- 前：Unconstrained Delegation で DC$ TGT を取得 → `Delegation_Attacks/Unconstrained.md`
+- 後：取得したチケットの使用方法 → `Kerberos_Attacks/Pass_The_Ticket.md`
+- 後：取得したハッシュ・パスワードの使い回し確認 → `../02_Initial_Access/Credential_Discovery.md`
+- 後：ハッシュクラック → `../05_Tools_Reference/Hashcat.md`
+- 後：LAPS 値の取得 → `LAPS_Dump.md`

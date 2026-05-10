@@ -308,7 +308,7 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 | `uname -a` の出力 | 次に確認すること |
 |----------------|--------------|
 | ビルド日時が2年以上前 | `searchsploit linux kernel [バージョン系列]` で CVE 候補を確認 |
-| `/var/mail/<username>` に脆弱性名・技術名の言及あり | その技術名・CVEを最優先に searchsploit / GitHub で調べる |
+| `/var/mail/[USERNAME]` に脆弱性名・技術名の言及あり | その技術名・CVEを最優先に searchsploit / GitHub で調べる |
 | `findmnt \| grep overlay` でOverlayFSが使われている | OverlayFS 系カーネルCVEの適用条件が整っている可能性 |
 
 PoC取得→ターゲットへの転送→コンパイル（gcc / make）→実行の流れが典型。

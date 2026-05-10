@@ -265,7 +265,7 @@ impacket-psexec [DOMAIN]/administrator@[DC_FQDN] -k -no-pass
 
 ## 注意点・落とし穴
 
-- `-spn 'cifs/[DC_FQDN]'` の `[DC_FQDN]` は `dc01.example.local` のような完全修飾名にする（IPではKerberosが通らない）
+- `-spn 'cifs/[DC_FQDN]'` の `[DC_FQDN]` は `[DC_HOSTNAME].[DOMAIN_FQDN]` のような完全修飾名にする（IPではKerberosが通らない）
 - `KRB5CCNAME` 環境変数は `export` でセッションに設定する（sudo で実行する場合は `-E` オプション）
 - マシンアカウントの作成上限（デフォルト10台 / ドメイン管理者が変更している場合もある）に達している場合は、既存のマシンアカウントを制御できる場合のみそれを利用する
 - ルートB の Rubeus.exe は多くの AV/EDR で検知される。実案件では検知回避手段（難読化ビルド・メモリ内実行等）を事前合意の上で実施する

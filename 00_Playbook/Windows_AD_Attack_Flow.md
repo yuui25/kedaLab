@@ -118,7 +118,7 @@ nmap の `-sC` スクリプトスキャン結果から：
 を確認する。`/etc/hosts` に **ホスト名・ドメイン名・FQDN** の3つを登録しておく。
 
 ```
-192.0.2.10  dc01 dc01.example.local example.local
+192.0.2.10  [DC_HOSTNAME] [DC_HOSTNAME].example.local example.local
 ```
 
 > 原理（なぜ IP では Kerberos / LDAP / TLS が動かないのか・どのドメイン名を登録すべきか・原状回復） → `../06_Concepts/Hosts_File_For_AD.md`

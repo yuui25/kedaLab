@@ -16,6 +16,7 @@
 | robots.txt からの隠しパス発見 | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | サービスバージョン検出 | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
 | IPレンジからDockerコンテナを特定（172.17.0.x） | Reconnaissance | `01_Reconnaissance/Network_Scanning.md` |
+| Webディレクトリファジング中のレート制限・WAF throttle 対処（gobuster -t / --delay 調整） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | コンテナ環境の確認（/.dockerenv / /etc/hosts / ip addr） | Post Access Linux | `03_Post_Access_Linux/Enumeration_Checklist.md` |
 | Webディレクトリ列挙（gobuster） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | vhostファジング | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
@@ -98,6 +99,7 @@
 | MSSQL 列挙・悪用（impacket-mssqlclient / DB列挙・ハッシュ取得） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | MSSQL ユーザーなりすまし（enum_impersonate / EXECUTE AS LOGIN） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | MSSQL xp_cmdshell による OS コマンド実行 | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| Java デシリアライズ allowlist バイパス（resolveProxyClass 経由） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` |
 
 ---
 
@@ -116,7 +118,7 @@
 | sudo docker exec ワイルドカード NOPASSWD | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md` |
 | Ruby YAML.load Psych Gadget Chain（sudo スクリプト経由 → root RCE） | Post Access Linux | `03_Post_Access_Linux/Sudo_Misconfig.md` |
 | シェル安定化（TTYアップグレード・python3 pty.spawn・stty raw -echo） | Post Access Linux | `03_Post_Access_Linux/Shell_Stabilization.md` |
-| /var/mail/<username> 確認（システムメール・脆弱性ヒント） | Post Access Linux | `03_Post_Access_Linux/Enumeration_Checklist.md` |
+| /var/mail/[USERNAME] 確認（システムメール・脆弱性ヒント） | Post Access Linux | `03_Post_Access_Linux/Enumeration_Checklist.md` |
 | カーネルエクスプロイト（CVE探索・PoC転送・Cソースコンパイル・2プロセス並行実行） | Post Access Linux | `03_Post_Access_Linux/Kernel_Exploits.md` |
 | CVE-2023-0386（OverlayFS + FUSE カーネル特権昇格） | Post Access Linux | `03_Post_Access_Linux/Kernel_Exploits.md` |
 | python3 -m http.server によるファイル転送（攻撃側HTTP配信 + wget取得） | Post Access Linux | `03_Post_Access_Linux/Kernel_Exploits.md` |
@@ -195,6 +197,19 @@
 
 ---
 
+## プレイブック・攻撃フロー
+
+個別技術の組み合わせ方と判断順序を示すフロー全体のガイド。技術の詳細ではなく「次に何を試すか」の迷いをなくすために開く。
+
+| Playbookタイトル | 用途 | ファイルパス |
+|---------------|------|------------|
+| Linux 侵入・権限昇格フロー（OS判定 → ポートスキャン → シェル取得 → 権限昇格） | Linux全体フロー | `00_Playbook/Linux_Attack_Flow.md` |
+| Windows AD 攻撃フロー（偵察 → 初期アクセス → AD列挙 → DCSync） | Windows AD全体フロー | `00_Playbook/Windows_AD_Attack_Flow.md` |
+| Web脆弱性調査フロー（Webのみスコープ向け偵察 → 機能別脆弱性確認 → 認証・認可横断確認） | Webスコープ限定フロー | `00_Playbook/Web_Vuln_Flow.md` |
+| 技術名が分からない状態からの調査フロー（機能観察 → 英語化 → 脆弱性クラス特定） | 未知技術マッピング | `00_Playbook/01_Unknown_Tech_Research.md` |
+
+---
+
 ## 原理・背景（セキュリティ）
 
 作業ファイル（01〜05）から参照される動作原理の解説ファイル群。作業中ではなく「なぜその手が効くのか」「環境が違うときどこを見るか」を確認したいときに開く。
@@ -208,6 +223,7 @@
 | GPP cpassword の暗号化・復号原理（固定鍵の公開・MS14-025後の挙動） | `01_Reconnaissance/SMB_Enumeration.md` / `02_Initial_Access/Credential_Discovery.md` | `06_Concepts/GPP_Credential.md` |
 | PAM の動作原理（session スタック・pam_motd・PATH ハイジャックが成立する条件） | `03_Post_Access_Linux/PAM_Misconfig.md` / `03_Post_Access_Linux/Enumeration_Checklist.md` | `06_Concepts/PAM.md` |
 | Docker の分離機構（namespace / cgroup / capability とブロックデバイス可視性） | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4） | `06_Concepts/Docker_Isolation.md` |
+| Java ObjectInputStream クラス解決の2経路（resolveClass / resolveProxyClass）と allowlist バイパス原理 | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` | `06_Concepts/Java_Deserialization.md` |
 
 ---
 

@@ -227,7 +227,7 @@ Linux hostname 5.15.70-051570-generic #202209231339 SMP Fri Sep 23 13:45:37 UTC 
 ```
 
 ビルド日時が古い場合（目安：2年以上前）は `searchsploit linux kernel [バージョン]` で既知CVEを確認する。
-`/var/mail/<username>` に特定の脆弱性への言及があれば、そのCVEを最優先に調べる。
+`/var/mail/[USERNAME]` に特定の脆弱性への言及があれば、そのCVEを最優先に調べる。
 
 → 詳細手順（CVE選択・PoC転送・コンパイル・実行）: `Kernel_Exploits.md`
 

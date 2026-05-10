@@ -165,7 +165,7 @@ smbclient -L //[IP] -N 2>&1 | head -20
 # nmap スクリプトで詳細取得
 nmap -p 445 --script smb-os-discovery [IP]
 # → OS: Windows Server 2019 Standard 17763
-# → Computer name: DC01
+# → Computer name: [DC_HOSTNAME]
 # → Domain name: example.local
 ```
 

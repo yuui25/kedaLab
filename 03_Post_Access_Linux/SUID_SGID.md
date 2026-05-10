@@ -144,6 +144,22 @@ cp /tmp/passwd.bak /etc/passwd           # 元のファイルに戻す
 
 ---
 
+## 昇格成功後に確認すること（横展開観点）
+
+**「SUID 経由で root になれた = ゴール」ではない。** root 権限を得た時点で以下を確認し、横展開・証跡収集を行う。
+
+- `/root/.ssh/` 配下の秘密鍵 → 他ホストへの SSH 接続性の確認
+- `/etc/shadow` 全エントリのハッシュ → 他システムでのパスワード使い回し検証（`hashcat` で一括クラック）
+- `/root/.bash_history` → 直近の接続先・コマンド履歴
+- root の cron / systemd サービスへの認証情報埋め込み
+- AD 連携設定（`/etc/sssd/sssd.conf` / `/etc/krb5.conf`）→ ドメイン側資格情報
+- 内部サービス（DB・管理画面・API）の設定ファイル・環境変数 → 接続情報・シークレット
+- 作成・改造した SUID バイナリは原状回復必須（注意点・落とし穴・商用前提セクション参照）
+
+---
+
 ## 関連技術
+- 前：`Enumeration_Checklist.md`（`find / -perm -4000` の実行）
+- 後：Capabilities も確認 → `Capabilities.md`
+- 後：`/etc/shadow` を読めるようになった → ハッシュクラック: `../05_Tools_Reference/Hashcat.md`
 - GTFOBins: https://gtfobins.github.io/
-- Capabilities も確認 → `Capabilities.md`
