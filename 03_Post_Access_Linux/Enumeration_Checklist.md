@@ -19,7 +19,7 @@ groups
 `id` の出力には `uid`・`gid`・`groups` が含まれる。**特権昇格の糸口はグループに隠れていることが多い。**
 
 ```
-uid=1000(jkr) gid=1000(jkr) groups=1000(jkr),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),108(netdev),999(staff)
+uid=1000([USER]) gid=1000([USER]) groups=1000([USER]),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),108(netdev),50(staff)
 ```
 
 権限昇格に直結しうるグループ一覧：
@@ -92,6 +92,19 @@ sudo -l
 ps aux
 ps aux | grep root
 ```
+
+**`ps aux` だけでは見えない短命プロセス（SSH ログイン引き金 / cron 系）には `pspy` を使う：**
+
+`update-motd.d` のスクリプトや cron で動く root プロセスは数百ミリ秒で完結することが多く、`ps aux` のスナップショットでは捕捉できない。**`staff` / `lxd` グループに所属していて PATH ハイジャック・cron スクリプト改竄が候補に上がっている場合は、列挙の早い段階で pspy を導入する。**
+
+```bash
+# [Target] pspy をバックグラウンドで起動
+/tmp/pspy64 -i 1000
+
+# [Attacker] 別端末から SSH 再ログインを引き金に張ると、UID=0 のプロセスが pspy 出力に流れる
+```
+
+→ 詳細手順（バイナリ取得・転送・出力の読み方・シグナル別の次の手）: `../05_Tools_Reference/pspy.md`
 
 ### ネットワーク接続（内部サービスの確認）
 ```bash

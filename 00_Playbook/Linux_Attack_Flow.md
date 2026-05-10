@@ -236,6 +236,7 @@ export TERM=xterm
 | 高 | SUID/SGID バイナリ | `find / -perm -4000 -type f 2>/dev/null` |
 | 高 | sudo 権限 | `sudo -l` |
 | 中 | 実行中プロセス | `ps aux` |
+| 中 | **短命な root プロセス（SSH ログイン引き金 / cron 系）** | **`pspy64`（`ps aux` には映らない数百ms完結のプロセスを捕捉）** → `../05_Tools_Reference/pspy.md` |
 | 中 | ネットワーク接続 | `ss -tlnp`, `netstat -tlnp` |
 | 中 | 環境変数 | `env` |
 | 低 | crontab | `crontab -l`, `/etc/cron*` |
@@ -294,6 +295,9 @@ GTFOBins で確認。標準バイナリ（find, vim, python等）に SUID が設
 2. `ls -la /usr/local/sbin/` で書き込み権限がある（`staff` が `/usr/local` に書ける慣習）
 3. `/etc/update-motd.d/` 配下にスクリプトが存在し、フルパスなしで外部コマンド（`run-parts` 等）を呼んでいる
 4. SSH ログインを引き金にできる（自分で再ログイン可能）
+
+> **条件 3 の確認は `cat /etc/update-motd.d/*` だけでは不十分。** 実際に root が SSH ログイン時に何を実行しているかは `pspy` で観察するのが確実。`pspy` 起動中に別端末から SSH ログインすると、`UID=0 ... run-parts --lsbsysinit /etc/update-motd.d` のような出力が見えるはず。
+> → 観察手順: `../05_Tools_Reference/pspy.md`
 
 → 詳細手順（スクリプト配置・引き金の引き方・失敗パターン）: `../03_Post_Access_Linux/PAM_Misconfig.md`
 → 原理（なぜ PAM session が root 権限で外部コマンドを呼ぶのか）: `../06_Concepts/PAM.md`
