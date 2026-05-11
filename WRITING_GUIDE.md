@@ -336,6 +336,38 @@ grep -nE "<[a-z][a-z _-]+>" [編集したファイル]
 # ヒット例: <attacker ip>, <user>, <password> → [ATTACKER_IP], [USER], [PASSWORD] へ置換
 ```
 
+### CVE 研究・バリアントハント由来の固有値検出
+
+CVE 研究や脆弱性報告で得た知見を kedalab に書く際は、**未公開（報告中・embargo 中）の発見** の固有値が
+残っていないかを別途チェックする。演習環境固有値とは別経路の漏洩リスク。
+
+```bash
+# 検証中・未公開のプロジェクト名・組織名（追加で検出したいものは随時追記）
+grep -nE "TriliumNext|trilium|siyuan|Joplin|Logseq|StandardNotes|Notable" [編集したファイル]
+
+# 起点 CVE のソースコード由来の関数名・ファイル名・行番号
+grep -nE "escapeAriaLabel|revisions\.ts|popover\.ts|tooltip\.ts|escape\.ts" [編集したファイル]
+grep -nE ":\s*[0-9]{2,4}\s*$|\.ts:[0-9]+|\.js:[0-9]+" [編集したファイル]
+
+# 製品バージョン pinning（v0.95.0 のような具体値は未公開発見の対象バージョンを暴露する）
+grep -nE "v[0-9]+\.[0-9]+\.[0-9]+" [編集したファイル]
+
+# 未公開 CVE 番号 / 直近年の CVE は要注意（公開済みなら明示してよい）
+grep -nE "CVE-202[5-9]-[0-9]+" [編集したファイル]
+# ヒットした場合: NVD で当該 CVE が published 状態か確認。Reserved / Rejected のまま記載しない。
+
+# 「実例」「ケーススタディ」セクションの存在自体を要確認
+grep -nE "^##\s*実例|^##\s*ケーススタディ|^##\s*事例" [編集したファイル]
+# ヒットした場合: そのセクションに固有値が残っていないかを目視確認。
+# kedalab は「演習・案件由来の知見を汎用化する場」なので、
+# 実例は必ず [CANDIDATE_REPO] / [CLIENT_RENDERING_FILE] 等のプレースホルダで書く。
+```
+
+**chunk テスト：** 上記 grep がヒットしたら、ヒットした行を以下のいずれかで処理する：
+1. 公開済み CVE への参照なら維持してよい（NVD で published を確認した上で）
+2. 未公開 / 報告中の発見由来なら **角括弧プレースホルダに戻す**
+3. 起点 CVE の説明として残すなら **「バグクラス」表現（条件 + sink + 結果）** に書き換える
+
 ### 相対パスリンクの深さ誤り検出
 
 `02_Initial_Access/Web_Vulnerabilities/` のように **2 階層下** にあるファイルから kedalab ルートへ戻るには `../../` で十分。`../../../` は kedalab の**外**を指してしまうのでリンク切れになる：

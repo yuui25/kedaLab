@@ -135,6 +135,7 @@
 | MSSQL Linked Server 経由の xp_cmdshell 遠隔有効化（多段チェーン・impacket-mssqlclient / PowerUpSQL 使い分け） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | MSSQL xp_dirtree による NTLM 強制認証（Linked Server 経由 → Responder / ntlmrelayx への誘導） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | Java デシリアライズ allowlist バイパス（resolveProxyClass 経由） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` |
+| Electron アプリ XSS → RCE エスカレーション（nodeIntegration:true + contextIsolation:false） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Electron_XSS_RCE.md` |
 | 製品デフォルト認証情報試行（製品カテゴリ別の出荷時組合せ早見表・SecLists Default-Credentials/ 利用） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
 | アプライアンス管理 UI / Tomcat manager / JBoss / Jenkins / Grafana / Kibana / DB / プリンタ / IP カメラ / VPN 管理画面のデフォルト認証 | Initial Access | `02_Initial_Access/Default_Credentials.md` |
 | hydra による多プロトコル辞書攻撃（http-get / http-post-form / ssh / ftp / telnet / snmp / ipmi） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
@@ -324,6 +325,8 @@
 | PAM の動作原理（session スタック・pam_motd・PATH ハイジャックが成立する条件） | `03_Post_Access_Linux/PAM_Misconfig.md` / `03_Post_Access_Linux/Enumeration_Checklist.md` | `06_Concepts/PAM.md` |
 | Docker の分離機構（namespace / cgroup / capability とブロックデバイス可視性） | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4） | `06_Concepts/Docker_Isolation.md` |
 | Java ObjectInputStream クラス解決の2経路（resolveClass / resolveProxyClass）と allowlist バイパス原理 | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` | `06_Concepts/Java_Deserialization.md` |
+| Electron の nodeIntegration / contextIsolation の仕組みと XSS → RCE エスカレーション原理 | `02_Initial_Access/Web_Vulnerabilities/Electron_XSS_RCE.md` | `06_Concepts/Electron_Security.md` |
+| バリアントハンティング（既知 CVE のバグクラスから類似プロジェクトの変種を探す手法） | CVE 研究・脆弱性調査全般 | `06_Concepts/Variant_Hunting.md` |
 
 ---
 
