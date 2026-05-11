@@ -38,6 +38,25 @@
 | ファイルメタデータ解析（exiftool / docProps/core.xml）によるユーザー名・ドメイン名取得 | Reconnaissance | `01_Reconnaissance/Metadata_Analysis.md` |
 | FTP 匿名アクセス・再帰ダウンロード（wget -m ftp://）| Reconnaissance | `02_Initial_Access/Protocol_Exploitation.md` |
 | OLE2 / .msg ファイル解析・変換（msgconvert / extract-msg）| Reconnaissance | `02_Initial_Access/Binary_Analysis.md` |
+| TLS プロトコル/暗号スイート列挙（nmap ssl-enum-ciphers / testssl.sh / sslyze） | Reconnaissance | `01_Reconnaissance/TLS_Audit.md` |
+| 証明書 CN / SAN / Issuer からの組織・製品・FQDN 推定 | Reconnaissance | `01_Reconnaissance/TLS_Audit.md` |
+| openssl s_client によるプロトコル別接続・SNI 指定・mTLS 判定 | Reconnaissance | `01_Reconnaissance/TLS_Audit.md` |
+| 名前付き TLS 脆弱性確認（Heartbleed / POODLE / FREAK / Logjam / ROBOT / DROWN / Sweet32 / Ticketbleed） | Reconnaissance | `01_Reconnaissance/TLS_Audit.md` |
+| HSTS / セキュリティヘッダー確認（Strict-Transport-Security / CSP / X-Frame-Options） | Reconnaissance | `01_Reconnaissance/TLS_Audit.md` |
+| .git / .svn / .hg ディレクトリ露出検出と git-dumper によるリポジトリ復元 | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| .env / config.php / wp-config.php 等の設定ファイル誤公開 | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| バックアップファイル列挙（.bak / .old / ~ / .swp / .tar.gz / .zip / .sql） | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| サーバー設定ファイル誤公開（.htaccess / .htpasswd / web.config / nginx.conf） | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| 動作確認用ファイル誤公開（phpinfo.php / server-status / server-info） | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| Swagger / OpenAPI 仕様ファイル誤公開からの裏 API 列挙 | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| .DS_Store / Thumbs.db / .idea / .vscode メタファイルからのファイル名抽出 | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| ディレクトリリスティング検出（Apache autoindex / Nginx autoindex / IIS / Tomcat / Python http.server のシグナル） | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| 管理コンソール誤公開（Tomcat manager / JBoss jmx / Spring Actuator env・heapdump / Jenkins script） | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| nuclei exposures テンプレートによる誤公開一括チェック | Reconnaissance | `01_Reconnaissance/Exposed_Files.md` |
+| SNMP コミュニティ文字列ブルートフォース（onesixtyone）/ UDP 161 ホスト発見 | Reconnaissance | `01_Reconnaissance/SNMP_Enumeration.md` |
+| snmpwalk による MIB 全取得（OID 1.3.6.1 系 / ARP・ルーティング・プロセス・ソフトウェア・Windows ユーザー） | Reconnaissance | `01_Reconnaissance/SNMP_Enumeration.md` |
+| SNMPv3 認証情報確認（auth/priv プロトコル列挙・nmap snmp-brute） | Reconnaissance | `01_Reconnaissance/SNMP_Enumeration.md` |
+| SNMP 書き込み可能コミュニティ文字列による設定変更（snmpset / ルーター設定改ざん） | Reconnaissance | `01_Reconnaissance/SNMP_Enumeration.md` |
 
 ---
 
@@ -112,7 +131,32 @@
 | MSSQL 列挙・悪用（impacket-mssqlclient / DB列挙・ハッシュ取得） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | MSSQL ユーザーなりすまし（enum_impersonate / EXECUTE AS LOGIN） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | MSSQL xp_cmdshell による OS コマンド実行 | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| MSSQL Linked Server 列挙・悪用（enum_links / EXECUTE AT / openquery による権限昇格） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| MSSQL Linked Server 経由の xp_cmdshell 遠隔有効化（多段チェーン・impacket-mssqlclient / PowerUpSQL 使い分け） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
+| MSSQL xp_dirtree による NTLM 強制認証（Linked Server 経由 → Responder / ntlmrelayx への誘導） | Initial Access | `02_Initial_Access/MSSQL_Exploitation.md` |
 | Java デシリアライズ allowlist バイパス（resolveProxyClass 経由） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` |
+| 製品デフォルト認証情報試行（製品カテゴリ別の出荷時組合せ早見表・SecLists Default-Credentials/ 利用） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| アプライアンス管理 UI / Tomcat manager / JBoss / Jenkins / Grafana / Kibana / DB / プリンタ / IP カメラ / VPN 管理画面のデフォルト認証 | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| hydra による多プロトコル辞書攻撃（http-get / http-post-form / ssh / ftp / telnet / snmp / ipmi） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| medusa による辞書攻撃（hydra 非対応プロトコルの代替） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| IPMI cipher 0 認証バイパス（CVE-2013-4786 系） | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| nuclei default-logins/ テンプレートによる製品別デフォルト認証情報一括チェック | Initial Access | `02_Initial_Access/Default_Credentials.md` |
+| アカウントロックアウトポリシー事前確認（AD：nxc smb --pass-pol / impacket-samrdump / rpcclient getdompwinfo） | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| LDAP 経由のロックアウト属性取得（lockoutThreshold / lockoutDuration / lockOutObservationWindow / 100ns 単位変換） | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| Linux ロックアウト機構の確認（pam_faillock / pam_tally2 / faillock --user） | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| Web フォームのロックアウト・IP ブロック観察（HTTPレスポンス差分・Retry-After / X-RateLimit ヘッダー） | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| SSH の MaxAuthTries / fail2ban / pam_faillock の見分けと auth.log シグネチャ | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| パスワードスプレーの試行間隔設計（観察期間 + buffer の sleep 設計・継続試行検知の回避） | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| 細粒度パスワードポリシー（FGPP / msDS-PasswordSettings）の確認 | Initial Access | `02_Initial_Access/Account_Lockout_Recon.md` |
+| エッジアプライアンス製品フィンガープリント（証明書 Issuer / favicon ハッシュ / URL パス / Server ヘッダー による製品特定） | Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| Citrix NetScaler ADC / Gateway 既知 CVE 照合（CVE-2023-3519 / CVE-2023-4966 Citrix Bleed / CVE-2019-19781）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| Fortinet FortiGate / FortiOS SSL-VPN 既知 CVE 照合（CVE-2024-21762 / CVE-2022-42475 / CVE-2023-27997 XORtigate）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| Ivanti Connect Secure 既知 CVE 照合（CVE-2023-46805 + CVE-2024-21887 チェーン / CVE-2024-22024 XXE / CVE-2024-29824 EPM SQLi）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| Palo Alto PAN-OS GlobalProtect 既知 CVE 照合（CVE-2024-3400 任意ファイル作成 → RCE）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| F5 BIG-IP iControl REST / TMUI 既知 CVE 照合（CVE-2022-1388 認証バイパス / CVE-2023-46747 SSRF → admin 作成）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| nuclei によるアプライアンス CVE 一括スキャン（-tags citrix / fortinet / ivanti / panos / f5）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| PoC リポジトリ選定基準（Rapid7 / Mandiant / Horizon3 / Bishop Fox 優先・バックドア入り PoC の識別）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
+| 成功シグナルの段階的確認（到達性 → 脆弱版数 → 読み取り系 PoC → RCE 承認後のみ）| Initial Access | `02_Initial_Access/Edge_Appliance_CVEs.md` |
 
 ---
 
@@ -180,9 +224,47 @@
 | Pass-The-Ticket（PTT） | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | Golden Ticket | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | Silver Ticket | Post Access AD | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
+| LLMNR / NBT-NS / mDNS / WPAD ポイズニング（Responder）— ハッシュキャプチャ・SMB Signing 事前確認・Relay 専用モード | Post Access AD | `04_Post_Access_Windows_AD/NTLM_Relay/Responder.md` |
+| NTLM リレー（ntlmrelayx）— SMB / LDAP / LDAPS / MSSQL / AD CS ESC8 リレー・Shadow Credentials・RBCD・socks モード・Drop the MIC | Post Access AD | `04_Post_Access_Windows_AD/NTLM_Relay/ntlmrelayx.md` |
+| Coerce 系強制認証（PetitPotam / PrinterBug / DFSCoerce）— LLMNR 無効環境での代替 Relay 起点・ESC8 DC$ 認証強制 | Post Access AD | `04_Post_Access_Windows_AD/NTLM_Relay/Coerce.md` |
+| mitm6（IPv6 DNS スプーフィング）— DHCPv6 / WPAD 悪用・LLMNR/NBT-NS 無効環境でも有効な Relay 起点 | Post Access AD | `04_Post_Access_Windows_AD/NTLM_Relay/mitm6.md` |
+| SeImpersonate / SeAssignPrimaryToken — GodPotato / PrintSpoofer / RoguePotato による SYSTEM 昇格（環境判定フロー付き） | Post Access AD/Win | `04_Post_Access_Windows_AD/Privilege_Tokens.md` |
+| SeBackup / SeRestore — `reg save` による SAM/SYSTEM/SECURITY ハイブ取得 → impacket-secretsdump でハッシュ解析 | Post Access AD/Win | `04_Post_Access_Windows_AD/Privilege_Tokens.md` |
+| SeDebug — procdump / Mimikatz による LSASS ダンプ → pypykatz でハッシュ・DPAPI マスターキー取得 | Post Access AD/Win | `04_Post_Access_Windows_AD/Privilege_Tokens.md` |
+| SeTakeOwnership — `takeown` + `icacls` による SAM/SYSTEM ハイブの強制取得 | Post Access AD/Win | `04_Post_Access_Windows_AD/Privilege_Tokens.md` |
+| DPAPI マスターキー取得（オンライン：`sekurlsa::dpapi` / pypykatz / SharpDPAPI） | Post Access AD/Win | `04_Post_Access_Windows_AD/DPAPI_Browser_Creds.md` |
+| DPAPI マスターキー取得（オフライン：ドメインバックアップキー / NT ハッシュ → impacket-dpapi） | Post Access AD/Win | `04_Post_Access_Windows_AD/DPAPI_Browser_Creds.md` |
+| Chrome / Edge 保存パスワード取得（`Login Data` SQLite + DPAPI / AES-GCM 復号） | Post Access AD/Win | `04_Post_Access_Windows_AD/DPAPI_Browser_Creds.md` |
+| Firefox 保存パスワード取得（`logins.json` + `key4.db` → firepwd / firefox_decrypt） | Post Access AD/Win | `04_Post_Access_Windows_AD/DPAPI_Browser_Creds.md` |
+| Windows Credential Manager 取得（`cmdkey /list` + SharpDPAPI / Mimikatz `dpapi::cred`） | Post Access AD/Win | `04_Post_Access_Windows_AD/DPAPI_Browser_Creds.md` |
+| UAC レベル確認（ConsentPromptBehaviorAdmin / EnableLUA レジストリ値） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 1.3） |
+| UAC バイパス — fodhelper.exe / eventvwr.exe 自動昇格バイナリ悪用（HKCU レジストリ書き換え） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 1.3） |
+| UAC バイパス — UACME / Metasploit bypassuac モジュールの使い分けと検知性 | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 1.3） |
+| AMSI 有効状態確認（AmsiUtils クラス検出）と PowerShell Downgrade Attack（v2 起動） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
+| AMSI バイパス — AmsiScanBuffer メモリパッチ（amsiInitFailed 設定）と検知性 | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
+| AMSI バイパス — ETW 無効化との組み合わせ（商用案件では原則禁止） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
+| BYOVD（Bring Your Own Vulnerable Driver）— 脆弱ドライバーロードで EDR Kernel Callback を削除 | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |
+| BYOVD — LOLDrivers.io / Microsoft Vulnerable Driver Blocklist による脆弱ドライバー選定 | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |
+| BYOVD — sc.exe による脆弱カーネルドライバー登録・起動・原状回復（Sysmon Event ID 6 / 7045） | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |
 | DCSync（全NTLMハッシュ取得） | Post Access AD | `04_Post_Access_Windows_AD/Credential_Dumping.md` |
 | Pass-The-Hash（PTH） | Post Access AD | `04_Post_Access_Windows_AD/Credential_Dumping.md` |
 | SAM / SYSTEM ローカルダンプ | Post Access AD | `04_Post_Access_Windows_AD/Credential_Dumping.md` |
+| AD CS 列挙（Certipy find・脆弱テンプレート特定・CA フラグ確認） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/Overview.md` |
+| ESC1（ENROLLEE_SUPPLIES_SUBJECT + Client Auth → 任意ユーザー証明書取得 → PKINIT → DCSync） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC1.md` |
+| ESC2（Any Purpose EKU / SubCA テンプレート → ESC1 相当または ESC3 チェーン起点） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC2.md` |
+| ESC3（Enrollment Agent テンプレートチェーン → 代理申請で任意ユーザー証明書取得） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC3.md` |
+| ESC4（テンプレートオブジェクト Write ACL → テンプレートを ESC1 化） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC4.md` |
+| ESC5（PKI オブジェクト Write ACL → CA オブジェクト・NTAuthCertificates 改ざん） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC5.md` |
+| ESC6（EDITF_ATTRIBUTESUBJECTALTNAME2 CA フラグ → 任意テンプレートで UPN 自由指定） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC6.md` |
+| ESC7（ManageCA / ManageCertificates → CA フラグ変更・Pending 証明書強制発行） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC7.md` |
+| ESC8（NTLM Relay to AD CS HTTP WebEnrollment → DC$ 証明書取得 → DCSync） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC8.md` |
+| ESC9（No Security Extension：CT_FLAG_NO_SECURITY_EXTENSION + GenericWrite(UPN) → SAN 偽装・標的 UPN 証明書取得） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC9.md` |
+| ESC10（Weak Certificate Mappings：StrongCertificateBindingEnforcement 0/1 → UPN ベースマッピング悪用） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC10.md` |
+| ESC11（IF_ENROLLEE_SUPPLIES_SUBJECT_ALT_NAME + PEND_ALL_REQUESTS → ManageCertificates で強制発行） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC11.md` |
+| ESC12（CA シェルアクセス + EDITF_ATTRIBUTESUBJECTALTNAME2 設定 → ESC6 相当を手動有効化） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC12.md` |
+| ESC13（DCOM / RPC / CES 経由の証明書発行：HTTP WebEnrollment が無効な環境での代替申請経路） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC13.md` |
+| ESC14（Issuance Policies OID グループリンク：msDS-OIDToGroupLink で特権グループにリンクされた OID 悪用） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC14.md` |
+| ESC15（Cross CA Enrollment：クロスフォレスト PKI 信頼 + 別 CA の脆弱テンプレートで別フォレストに認証） | Post Access AD | `04_Post_Access_Windows_AD/AD_CS/ESC15.md` |
 
 ---
 
@@ -210,6 +292,7 @@
 | Exploit-DB Web・NVD・GitHub PoC の使い分け | `05_Tools_Reference/Searchsploit.md` |
 | netexec（nxc）/ CrackMapExec — パスワードスプレー・SMB/WinRM認証確認 | `05_Tools_Reference/Netexec.md` |
 | pspy（procfs ポーリング型プロセス観察ツール・短命 root プロセス検出） | `05_Tools_Reference/pspy.md` |
+| Certipy（AD CS 列挙・証明書申請・PKINIT 認証・CA 管理の統合ツール。find / req / auth / ca / template / forge / relay） | `05_Tools_Reference/Certipy.md` |
 
 ---
 
@@ -223,6 +306,7 @@
 | Windows AD 攻撃フロー（偵察 → 初期アクセス → AD列挙 → DCSync） | Windows AD全体フロー | `00_Playbook/Windows_AD_Attack_Flow.md` |
 | Web脆弱性調査フロー（Webのみスコープ向け偵察 → 機能別脆弱性確認 → 認証・認可横断確認） | Webスコープ限定フロー | `00_Playbook/Web_Vuln_Flow.md` |
 | 技術名が分からない状態からの調査フロー（機能観察 → 英語化 → 脆弱性クラス特定） | 未知技術マッピング | `00_Playbook/01_Unknown_Tech_Research.md` |
+| 内部ネットワークペネトレテスト全体フロー（VLAN アクセス開始 → ホスト発見 → AD 列挙 → DC 陥落 → 横展開） | 内部ネットワーク全体フロー | `00_Playbook/Internal_Network_Pentest_Flow.md` |
 
 ---
 

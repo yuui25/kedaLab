@@ -448,3 +448,4 @@ https://nvd.nist.gov/vuln/detail/CVE-2021-43798
 - GitHub PoC 検索: `site:github.com CVE-[YEAR]-[NUMBER]`
 - Webバージョン確認からCVE特定 → `../01_Reconnaissance/Web_Enumeration.md`
 - パストラバーサルの実施 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
+- エッジアプライアンス CVE（Citrix / Fortinet / Ivanti / Palo Alto / F5 系の PoC 選定・GitHub リポジトリ評価基準） → `../02_Initial_Access/Edge_Appliance_CVEs.md`

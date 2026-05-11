@@ -36,7 +36,8 @@ ping -c 1 [IP]
 | 128 ± 数 | 128 | Windows |
 | 64 ± 数 | 64 | Linux / macOS |
 | 255 ± 数 | 255 | Cisco / 一部の Unix |
-| 32 ± 数 | 32 | 古い Windows（95/98） |
+
+> 稀なTTL値（32: 古いOS / その他）の詳細 → `../06_Concepts/OS_Fingerprinting_Principles.md`
 
 ### 注意点
 - TTL はあくまで**目安**。ルーター・中継機器（VPN・プロキシ・SDN・ロードバランサ等）を何段経由しているかで大きく変わる

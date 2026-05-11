@@ -282,6 +282,13 @@ searchsploit -m [PATH_FROM_RESULTS]
 ---
 
 ### 関連技術
-- 連番IDを発見 → `../02_Initial_Access/Web_Vulnerabilities/IDOR.md`
-- ログインフォームを発見 → `../02_Initial_Access/Web_Vulnerabilities/SQLi.md`
-- バージョン確認から CVE 検索 → `../05_Tools_Reference/Searchsploit.md`
+
+- 前：`Network_Scanning.md`（Webポートの発見）
+- 後：`TLS_Audit.md`（HTTPS で動作している場合のプロトコル/暗号/証明書監査・SAN からの vhost 抽出）
+- 後：`Exposed_Files.md`（バックアップ・設定ファイル・`.git/`・ディレクトリリスティング等の誤公開検出）
+- 後：`../02_Initial_Access/Default_Credentials.md`（管理画面・ログインフォーム・特定製品のデフォルト認証情報試行）
+- 後：`../02_Initial_Access/Account_Lockout_Recon.md`（ログインフォームに対する辞書攻撃前のロックアウトポリシー事前確認）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/IDOR.md`（連番IDを発見した場合）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/SQLi.md`（ログインフォームを発見した場合）
+- 後：`../05_Tools_Reference/Searchsploit.md`（バージョン確認後の CVE 検索）
+- 後：`../02_Initial_Access/Edge_Appliance_CVEs.md`（ログイン HTML タイトル / URL パス / favicon ハッシュ / Server ヘッダーがアプライアンス製品と一致した場合、ベンダー別既知 CVE 照合へ）

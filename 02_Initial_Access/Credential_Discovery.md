@@ -481,5 +481,8 @@ netexec smb [IP] -u users.txt -p '[PASSWORD]' --continue-on-success
 - 前：LDAP認証情報でLDAPにアクセス → `../../01_Reconnaissance/LDAP_Enumeration.md`
 - 前：バイナリから認証情報 → `../Binary_Analysis.md`
 - 前：Webアプリのファイル読み取りでDBを取得 → `Web_Vulnerabilities/Path_Traversal.md`
+- 前：`../01_Reconnaissance/Exposed_Files.md`（`.env` / `.git/` / `.htpasswd` / Spring actuator/env / heapdump 等の誤公開から認証情報を取得した直後）
 - 後：Grafana ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`
 - 後：取得したパスワードを使ったsudo悪用（YAML.load） → `../../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン5）
+- 後：`Default_Credentials.md`（取得した認証情報を製品管理画面のデフォルト試行と組合せて他システムへ展開）
+- 後：`Account_Lockout_Recon.md`（取得済みパスワードの使い回し確認スプレー前にロックアウトポリシーを取得し試行設計を組む）

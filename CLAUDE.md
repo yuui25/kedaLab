@@ -45,11 +45,12 @@ kedalab/
 ├── 05_Tools_Reference/              # ツール別クイックリファレンス
 ├── 06_Concepts/                     # 動作原理・背景知識（「なぜそうなるか」専用）
 │   └── AI_ML/                       # AI・機械学習の原理（概念・理論のみ）
-└── 07_AI_Red_Teaming/               # AI Red Teaming 攻撃手順
-    ├── 01_Reconnaissance/           # LLMアプリ偵察・フィンガープリンティング
-    ├── 02_LLM_Prompt_Injection/     # プロンプトインジェクション・Jailbreak
-    ├── 03_LLM_Output_Attacks/       # LLM出力経由のXSS・SQLi・コードインジェクション
-    ├── 04_AI_Data_Attacks/          # データポイズニング・ラベルフリッピング
-    ├── 05_AI_Application_System/    # MCPの脆弱性・モデルデプロイ改ざん
-    └── 06_AI_Evasion/               # 敵対的サンプル・First-Order/Sparsity攻撃
+├── 07_AI_Red_Teaming/               # AI Red Teaming 攻撃手順
+│   ├── 01_Reconnaissance/           # LLMアプリ偵察・フィンガープリンティング
+│   ├── 02_LLM_Prompt_Injection/     # プロンプトインジェクション・Jailbreak
+│   ├── 03_LLM_Output_Attacks/       # LLM出力経由のXSS・SQLi・コードインジェクション
+│   ├── 04_AI_Data_Attacks/          # データポイズニング・ラベルフリッピング
+│   ├── 05_AI_Application_System/    # MCPの脆弱性・モデルデプロイ改ざん
+│   └── 06_AI_Evasion/               # 敵対的サンプル・First-Order/Sparsity攻撃
+└── 08_Cloud_Identity/               # クラウドID基盤（現在スコープ外・将来拡張用の見出し予約）
 ```

@@ -126,9 +126,12 @@ impacket-secretsdump -sam sam.hive -system system.hive LOCAL
 - **事前合意の要否**: ★★★（書面承認必須）。DCSync はドメイン全体の認証情報取得に直結する最重要操作
 - **想定されるSIEM/EDR検知**:
   - Event ID 4662（オブジェクトへのアクセス）+ DRSUAPI のレプリケーション RPC 呼び出し
-  - Microsoft ATA/Defender for Identity の DCSync アラート
+  - Microsoft ATA/Defender for Identity の DCSync アラート（`DS-Replication-Get-Changes-All` 権限行使を検知）
   - LSASS プロセスへのアクセス → Defender for Endpoint / EDR の挙動検知
   - Pass-The-Hash 利用は Event ID 4624 Type 3（NTLM）で検知
+  - **Sysmon Event ID 10（ProcessAccess to lsass.exe）**: procdump / Mimikatz がLSASSにアクセスする際に記録。GrantedAccess `0x1010` / `0x1410` / `0x143A` などが SIEM 検知クエリの対象となる。`impacket-secretsdump` のリモート実行では DRSUAPI 経由のため Event ID 4662 が主になる
+  - **Sysmon Event ID 8（CreateRemoteThread）**: ソースプロセスからターゲット `lsass.exe` へのスレッド作成。Mimikatz の一部モードで発生
+  - **EDR アラート名（例）**: Defender for Endpoint「Credential dumping」、CrowdStrike「OS Credential Dumping: LSASS Memory」、SentinelOne「Credential Access: LSASS Memory Access」
 - **業務影響リスク**: なし（参照のみで業務影響は出ないが、ダンプ操作自体が高優先度のインシデントとして扱われる）
 - **原状回復必須項目**:
   - ✅ DCSync 用に付与した複製権限（`DS-Replication-Get-Changes` / `DS-Replication-Get-Changes-All`）の削除
