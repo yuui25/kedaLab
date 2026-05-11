@@ -3,7 +3,7 @@
 調査開始から権限昇格までの判断フロー。各ステップの詳細は対応する .md を参照。
 
 > **商用案件の場合**：本フローに入る前にスコープ・実施可否・業務影響について事前合意を確認すること。
-> 詳細は [`../START_HERE.md`](../START_HERE.md) Step 0 と [`../06_Concepts/Pentest_Fundamentals.md`](../06_Concepts/Pentest_Fundamentals.md) を参照。
+> 詳細は [`../README.md`](../README.md) Step 0 と [`../06_Concepts/Pentest_Fundamentals.md`](../06_Concepts/Pentest_Fundamentals.md) を参照。
 > 演習環境（HTB / OSCP 等）ではこのチェックは不要。
 
 ---
@@ -53,6 +53,9 @@ Linux と確定した上でこのファイルのStep 1以降を進める。
 ---
 
 ## Step 1 — ポートスキャン
+
+> `00_OS_Identification.md` で実施した初期 nmap スキャン（`-sC -sV`）は再利用してよい。
+> このStep 1の目的は**追加で全ポートスキャン（`-p-`）を行うこと**。OS判定時のスキャンで見落としたポートを拾う。
 
 まず全ポートをスキャンして開いているサービスを把握する。
 

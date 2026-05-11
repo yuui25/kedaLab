@@ -4,7 +4,7 @@
 各ステップの詳細は対応する .md を参照し、このファイル内には技術の説明を書かない。
 
 > **商用案件の場合**：本フローに入る前にスコープ・実施可否・業務影響について事前合意を確認すること。
-> 詳細は [`../START_HERE.md`](../START_HERE.md) Step 0 と [`../06_Concepts/Pentest_Fundamentals.md`](../06_Concepts/Pentest_Fundamentals.md) を参照。
+> 詳細は [`../README.md`](../README.md) Step 0 と [`../06_Concepts/Pentest_Fundamentals.md`](../06_Concepts/Pentest_Fundamentals.md) を参照。
 
 ---
 
@@ -46,20 +46,24 @@
 ## フロー概要
 
 ```
-[Step 1] ポートスキャン・バナー取得・製品識別    → 01_Reconnaissance/
+[Step 1] ポートスキャン・バナー取得・製品識別    → 01_Reconnaissance/          【必須】
           ↓
-[Step 2] Edge CVE照合（製品確定後の最初の一手）  → 02_Initial_Access/Edge_Appliance_CVEs.md
+[Step 2] Edge CVE照合（製品確定後の最初の一手）  → 02_Initial_Access/Edge_Appliance_CVEs.md  【必須】
           ↓ CVEなし・パッチ済み・対象外
-[Step 3] 誤設定・誤公開ファイル確認              → 01_Reconnaissance/Exposed_Files.md
+[Step 3] 誤設定・誤公開ファイル確認              → 01_Reconnaissance/Exposed_Files.md        【条件次第】
           ↓
-[Step 4] TLS弱点・証明書情報の確認              → 01_Reconnaissance/TLS_Audit.md
+[Step 4] TLS弱点・証明書情報の確認              → 01_Reconnaissance/TLS_Audit.md            【条件次第】
           ↓
-[Step 5] ロックアウトポリシー確認               → 02_Initial_Access/Account_Lockout_Recon.md
+[Step 5] ロックアウトポリシー確認               → 02_Initial_Access/Account_Lockout_Recon.md 【必須：Step 6の前に必ず実施】
           ↓
-[Step 6] デフォルト認証情報試行                 → 02_Initial_Access/Default_Credentials.md
+[Step 6] デフォルト認証情報試行                 → 02_Initial_Access/Default_Credentials.md  【条件次第】
 ```
 
 各ステップは「前のステップで得た情報」を次の判断に使う。スキップは判断根拠が記録できる場合のみ許容する。
+
+> **時間が限られている場合の考え方**：【必須】のStep（1・2・5）を先に完了させる。
+> 【条件次第】のStep（3・4・6）は、前のStepの出力結果を見て「ここに時間をかける根拠があるか」を判断してから着手する。
+> Step 2でCVEが見つかった場合はそこに集中し、Step 3以降は後回しにしてよい。
 
 ---
 
