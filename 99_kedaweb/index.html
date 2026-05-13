@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>kedalab // PenTest & AI Red Teaming Knowledge Base</title>
+<meta name="description" content="kedalab — ペネトレスト・AI Red Teaming ナレッジ。攻撃フェーズの判断ロジックと技術カタログ。" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- background matrix rain -->
+<canvas id="matrix"></canvas>
+
+<!-- boot screen -->
+<div id="boot"><pre id="boot-log"><span class="cursor"></span></pre></div>
+
+<!-- top bar -->
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">K</span>
+    <span class="name">KEDALAB</span>
+    <span class="ver">v1.0</span>
+    <span id="loaderPill" class="loader-pill">⋯ initializing</span>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">›</span>
+    <input id="topSearch" class="search-input" type="text" placeholder="技術・CVE・ツール名で検索…" autocomplete="off" />
+    <span class="kbd-hint">Ctrl + K</span>
+  </div>
+  <nav class="nav-links">
+    <a class="nav-link" href="#quickstart">Start</a>
+    <a class="nav-link" href="#chain">Chain</a>
+    <a class="nav-link" href="#playbook">Playbook</a>
+    <a class="nav-link" href="#browser">Browser</a>
+    <a class="nav-link opt" href="#raw">Raw</a>
+  </nav>
+</header>
+
+<!-- hero -->
+<section class="hero" style="max-width:none;padding-left:0;padding-right:0;">
+  <h1 class="hero-title glitch">KEDALAB</h1>
+  <p class="hero-sub">
+    <span class="accent">&gt;</span> Penetration Testing &amp; AI Red Teaming Knowledge Base ·
+    攻撃者の思考トレースを再現する技術ノウハウ集
+  </p>
+  <div class="hero-stats">
+    <div class="stat" style="--stat-c: var(--acc-g);"><div class="stat-num" data-count-to="0" id="statTotal">0</div><div class="stat-lbl">Techniques</div></div>
+    <div class="stat" style="--stat-c: var(--acc-c);"><div class="stat-num" data-count-to="0" id="statPhases">0</div><div class="stat-lbl">Phases</div></div>
+    <div class="stat" style="--stat-c: var(--acc-y);"><div class="stat-num" data-count-to="0" id="statPlay">0</div><div class="stat-lbl">Playbooks</div></div>
+    <div class="stat" style="--stat-c: var(--acc-r);"><div class="stat-num" data-count-to="0" id="statCVE">0</div><div class="stat-lbl">CVE Entries</div></div>
+    <div class="stat" style="--stat-c: var(--acc-p);"><div class="stat-num" data-count-to="0" id="statAI">0</div><div class="stat-lbl">AI Red Team</div></div>
+  </div>
+</section>
+
+<!-- quick start (situation wizard) — primary entry for first-time viewers -->
+<section id="quickstart" class="reveal">
+  <div class="section-title">quick start</div>
+  <h2 class="section-h">kedalab は<span class="accent">こう使う</span></h2>
+  <p class="qs-lead">何が手元にありますか？ 状況をクリックすると、開くべき Playbook が下に展開されます。</p>
+  <div id="qsGrid" class="qs-grid"></div>
+  <div id="qsExpand" class="qs-expand" aria-live="polite"></div>
+
+  <details class="qs-tips-acc">
+    <summary>▽ もっと使い方を見る（STEP 0 · 2 · 3 · 4）</summary>
+    <div class="qs-tips">
+      <div class="qs-tip"><strong>STEP 0 · 事前確認</strong>商用案件はスコープ・実施可否・業務影響・連絡ライン・取得情報の取扱を先に合意する。演習はスキップ可。</div>
+      <div class="qs-tip"><strong>STEP 2 · フローを上から</strong>Playbook は判断フロー。コマンドを打ちながら出力を判断表と照合し、次の手を選ぶ。</div>
+      <div class="qs-tip"><strong>STEP 3 · 必要な時だけ深掘り</strong>「このコマンドって?」となったとき初めて技術ファイルを開く。最初から全部読まない。</div>
+      <div class="qs-tip"><strong>STEP 4 · 詰まったら</strong>各技術ファイルの「刺さらなかったとき」セクション → 「注意点・落とし穴」 → 一次情報の順に確認。</div>
+    </div>
+  </details>
+</section>
+
+<!-- attack chain — compact strip for orientation -->
+<section id="chain" class="reveal compact-section">
+  <div class="section-title">attack chain</div>
+  <h2 class="section-h compact-h">フェーズで巡る · <span class="accent">7つの章</span></h2>
+  <div id="chainGrid" class="chain"></div>
+</section>
+
+<!-- playbooks -->
+<section id="playbook" class="reveal compact-section">
+  <div class="section-title">playbooks</div>
+  <h2 class="section-h compact-h">「今、何をすべきか」を<span class="accent">判断するフロー</span></h2>
+  <div id="pbGrid" class="pb-grid"></div>
+</section>
+
+<!-- technique browser — collapsible (heavy: hundreds of cards) -->
+<section id="browser" class="reveal collapsible" data-collapsed="true">
+  <button type="button" class="coll-header" aria-expanded="false">
+    <span class="section-title">technique browser</span>
+    <span class="coll-title">フィルタして <span class="accent">技術を引く</span></span>
+    <span class="coll-count" id="browserCount">—</span>
+    <span class="coll-chevron">▾</span>
+  </button>
+  <div class="coll-body">
+    <div id="tbToolbar" class="tb-toolbar"></div>
+    <div id="tbGrid" class="tb-grid"></div>
+    <div id="tbEmpty" class="tb-empty" style="display:none;">該当なし — フィルタを解除するか別キーワードを試して</div>
+  </div>
+</section>
+
+<!-- raw index files — collapsible (advanced) -->
+<section id="raw" class="reveal collapsible" data-collapsed="true">
+  <button type="button" class="coll-header" aria-expanded="false">
+    <span class="section-title">raw index</span>
+    <span class="coll-title">原文の <span class="accent">索引ファイル</span> を開く</span>
+    <span class="coll-chevron">▾</span>
+  </button>
+  <div class="coll-body">
+    <div id="rawGrid" class="pb-grid"></div>
+  </div>
+</section>
+
+<!-- footer -->
+<footer>
+  &gt; KEDALAB · <span class="accent">PERSONAL PENTEST &amp; AI RED TEAMING NOTES</span> · 2026
+  · <span id="footMeta"></span>
+</footer>
+
+<!-- modal viewer -->
+<div id="modal" class="modal-bg" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-head">
+      <div id="modalPath" class="modal-path">—</div>
+      <button id="modalClose" class="modal-close">[×] close</button>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+  </div>
+</div>
+
+<!-- cmd palette -->
+<div id="palette" class="palette">
+  <div class="palette-box">
+    <input id="paletteInput" class="palette-input" type="text" placeholder="› 検索: 技術名 / タグ / CVE / ファイル名…" />
+    <div id="paletteList" class="palette-list"></div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/matrix.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

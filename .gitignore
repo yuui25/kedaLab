@@ -1,1 +1,5 @@
 REVIEW/
+speech_draft.md
+
+# 公開前の作業領域(中身は .gitignore とは別に管理。クローン経路には乗らない)
+_pending/

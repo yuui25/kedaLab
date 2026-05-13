@@ -54,3 +54,18 @@ kedalab/
 │   └── 06_AI_Evasion/               # 敵対的サンプル・First-Order/Sparsity攻撃
 └── 08_Cloud_Identity/               # クラウドID基盤（現在スコープ外・将来拡張用の見出し予約）
 ```
+
+---
+
+## 99_kedaweb/ について
+
+kedalab を動的に閲覧する Web ビューア。**実行時に `TECHNIQUES_INDEX*.md` / `README.md` / 各 Playbook の MD をパースして表示している**ため、技術追加・修正のたびに kedaweb 側を触る必要は無い。
+
+**触らないこと:**
+- 通常の技術追加（インデックスへの追記・新ファイル作成）で `99_kedaweb/` を編集してはいけない。リロードだけで自動反映される。
+
+**触る必要がある場合（稀）:**
+- 新しいトップ番号フォルダ（例: `08_Cloud_Identity/` を本格スコープ化）を追加したとき
+  → `99_kedaweb/js/data.js` の `phases` 配列に1行 + `99_kedaweb/js/app.js` の `phaseFromPath()` に1行
+
+それ以外（ユーザーが UI 改修を依頼してきた等）は通常通り。
