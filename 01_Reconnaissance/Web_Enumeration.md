@@ -280,6 +280,88 @@ searchsploit -m [PATH_FROM_RESULTS]
 - 見つかった脆弱性がパストラバーサルの場合 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
 
 ---
+## Cookie の分類：third-party 除外と first-party テスト対象の絞り込み
+
+### 着火条件
+
+Webアプリの Cookie を確認し、「どれをテストすべきか」を素早く絞り込みたい場合。
+Cookie が 20 個以上あって GA / Cloudflare / Akamai 等の third-party が混在していると、
+テスト対象が埋もれる。
+
+### 観点・着眼点
+
+**先に確認すること：** 対象ドメインの Cookie を全件取得する前に、
+プロキシ（Burp 等）でキャプチャした Raw リクエストの `Cookie:` ヘッダーに
+third-party ベンダー名が分かる接頭辞（`_ga` / `_fbp` / `__cf_bm` 等）がすでに見えているか確認する。
+
+**攻撃者の思考トレース：** third-party Cookie はセッション・認可・ビジネスロジックに関与しない。
+「自社アプリが発行している Cookie だけ」に絞ることで、HttpOnly 欠落・Secure 欠落・弱い値など
+本質的な問題に集中できる。
+
+**分類の判断基準：**
+
+| Cookie 名のパターン | 判断 |
+|--------------------|------|
+| `_ga` / `_ga_*` / `_gid` / `_gat_*` | Google Analytics → third-party、除外 |
+| `__cf_bm` / `cf_clearance` / `__cfduid` | Cloudflare → third-party、除外 |
+| `_abck` / `bm_sv` / `ak_bmsc` | Akamai Bot Manager → third-party、除外 |
+| `_fbp` / `_fbc` | Meta/Facebook → third-party、除外 |
+| `AWSELB` / `AWSALB` | AWS ELB スティッキーセッション → インフラ、除外 |
+| `JSESSIONID` / `PHPSESSID` / `session` / `token` 等 | 自社 → **テスト対象** |
+| 上記パターンに一致しない未知の名前 | 自社の可能性 → **テスト対象** |
+
+**third-party を除外した後に確認すること：**
+
+| 確認観点 | シグナル | 次のアクション |
+|---------|---------|-------------|
+| HttpOnly が付いていない | JS から読み取り可能 → XSS と組み合わせてトークン窃取できる | XSS の有無を確認 → `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
+| Secure が付いていない | HTTP でも送信される | HTTP Strict-Transport-Security の有無も確認 |
+| SameSite が None + Secure 欠落 | CSRF の余地 | CSRF トークンの有無・有効性を確認 |
+| Cookie 値が Base64 / JWT 形式 | デコードで内部情報（user_id・role 等）が見える可能性 | 多重エンコード剥がし → 後述の `JS_Obfuscation.md`（多重エンコードセクション）|
+| Expires / Max-Age が極端に長い（1 年超） | 長期有効なトークンはローテーションされない可能性 | トークン値の予測可能性・固定値かどうかを確認 |
+
+### 手順
+
+**事前準備（必須）：** プロキシを通じてキャプチャしたリクエストを `.txt` 等のファイルに保存しておく。
+
+```bash
+# [Attacker] Burp の "Save item" や "Copy as curl" 等で取得した
+# Raw HTTP リクエストを request.txt として保存済みの場合
+
+# cookie_classify.py（別途入手・Python 3 標準ライブラリのみ）で分類
+python cookie_classify.py request.txt
+# → "Unknown / likely first-party" に列挙されたものがテスト対象
+
+# Cookie 文字列を直接渡す場合
+python cookie_classify.py --cookie "sessionid=abc; _ga=GA1.2.xxx; __cf_bm=yyy"
+
+# third-party 側も確認したい場合
+python cookie_classify.py request.txt --show-thirdparty
+
+# DevTools で確認する場合（ツール不要）
+# F12 → Application → Storage → Cookies → 左ペインのドメイン別ツリーで
+# 自社ドメイン配下 vs 外部ドメイン配下を目視で分類する
+```
+
+### 刺さらなかったとき
+
+- Cookie が 1〜2 本しかなく third-party が混在していない → 全件をそのままテスト対象にする
+- ドメイン直下に third-party Cookie がない（CDN / SPA 構成等）→ `localStorage` / `sessionStorage` に認証トークンが入っている可能性を DevTools で確認する
+
+### 注意点・落とし穴
+
+- `__Secure-` / `__Host-` 接頭辞の Cookie は Cookie Prefix（ブラウザの強制 Secure/Path 制限）を意味する。脆弱性として報告する前にブラウザ側の保護が有効かを確認する
+- Cookie 名だけで判断できないケース（例：社内製ツールが `_ga_[ID]` 風の名前を偶然使っている）は、Cookie 値の形式と発行タイミング（ログイン前から存在するか）も合わせて判断する
+
+### 関連技術
+
+- 前：このファイル「Webアプリのフレームワーク・アプリ名の特定」（Cookie 名からの CMS 識別）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/XSS.md`（HttpOnly 欠落の悪用）
+- 後：`../01_Reconnaissance/Web_Response_Triage.md`（Cookie 属性・セキュリティヘッダー・機微情報の一括スキャン）
+
+> 原理（なぜ third-party Cookie の除外が重要か・Cookie Prefix の仕様） → `../06_Concepts/Web_Pentest_Tooling.md`
+
+---
 
 ### 関連技術
 

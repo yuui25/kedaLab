@@ -155,6 +155,51 @@
     return md;
   }
 
+  // ---- Full-text content index --------------------------------------------
+  // file → lowercased markdown body. Populated lazily by ensureContentIndex()
+  // so the top-bar search can match on body text in addition to name/tags/path.
+  const _contentIndex = new Map();
+  let _contentIndexBuilding = null;
+  let _contentIndexBuilt = false;
+
+  function ensureContentIndex() {
+    if (_contentIndexBuilt || isFile) return Promise.resolve();
+    if (_contentIndexBuilding) return _contentIndexBuilding;
+    _contentIndexBuilding = (async () => {
+      const files = Array.from(new Set(
+        D.techniques.map(t => t.f).filter(Boolean)
+      ));
+      if (!files.length) { _contentIndexBuilt = true; return; }
+      const total = files.length;
+      let done = 0;
+      setPill(`⋯ indexing 0/${total}`, "loading");
+      let cursor = 0;
+      const CONC = 8;
+      async function worker() {
+        while (cursor < files.length) {
+          const f = files[cursor++];
+          try {
+            const md = await getMd(f);
+            _contentIndex.set(f, md.toLowerCase());
+          } catch (e) {
+            _contentIndex.set(f, ""); // mark as fetched (failed) so we skip
+          }
+          done++;
+          if (done === total || done % 20 === 0) {
+            setPill(`⋯ indexing ${done}/${total}`, "loading");
+          }
+        }
+      }
+      await Promise.all(
+        Array.from({ length: Math.min(CONC, files.length) }, worker)
+      );
+      _contentIndexBuilt = true;
+      setLoadedPill();
+      if (currentQuery) renderTechniques();
+    })();
+    return _contentIndexBuilding;
+  }
+
   function shortLabel(file) {
     if (!file) return "";
     return file.split("/").pop().replace(/\.md$/, "").replace(/_/g, " ");
@@ -547,7 +592,10 @@
   function matchQuery(t, q) {
     if (!q) return true;
     const hay = (t.n + " " + (t.tags || []).join(" ") + " " + (t.f || "")).toLowerCase();
-    return q.toLowerCase().split(/\s+/).filter(Boolean).every(tok => hay.includes(tok));
+    const body = _contentIndex.get(t.f) || "";
+    return q.toLowerCase().split(/\s+/).filter(Boolean).every(tok =>
+      hay.includes(tok) || body.includes(tok)
+    );
   }
 
   function renderTechniques() {
@@ -607,7 +655,10 @@
   // ============================================================
   $("#topSearch").addEventListener("input", e => {
     currentQuery = e.target.value;
-    if (currentQuery) expandCollapsible("browser");
+    if (currentQuery) {
+      expandCollapsible("browser");
+      ensureContentIndex(); // background; re-renders when ready
+    }
     renderTechniques();
     document.getElementById("browser").scrollIntoView({ behavior: "smooth", block: "start" });
   });
@@ -1114,11 +1165,7 @@
   showFileBanner();
   renderAll();
 
-  // ---- post-load finalizer (re-usable for reload too) ----
-  function finalizeLoad() {
-    dataLoaded = true;
-    renderAll();
-    animateCounters();
+  function setLoadedPill() {
     if (loaderErrors.length) {
       setPill("✕ " + loaderErrors.length + " err · ⟲ retry", "err");
     } else if (isFile) {
@@ -1128,6 +1175,14 @@
       const p = (D.playbookList || []).length;
       setPill(`✓ ${t} tech · ${p} pb · ⟲ reload`, "ok");
     }
+  }
+
+  // ---- post-load finalizer (re-usable for reload too) ----
+  function finalizeLoad() {
+    dataLoaded = true;
+    renderAll();
+    animateCounters();
+    setLoadedPill();
   }
 
   // 2) After kedalab data is loaded → re-render and animate stats
@@ -1145,6 +1200,9 @@
     _reloading = true;
     loaderErrors.length = 0;
     _mdCache.clear();
+    _contentIndex.clear();
+    _contentIndexBuilt = false;
+    _contentIndexBuilding = null;
     dataLoaded = false;
     setPill("⋯ reloading kedalab data", "loading");
     try { await loadKedalabData(); }

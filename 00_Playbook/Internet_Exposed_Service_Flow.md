@@ -211,3 +211,4 @@ Step 3 で発見した認証情報候補もここで使用する。
 - 後：`../00_Playbook/Web_Vuln_Flow.md`（全ステップ失敗時、または Web アプリ層に脆弱性の手がかりが見つかった場合に転換）
 - 後：`../03_Post_Access_Linux/Enumeration_Checklist.md`（Step 6 でシェルを取得した後の Linux 侵入後フロー）
 - 後：`../04_Post_Access_Windows_AD/Enumeration_Checklist.md`（アプライアンス経由でWindows環境に踏み込んだ場合）
+- 関連：`Linux_Attack_Flow.md` / `Windows_AD_Attack_Flow.md`（対象が境界機器ではなく Linux / Windows AD 環境と確定した場合は本フローを使わずこちらへ）

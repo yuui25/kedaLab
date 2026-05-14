@@ -66,12 +66,17 @@
 |--------|---------|------------|
 | Webアプリフレームワーク・アプリ名の特定（フッター・contactページ・HTMLソース・ヘッダー） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | Cookie 名からの CMS / フレームワーク識別（CMSSESSID / wp-* / JSESSIONID 等） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
+| Cookie の third-party 除外と first-party テスト対象の絞り込み（cookie_classify） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
+| リクエスト/レスポンスの機微情報・設定不備一括スキャン（sensitive_scan / WSTG-INFO） | Reconnaissance | `01_Reconnaissance/Web_Response_Triage.md` |
+| セキュリティヘッダー欠落確認（CSP / HSTS / X-Content-Type-Options / Referrer-Policy / Permissions-Policy 等） | Reconnaissance | `01_Reconnaissance/Web_Response_Triage.md` |
+| Cookie 属性不備確認（HttpOnly / Secure / SameSite 欠落・超長期 Expires）（WSTG-SESS-02） | Reconnaissance | `01_Reconnaissance/Web_Response_Triage.md` |
 | **Server ヘッダーからの Python WSGI 系識別（Werkzeug / gunicorn / uWSGI / Tornado / Django runserver）と非標準ポート観点** | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | HTML `<meta name="generator">` 著作権年範囲からのバージョン推定 | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | DoS 保護・自動 IP ブロック前提のディレクトリ列挙抑制（robots.txt・トップページの警告文を読む） | Reconnaissance | `01_Reconnaissance/Web_Enumeration.md` |
 | 未認証ファイルアップロード RCE（二重拡張子・マジックバイト・Content-Type 偽装） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/File_Upload.md` |
 | 難読化JavaScript解析（eval/Packer形式・console.log置換・de4js） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | ROT13 / Base64 APIレスポンスのデコード | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
+| 多重エンコードの自動検出・再帰デコード（URL / Base64 / JWT / gzip / Hex 等、decode_layers）（WSTG-INPV-01） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | OSコマンドインジェクション（セミコロン・パイプ・バッククォート） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | PDFKit コマンドインジェクション（バックティック URL 注入 / CVE-2022-25765） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
 | HTTPサーバー経由のリバースシェル配信（python3 -m http.server + curl \| bash） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` |
@@ -333,6 +338,7 @@
 | Java ObjectInputStream クラス解決の2経路（resolveClass / resolveProxyClass）と allowlist バイパス原理 | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` | `06_Concepts/Java_Deserialization.md` |
 | Electron の nodeIntegration / contextIsolation の仕組みと XSS → RCE エスカレーション原理 | `02_Initial_Access/Web_Vulnerabilities/Electron_XSS_RCE.md` | `06_Concepts/Electron_Security.md` |
 | バリアントハンティング（既知 CVE のバグクラスから類似プロジェクトの変種を探す手法） | CVE 研究・脆弱性調査全般 | `06_Concepts/Variant_Hunting.md` |
+| Web 診断ツール使い分けの原理（スクリプト / Burp / DevTools の役割分担・Cookie Prefix 仕様） | Web 診断全般 | `06_Concepts/Web_Pentest_Tooling.md` |
 
 ---
 

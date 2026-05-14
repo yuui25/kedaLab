@@ -261,3 +261,12 @@ sudo p0f -i [INTERFACE]
 ロードバランサー・WAF・リバースプロキシ経由の可能性がある。
 `traceroute [IP]` でホップ数と中継機器を確認し、「スキャン対象が中継機器自体なのか、その背後のシステムなのか」を切り分ける。
 → 中継機器と判断した場合は `Internet_Exposed_Service_Flow.md` へ切り替える。
+
+---
+
+## 関連技術
+
+- 前：`../01_Reconnaissance/DNS_Enumeration.md`（ドメインのみ提供時、IP特定後にここへ。IPが手元にある場合は調査の起点となるためこの前段は無い）
+- 後：`Linux_Attack_Flow.md`（Linux と判定）
+- 後：`Windows_AD_Attack_Flow.md`（Windows と判定。88番 Kerberos の有無で AD / スタンドアロンを読み分ける）
+- 後：`Internet_Exposed_Service_Flow.md`（OS特定に至らず「インターネット境界機器らしい」と判断した場合）
