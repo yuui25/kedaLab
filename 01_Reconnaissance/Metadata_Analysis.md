@@ -61,7 +61,7 @@ exiftool -r -Author [directory]/ 2>/dev/null | grep -v "^$"
 # FirstnameLastname    (スペースなし結合)
 ```
 
-> **ユーザー名の形式が不明な場合は：** LDAP 匿名バインドで sAMAccountName を確認する（`../LDAP_Enumeration.md`）か、Kerbrute でユーザー名候補リストを検証する（`../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md` の Kerbrute セクション）。
+> **ユーザー名の形式が不明な場合は：** LDAP 匿名バインドで sAMAccountName を確認する（`LDAP_Enumeration.md`）か、Kerbrute でユーザー名候補リストを検証する（`../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md` の Kerbrute セクション）。
 
 ---
 

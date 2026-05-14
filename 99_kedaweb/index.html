@@ -36,6 +36,7 @@
     <a class="nav-link" href="#quickstart">Start</a>
     <a class="nav-link" href="#chain">Chain</a>
     <a class="nav-link" href="#browser">Browser</a>
+    <a class="nav-link nav-page" data-page="navigator" href="#navigator">Navigator</a>
     <a class="nav-link opt" href="#raw">Raw</a>
   </nav>
 </header>
@@ -113,6 +114,31 @@
   <div class="coll-body">
     <div id="rawGrid" class="pb-grid"></div>
   </div>
+</section>
+
+<!-- navigator page — MITRE-style matrix view; toggled via body.nav-mode -->
+<section id="navigator" class="page-nav">
+  <div class="nav-head">
+    <div class="section-title">navigator</div>
+    <h2 class="section-h">マトリックスで<span class="accent">技術を辿る</span></h2>
+    <p class="nav-lead">クリック or 検索 → Enter で 1 ファイルにフォーカス。末尾の <code>## 関連技術</code> セクションから <strong style="color:#00d4ff">前</strong> / <strong style="color:#ffb800">後</strong> / <strong style="color:#00ff9c">関連</strong> をハイライトします。フォーカス済みセルを再クリックでファイルを開きます。</p>
+    <div class="nav-controls">
+      <div class="nav-search-wrap">
+        <span class="search-icon">›</span>
+        <input id="navSearch" class="search-input" type="text" placeholder="技術を検索 → Enter で第1ヒットにフォーカス…" autocomplete="off" />
+      </div>
+      <div class="nav-legend">
+        <span class="lg-chip lg-focus">FOCUS</span>
+        <span class="lg-chip lg-prev">前</span>
+        <span class="lg-chip lg-next">後</span>
+        <span class="lg-chip lg-related">関連</span>
+        <button id="navClear" class="nav-clear" type="button">✕ クリア</button>
+      </div>
+    </div>
+  </div>
+  <div id="navMatrix" class="nav-matrix"></div>
+  <div id="navFocus" class="nav-focus empty"></div>
+  <div id="navStatus" class="nav-status">› navigator の起動には全 MD のフェッチが必要です(初回のみ)</div>
 </section>
 
 <!-- footer -->

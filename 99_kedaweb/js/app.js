@@ -117,8 +117,11 @@
   }
 
   // Load TECHNIQUES_INDEX*.md → flat technique list.
+  // The same file may appear in multiple tables (master index + phase-specific
+  // tables in the same MD); dedupe by file path so Browser/Navigator show it once.
   async function loadTechniques() {
     const out = [];
+    const seen = new Set();
     for (const src of ["TECHNIQUES_INDEX.md", "TECHNIQUES_INDEX_AI_ML.md"]) {
       let md;
       try { md = await fetchMd(src); }
@@ -131,8 +134,10 @@
           const file = extractFile(row[row.length - 1]);
           const name = cleanName(row[0]);
           if (!file || !name) continue;
+          if (seen.has(file)) continue;
           const p = phaseFromPath(file);
           if (!p) continue;
+          seen.add(file);
           out.push({ n: name, p, f: file, tags: deriveTags(name, file) });
         }
       }
@@ -648,6 +653,242 @@
     return s.replace(/[&<>"']/g, c => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     }[c]));
+  }
+
+  // ============================================================
+  // Navigator — MITRE-style matrix with focus highlighting
+  // Edges = parsed from each MD's `## 関連技術` section
+  // ============================================================
+  const _edges = new Map(); // file -> { prev: [], next: [], related: [] }
+  let _navLoaded = false;
+  let _navFocus = null;
+
+  function parseRelatedTech(file, md) {
+    const baseDir = file.split("/").slice(0, -1).join("/");
+    const out = { prev: [], next: [], related: [] };
+    // Split MD into top-level H2 sections; find the one whose heading is 関連技術
+    const parts = md.split(/^##\s+/m);
+    let section = null;
+    for (const p of parts) {
+      if (/^関連技術\s*$/m.test(p.split(/\n/)[0])) { section = p; break; }
+    }
+    if (!section) return out;
+    // strip the heading line itself
+    section = section.replace(/^[^\n]*\n/, "");
+    for (const line of section.split(/\n/)) {
+      const t = line.trim();
+      if (!t.startsWith("-")) continue;
+      let bucket;
+      if (/^-\s*前[：:]/.test(t)) bucket = out.prev;
+      else if (/^-\s*後[：:]/.test(t)) bucket = out.next;
+      else if (/^-\s*関連[：:]/.test(t)) bucket = out.related;
+      else continue;
+      const pathRe = /`([^`]+\.md)`/g;
+      let pm;
+      while ((pm = pathRe.exec(t)) !== null) {
+        const resolved = resolvePath(baseDir, pm[1]);
+        if (!bucket.includes(resolved)) bucket.push(resolved);
+      }
+    }
+    return out;
+  }
+
+  function buildEdgesIndex() {
+    if (_edges.size > 0) return;
+    for (const t of D.techniques) {
+      const md = _mdCache.get(t.f);
+      if (!md) continue;
+      _edges.set(t.f, parseRelatedTech(t.f, md));
+    }
+  }
+
+  function shortFileName(file) {
+    return file.split("/").pop().replace(/\.md$/, "").replace(/_/g, " ");
+  }
+
+  function renderNavigatorMatrix() {
+    const grid = document.getElementById("navMatrix");
+    if (!grid) return;
+    const byPhase = {};
+    D.phases.forEach(p => (byPhase[p.id] = []));
+    D.techniques.forEach(t => { if (byPhase[t.p]) byPhase[t.p].push(t); });
+    for (const id in byPhase) byPhase[id].sort((a, b) => a.n.localeCompare(b.n, "ja"));
+
+    grid.innerHTML = D.phases.map(p => {
+      const list = byPhase[p.id] || [];
+      const cells = list.map(t => `
+        <button class="nav-cell" data-file="${escapeHtml(t.f)}" title="${escapeHtml(t.f)}">
+          ${escapeHtml(t.n)}
+        </button>
+      `).join("");
+      return `
+        <div class="nav-col">
+          <div class="nav-col-h" style="--col-c: ${p.color};">
+            ${p.code} ${p.name.toUpperCase()}<span class="nav-col-count">${list.length}</span>
+          </div>
+          ${cells}
+        </div>
+      `;
+    }).join("");
+
+    grid.querySelectorAll(".nav-cell").forEach(c => {
+      c.addEventListener("click", () => {
+        const f = c.dataset.file;
+        if (_navFocus === f) openMD(f);
+        else setNavFocus(f);
+      });
+    });
+  }
+
+  function setNavFocus(file) {
+    _navFocus = file;
+    const body = document.body;
+    const cells = document.querySelectorAll(".nav-cell");
+    if (!file) {
+      body.classList.remove("has-nav-focus");
+      cells.forEach(c => c.classList.remove("focused", "prev", "next", "related"));
+      renderNavFocusPanel(null);
+      return;
+    }
+    body.classList.add("has-nav-focus");
+    const edges = _edges.get(file) || { prev: [], next: [], related: [] };
+    const prev = new Set(edges.prev);
+    const next = new Set(edges.next);
+    const related = new Set(edges.related);
+    cells.forEach(c => {
+      c.classList.remove("focused", "prev", "next", "related");
+      const f = c.dataset.file;
+      if (f === file) c.classList.add("focused");
+      else if (prev.has(f)) c.classList.add("prev");
+      else if (next.has(f)) c.classList.add("next");
+      else if (related.has(f)) c.classList.add("related");
+    });
+    renderNavFocusPanel(file);
+    const focused = document.querySelector(".nav-cell.focused");
+    if (focused) focused.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  function renderNavFocusPanel(file) {
+    const panel = document.getElementById("navFocus");
+    if (!panel) return;
+    if (!file) {
+      panel.className = "nav-focus empty";
+      panel.innerHTML = "";
+      return;
+    }
+    const t = D.techniques.find(x => x.f === file);
+    const p = t ? phaseById[t.p] : null;
+    const edges = _edges.get(file) || { prev: [], next: [], related: [] };
+    const renderList = (arr, cls, label) => arr.length
+      ? `<div class="nav-focus-section ${cls}">
+           <h4>${label} (${arr.length})</h4>
+           <div class="nav-focus-links">
+             ${arr.map(f => {
+               const tt = D.techniques.find(x => x.f === f);
+               const name = tt ? tt.n : shortFileName(f);
+               return `<a class="nav-focus-link" data-file="${escapeHtml(f)}">${escapeHtml(name)}<span class="nfl-path">${escapeHtml(f)}</span></a>`;
+             }).join("")}
+           </div>
+         </div>`
+      : "";
+    panel.className = "nav-focus";
+    panel.innerHTML = `
+      <div class="nav-focus-title">${escapeHtml(t ? t.n : shortFileName(file))}</div>
+      <div class="nav-focus-meta">
+        ${p ? `<span style="color:${p.color}">${p.code} · ${p.name}</span> · ` : ""}${escapeHtml(file)}
+      </div>
+      ${renderList(edges.prev,    "prev",    "前 (predecessor)")}
+      ${renderList(edges.next,    "next",    "後 (successor)")}
+      ${renderList(edges.related, "related", "関連 (related)")}
+      ${(edges.prev.length + edges.next.length + edges.related.length === 0)
+        ? `<div style="color:var(--fg-2);font-size:11px;">(関連技術セクションなし、または空)</div>`
+        : ""}
+      <div class="nav-focus-actions">
+        <button class="nav-focus-btn" data-act="open">📖 ファイルを開く</button>
+        <button class="nav-focus-btn secondary" data-act="clear">✕ フォーカス解除</button>
+      </div>
+    `;
+    panel.querySelector("[data-act='open']").addEventListener("click", () => openMD(file));
+    panel.querySelector("[data-act='clear']").addEventListener("click", () => setNavFocus(null));
+    panel.querySelectorAll(".nav-focus-link").forEach(a => {
+      a.addEventListener("click", () => setNavFocus(a.dataset.file));
+    });
+  }
+
+  async function ensureNavReady() {
+    if (_navLoaded) return;
+    const status = document.getElementById("navStatus");
+    if (isFile) {
+      if (status) status.textContent = "⚠ file:// では Navigator を構築できません — HTTP サーバ経由で開いてください";
+      return;
+    }
+    if (!dataLoaded) {
+      if (status) status.textContent = "› waiting for kedalab data …";
+      // try once more after current microtask; the user can retry
+      return;
+    }
+    if (status) status.textContent = "› fetching markdown for navigator … (初回のみ)";
+    await ensureContentIndex();
+    buildEdgesIndex();
+    renderNavigatorMatrix();
+    _navLoaded = true;
+    const linked = Array.from(_edges.values())
+      .reduce((n, e) => n + e.prev.length + e.next.length + e.related.length, 0);
+    if (status) status.textContent = `${D.techniques.length} files · ${linked} edges parsed from 関連技術 sections`;
+  }
+
+  function enterNavMode() {
+    document.body.classList.add("nav-mode");
+    window.scrollTo({ top: 0, behavior: "instant" });
+    ensureNavReady();
+  }
+  function exitNavMode() {
+    document.body.classList.remove("nav-mode");
+  }
+
+  // Wire nav links — Navigator entry toggles page mode; others exit it
+  $$(".nav-link").forEach(a => {
+    a.addEventListener("click", () => {
+      if (a.dataset.page === "navigator") {
+        // anchor href #navigator stays — let the hash update, but suppress
+        // default scroll by handling visibility ourselves
+        setTimeout(enterNavMode, 0);
+      } else if (document.body.classList.contains("nav-mode")) {
+        exitNavMode();
+      }
+    });
+  });
+
+  // In-page search box
+  const _navSearchEl = document.getElementById("navSearch");
+  if (_navSearchEl) {
+    _navSearchEl.addEventListener("input", e => {
+      const q = e.target.value.toLowerCase().trim();
+      const toks = q.split(/\s+/).filter(Boolean);
+      $$(".nav-cell").forEach(c => {
+        if (!toks.length) { c.classList.remove("qfilter-out"); return; }
+        const hay = (c.textContent + " " + c.dataset.file).toLowerCase();
+        c.classList.toggle("qfilter-out", !toks.every(t => hay.includes(t)));
+      });
+    });
+    _navSearchEl.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        const first = document.querySelector(".nav-cell:not(.qfilter-out)");
+        if (first) setNavFocus(first.dataset.file);
+      } else if (e.key === "Escape") {
+        e.target.value = "";
+        $$(".nav-cell").forEach(c => c.classList.remove("qfilter-out"));
+      }
+    });
+  }
+
+  const _navClearBtn = document.getElementById("navClear");
+  if (_navClearBtn) _navClearBtn.addEventListener("click", () => setNavFocus(null));
+
+  // Auto-enter if URL hash is #navigator on load
+  if (location.hash === "#navigator") {
+    // wait for data so the matrix has techniques to render
+    setTimeout(() => enterNavMode(), 100);
   }
 
   // ============================================================
@@ -1183,6 +1424,9 @@
     renderAll();
     animateCounters();
     setLoadedPill();
+    // If user already navigated to the Navigator page while data was loading,
+    // kick off its build now that techniques are available.
+    if (document.body.classList.contains("nav-mode")) ensureNavReady();
   }
 
   // 2) After kedalab data is loaded → re-render and animate stats

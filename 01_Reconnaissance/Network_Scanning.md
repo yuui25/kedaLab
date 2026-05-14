@@ -11,8 +11,8 @@
 
 | 観測される出力 | 示唆 | 次のアクション |
 |------------|-----|------------|
-| 21 / 22 / 80 だけの最小構成 | Linux + Web の典型 | `00_Playbook/Linux_Attack_Flow.md` へ |
-| 53 / 88 / 389 / 445 / 5985 が揃う | AD DC 確定 | `00_Playbook/Windows_AD_Attack_Flow.md` へ |
+| 21 / 22 / 80 だけの最小構成 | Linux + Web の典型 | `../00_Playbook/Linux_Attack_Flow.md` へ |
+| 53 / 88 / 389 / 445 / 5985 が揃う | AD DC 確定 | `../00_Playbook/Windows_AD_Attack_Flow.md` へ |
 | 8080 / 8443 / 8888 等の非標準 HTTP | 開発用管理パネル / API の可能性 | まず `/` にアクセスしてフレームワーク・バージョンを特定 |
 | 1433 / 3306 / 5432 などの DB ポートが外に出ている | 誤った公開設定 | デフォルト認証情報で接続試行 |
 | 2049（NFS） | ファイル共有が直接マウントできる可能性 | `showmount -e [IP]` |
@@ -132,8 +132,14 @@ searchsploit --nmap nmap_allports.xml
 
 ### 関連技術
 
+- 前：案件開始（IP 渡し）／OS 判定 → `../00_Playbook/00_OS_Identification.md`
 - 後：`Web_Enumeration.md`（HTTP / HTTPS ポート発見後）
 - 後：`SMB_Enumeration.md`（445 / 139 発見後）
 - 後：`LDAP_Enumeration.md`（389 / 636 発見後）
 - 後：`TLS_Audit.md`（443 / 8443 / 993 / 995 / 465 等 TLS ポート発見後のプロトコル/暗号/証明書監査）
 - 後：`Exposed_Files.md`（Web ポート発見後の誤公開ファイル探索）
+- 後：`SNMP_Enumeration.md`（UDP 161 発見後の SNMP 列挙・内部ネットワーク観点）
+- 後：ポートパターンからフロー判断 → `../00_Playbook/Linux_Attack_Flow.md` / `../00_Playbook/Windows_AD_Attack_Flow.md`
+- 後：検出サービス×バージョンの既知 CVE 一括確認 → `../05_Tools_Reference/Searchsploit.md`
+- 後：Linux 侵入後の列挙 → `../03_Post_Access_Linux/Enumeration_Checklist.md`
+- 後：`172.17.0.x` 等でコンテナ環境が判明した場合の権限昇格 → `../03_Post_Access_Linux/Sudo_Misconfig.md`

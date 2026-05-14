@@ -57,7 +57,7 @@
 | Issuer に社内 CA 名（`[ORG] Internal CA` 等）| 社内 PKI の存在。後続の Web 列挙時に同じ CA 配下の他サービスを推定 |
 | SAN に複数 FQDN が列挙 | vhost ファジング不要で対象 FQDN が一括判明 |
 | CN が `*.cloudflare.com` / `*.akamaized.net` / `*.azureedge.net` 等 | CDN 配下。観測している TLS 設定はオリジンではなく CDN |
-| Issuer に `Fortinet` / `Citrix` / `Palo Alto Networks` / `Pulse Secure` 等の製品名 | アプライアンス。`02_Initial_Access/Edge_Appliance_CVEs.md` 該当 |
+| Issuer に `Fortinet` / `Citrix` / `Palo Alto Networks` / `Pulse Secure` 等の製品名 | アプライアンス。`../02_Initial_Access/Edge_Appliance_CVEs.md` 該当 |
 | Issuer が `Let's Encrypt` で SAN に開発系 FQDN（`dev.` / `staging.` / `test.`）| ステージング環境の混在。本番より緩い設定の可能性 |
 
 ---

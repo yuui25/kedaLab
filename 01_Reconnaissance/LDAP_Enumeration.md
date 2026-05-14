@@ -155,9 +155,12 @@ netexec ldap [IP] -u [USER] -p '[PASSWORD]' --asreproast asrep.out
 ---
 
 ## 関連技術
-- ユーザー一覧が取得できた → パスワードスプレー: `../05_Tools_Reference/NetExec.md`
-- SPN 付きユーザーを発見 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`
-- AS-REP Roast 可能ユーザーを発見 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/AS_REP_Roasting.md`（存在する場合）
-- 全体の権限マッピング → `../05_Tools_Reference/BloodHound.md`
-- `info` フィールドにパスワード → `../02_Initial_Access/Credential_Discovery.md`
-- rpcclient / SMB 側の列挙と併用 → `./SMB_Enumeration.md`、`../02_Initial_Access/Protocol_Exploitation.md`
+- 前：ポートスキャンで 389 / 636 を発見 → `Network_Scanning.md`
+- 前：AD 攻撃フロー上の現在地確認・初期認証情報の取得 → `../00_Playbook/Windows_AD_Attack_Flow.md`
+- 前：メタデータから得たユーザー名・ドメイン名を起点に列挙 → `Metadata_Analysis.md`
+- 前：rpcclient / SMB 側の列挙と併用 → `SMB_Enumeration.md`、`../02_Initial_Access/Protocol_Exploitation.md`
+- 後：ユーザー一覧が取得できた → パスワードスプレー `../05_Tools_Reference/Netexec.md`
+- 後：SPN 付きユーザーを発見 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`
+- 後：AS-REP Roast 可能ユーザーを発見 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`
+- 後：全体の権限マッピング → `../05_Tools_Reference/BloodHound.md`
+- 後：`info` フィールドにパスワード → `../02_Initial_Access/Credential_Discovery.md`

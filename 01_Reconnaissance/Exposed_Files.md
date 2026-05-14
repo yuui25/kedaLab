@@ -250,7 +250,7 @@ curl -s http://[TARGET]/backup/   # [Attacker]
 # Tomcat
 curl -s http://[TARGET]:8080/manager/html   # [Attacker]
 # 401 が返れば Basic 認証あり → デフォルト認証情報を当たる
-# → ../02_Initial_Access/Default_Credentials.md（Phase 2 で作成予定）
+# → ../02_Initial_Access/Default_Credentials.md
 
 # JBoss / WildFly
 curl -s http://[TARGET]:8080/jmx-console/   # [Attacker]
@@ -286,7 +286,7 @@ nuclei -t exposures/backups/ -t exposures/configs/ -t exposures/tokens/ -u https
 
 | nuclei 出力 | 次のアクション |
 |------------|--------------|
-| `exposures/configs/dotenv-cred-files` ヒット | 即 `.env` 取得 → `Credential_Discovery.md` |
+| `exposures/configs/dotenv-cred-files` ヒット | 即 `.env` 取得 → `../02_Initial_Access/Credential_Discovery.md` |
 | `exposures/files/git-config` / `exposed-git-folder` | `git-dumper` でリポ復元 |
 | `exposures/configs/exposed-spring-actuator` | `/actuator/env` `/heapdump` を順に取得 |
 | `exposures/apis/swagger-api` | `swagger.json` を取得して裏 API を列挙 |
@@ -325,5 +325,6 @@ nuclei -t exposures/backups/ -t exposures/configs/ -t exposures/tokens/ -u https
 - 前：`Web_Enumeration.md`（フレームワーク特定後、そのフレームワーク固有の誤公開パスへ）
 - 前：`TLS_Audit.md`（SAN から判明した FQDN 群を誤公開ファイル探索の対象にする）
 - 後：`../02_Initial_Access/Credential_Discovery.md`（`.env` / `.git/` / `.htpasswd` から取り出した認証情報の処理）
+- 後：`../02_Initial_Access/Default_Credentials.md`（Tomcat / JBoss / Jenkins 等の管理コンソールが見つかった場合のデフォルト認証情報試行）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（`phpinfo` で `DOCUMENT_ROOT` 判明後）
 - 後：`../05_Tools_Reference/Searchsploit.md`（誤公開された設定ファイルから判明した製品/バージョンで CVE 検索）
