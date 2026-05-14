@@ -121,9 +121,10 @@ curl -X POST http://[TARGET]/api/v1/admin/vpn/generate \
 
 ### 関連技術
 - 前：難読化JSからAPIエンドポイント発見 → `JS_Obfuscation.md`
+- 前：APIエンドポイント列挙・ディレクトリ探索 → `../../01_Reconnaissance/Web_Enumeration.md`
 - 後：シェル安定化 → `../../03_Post_Access_Linux/Shell_Stabilization.md`
-- 侵入後の .env ファイル探索 → `../../02_Initial_Access/Credential_Discovery.md`
-- API列挙・ディレクトリ探索 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 後：侵入後の .env ファイル・認証情報探索 → `../../02_Initial_Access/Credential_Discovery.md`
+- 関連：リバースシェルの仕組み・ポート選択・IP確認 → `../../06_Concepts/Reverse_Shell.md`
 
 ---
 
@@ -188,6 +189,6 @@ searchsploit [ライブラリ名] [バージョン]
 ### 関連技術
 - 前：URL を入力できるフォームの発見 → `../../01_Reconnaissance/Web_Enumeration.md`
 - 後：シェル安定化 → `../../03_Post_Access_Linux/Shell_Stabilization.md`
-- 後：侵入後の認証情報探索 → `../../02_Initial_Access/Credential_Discovery.md`（`.bundle/config` 等）
-- CVE ペイロード詳細 → `../../05_Tools_Reference/CVE_Notes.md`
-- SSRF との切り替え → `SSRF.md`
+- 後：侵入後の認証情報探索（`.bundle/config` 等） → `../../02_Initial_Access/Credential_Discovery.md`
+- 関連：CVE ペイロード詳細 → `../../05_Tools_Reference/CVE_Notes.md`
+- 関連：バージョンがパッチ済みの場合の SSRF への切り替え → `SSRF.md`

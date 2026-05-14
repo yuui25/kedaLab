@@ -14,6 +14,7 @@ window.KEDA_DATA = {
   // Phase visual metadata. Folder prefix → phase id (see phaseFromPath in app.js).
   // Add a new phase here if a new top-level numbered folder is introduced.
   phases: [
+    { id: "playbook", code: "00", name: "Playbook",                jp: "判断フロー",       color: "#94a3b8", glyph: "▣", desc: "「次に何をすべきか」のフロー", dir: "00_Playbook" },
     { id: "recon",    code: "01", name: "Reconnaissance",          jp: "偵察・列挙",       color: "#00ff9c", glyph: "◈", desc: "サービス・ホスト・Web 調査", dir: "01_Reconnaissance" },
     { id: "initial",  code: "02", name: "Initial Access",          jp: "初期アクセス",     color: "#00d4ff", glyph: "◆", desc: "最初の足がかりを得る",       dir: "02_Initial_Access" },
     { id: "linux",    code: "03", name: "Post-Access · Linux",     jp: "Linux 侵入後",    color: "#ffb800", glyph: "▲", desc: "Linux 権限昇格・列挙",        dir: "03_Post_Access_Linux" },

@@ -204,7 +204,7 @@ python3 jwt_tool.py [JWT_TOKEN] -X s
 # 生成された JWKS ファイルを HTTP サーバーで公開し、jku をそのURLに書き換えたトークンを使用
 ```
 
-リスナーの起動方法と到達可能 IP の確認は `../../../06_Concepts/Reverse_Shell.md`（攻撃側の準備①②）を参照。
+リスナーの起動方法と到達可能 IP の確認は `../../06_Concepts/Reverse_Shell.md`（攻撃側の準備①②）を参照。
 
 ---
 

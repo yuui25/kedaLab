@@ -95,6 +95,7 @@
   // Map a root-relative file path → phase id (folder prefix).
   function phaseFromPath(file) {
     if (!file) return null;
+    if (file.startsWith("00_Playbook/")) return "playbook";
     if (file.startsWith("06_Concepts/AI_ML/")) return "ai";
     if (file.startsWith("07_")) return "ai";
     if (file.startsWith("06_")) return "concepts";
@@ -103,7 +104,7 @@
     if (file.startsWith("03_")) return "linux";
     if (file.startsWith("02_")) return "initial";
     if (file.startsWith("01_")) return "recon";
-    return null; // 00_Playbook etc.
+    return null;
   }
 
   function deriveTags(name, file) {
@@ -149,6 +150,34 @@
   function extractH1(md) {
     const m = md.match(/^#\s+(.+)$/m);
     return m ? m[1].trim() : null;
+  }
+
+  // Scan README.md (and other sources) for `00_Playbook/*.md` references and
+  // register each unique playbook as a technique node (phase = "playbook").
+  // Playbooks aren't listed in TECHNIQUES_INDEX*.md, so we discover them here.
+  async function loadPlaybookNodes() {
+    const out = [];
+    const seen = new Set();
+    const sources = ["README.md", "TECHNIQUES_INDEX.md", "TECHNIQUES_INDEX_AI_ML.md"];
+    for (const src of sources) {
+      let md;
+      try { md = await getMd(src); } catch (e) { continue; }
+      const re = /(?:^|[^\w/])(00_Playbook\/[\w][\w\-.]*\.md)\b/g;
+      let m;
+      while ((m = re.exec(md)) !== null) {
+        const f = m[1];
+        if (seen.has(f)) continue;
+        seen.add(f);
+        let name = f.split("/").pop().replace(/\.md$/, "");
+        try {
+          const pmd = await getMd(f);
+          const h1 = extractH1(pmd);
+          if (h1) name = h1;
+        } catch (e) { /* keep filename */ }
+        out.push({ n: name, p: "playbook", f, tags: ["playbook"] });
+      }
+    }
+    return out;
   }
 
   // Markdown cache to avoid refetching the same file.
@@ -666,15 +695,18 @@
   function parseRelatedTech(file, md) {
     const baseDir = file.split("/").slice(0, -1).join("/");
     const out = { prev: [], next: [], related: [] };
-    // Split MD into top-level H2 sections; find the one whose heading is 関連技術
-    const parts = md.split(/^##\s+/m);
-    let section = null;
-    for (const p of parts) {
-      if (/^関連技術\s*$/m.test(p.split(/\n/)[0])) { section = p; break; }
-    }
-    if (!section) return out;
-    // strip the heading line itself
-    section = section.replace(/^[^\n]*\n/, "");
+    // Find any heading whose text is exactly "関連技術", at any level (## ~ ######).
+    // Files in this repo use both ## and ### for this section.
+    const headRe = /^(#{2,6})\s+関連技術\s*$/m;
+    const hm = md.match(headRe);
+    if (!hm) return out;
+    const level = hm[1].length;
+    const bodyStart = hm.index + hm[0].length;
+    // The section ends at the next heading of the same or higher level.
+    const tail = md.slice(bodyStart);
+    const endRe = new RegExp("^#{1," + level + "}\\s+", "m");
+    const em = tail.match(endRe);
+    const section = em ? tail.slice(0, em.index) : tail;
     for (const line of section.split(/\n/)) {
       const t = line.trim();
       if (!t.startsWith("-")) continue;
@@ -693,13 +725,70 @@
     return out;
   }
 
-  function buildEdgesIndex() {
+  async function buildEdgesIndex() {
     if (_edges.size > 0) return;
+    // Pass 1: forward edges from known (TECHNIQUES_INDEX + playbook) techniques.
     for (const t of D.techniques) {
       const md = _mdCache.get(t.f);
-      if (!md) continue;
-      _edges.set(t.f, parseRelatedTech(t.f, md));
+      if (md) _edges.set(t.f, parseRelatedTech(t.f, md));
     }
+    // Pass 2: auto-discover orphan files referenced from 関連技術 sections
+    // (e.g. Concept files in 06_Concepts/ that aren't listed in any INDEX).
+    // Fetch them, register as nodes, parse their edges. Iterate because an
+    // orphan's own edges may surface further orphans.
+    const tried = new Set(D.techniques.map(t => t.f));
+    for (let pass = 0; pass < 4; pass++) {
+      const known = new Set(D.techniques.map(t => t.f));
+      const orphans = new Set();
+      for (const [, e] of _edges) {
+        for (const arr of [e.prev, e.next, e.related]) {
+          for (const f of arr) {
+            if (!known.has(f) && !tried.has(f) && phaseFromPath(f)) orphans.add(f);
+          }
+        }
+      }
+      if (!orphans.size) break;
+      const list = Array.from(orphans);
+      list.forEach(f => tried.add(f));
+      await Promise.all(list.map(async f => {
+        try { await getMd(f); } catch (e) { _mdCache.set(f, ""); }
+      }));
+      for (const f of list) {
+        const md = _mdCache.get(f) || "";
+        const p = phaseFromPath(f);
+        let name = f.split("/").pop().replace(/\.md$/, "");
+        const h1 = extractH1(md);
+        if (h1) name = h1;
+        D.techniques.push({ n: name, p, f, tags: [p, "auto"] });
+        _edges.set(f, parseRelatedTech(f, md));
+      }
+    }
+  }
+
+  // Effective edges = forward (authoritative) + non-conflicting inverse.
+  // If A.次 says B, B sees A as 前. If both A.次:B and B.次:A exist (which is
+  // contradictory across files), A.次 wins from A's view, B.次 wins from B's.
+  function effectiveEdges(file) {
+    const fwd = _edges.get(file) || { prev: [], next: [], related: [] };
+    const prev = new Set(fwd.prev);
+    const next = new Set(fwd.next);
+    const related = new Set(fwd.related);
+    const claimed = f => prev.has(f) || next.has(f) || related.has(f);
+    for (const [other, e] of _edges) {
+      if (other === file || claimed(other)) {
+        // forward already classifies this neighbour — skip inverse
+        continue;
+      }
+      // other says `前：file` → other depends on file → from file's view, other is a `次` step
+      if (e.prev.includes(file))       next.add(other);
+      else if (e.next.includes(file))  prev.add(other);
+      else if (e.related.includes(file)) related.add(other);
+    }
+    return {
+      prev: Array.from(prev),
+      next: Array.from(next),
+      related: Array.from(related)
+    };
   }
 
   function shortFileName(file) {
@@ -751,7 +840,7 @@
       return;
     }
     body.classList.add("has-nav-focus");
-    const edges = _edges.get(file) || { prev: [], next: [], related: [] };
+    const edges = effectiveEdges(file);
     const prev = new Set(edges.prev);
     const next = new Set(edges.next);
     const related = new Set(edges.related);
@@ -778,7 +867,7 @@
     }
     const t = D.techniques.find(x => x.f === file);
     const p = t ? phaseById[t.p] : null;
-    const edges = _edges.get(file) || { prev: [], next: [], related: [] };
+    const edges = effectiveEdges(file);
     const renderList = (arr, cls, label) => arr.length
       ? `<div class="nav-focus-section ${cls}">
            <h4>${label} (${arr.length})</h4>
@@ -829,12 +918,21 @@
     }
     if (status) status.textContent = "› fetching markdown for navigator … (初回のみ)";
     await ensureContentIndex();
-    buildEdgesIndex();
+    const beforeN = D.techniques.length;
+    await buildEdgesIndex();
+    const addedN = D.techniques.length - beforeN;
+    // Orphan resolution may have added new techniques — refresh Browser counts
+    if (addedN > 0) {
+      recomputeStats();
+      renderToolbar();
+      renderTechniques();
+    }
     renderNavigatorMatrix();
     _navLoaded = true;
     const linked = Array.from(_edges.values())
       .reduce((n, e) => n + e.prev.length + e.next.length + e.related.length, 0);
-    if (status) status.textContent = `${D.techniques.length} files · ${linked} edges parsed from 関連技術 sections`;
+    if (status) status.textContent =
+      `${D.techniques.length} files (incl. ${addedN} auto-discovered) · ${linked} edges parsed from 関連技術 sections`;
   }
 
   function enterNavMode() {
@@ -1348,6 +1446,16 @@
     } catch (e) {
       console.warn("[loader] techniques failed:", e);
       loaderErrors.push("techniques: " + e.message);
+    }
+    try {
+      const pbs = await loadPlaybookNodes();
+      const existing = new Set(D.techniques.map(t => t.f));
+      const added = pbs.filter(p => !existing.has(p.f));
+      D.techniques = D.techniques.concat(added);
+      console.log("[loader] playbook nodes:", pbs.length, "added:", added.length);
+    } catch (e) {
+      console.warn("[loader] playbooks failed:", e);
+      loaderErrors.push("playbooks: " + e.message);
     }
     setPill("⋯ fetching README & playbooks", "loading");
     try {

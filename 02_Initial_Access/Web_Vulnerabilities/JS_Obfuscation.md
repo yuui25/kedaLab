@@ -169,14 +169,8 @@ JSON.parse(atob("eyJ1c2VyIjoiYWRtaW4ifQ==".replace(/-/g,'+').replace(/_/g,'/')))
 
 ### 関連技術
 
-- 前：このファイル「難読化 JavaScript 解析」（手動デコードの基本）
-- 後：`JWT_Attacks.md`（デコード結果が JWT だった場合の攻撃手順）
-- 後：`IDOR.md`（デコード結果に ID が含まれていた場合）
-- 後：`../../01_Reconnaissance/Web_Response_Triage.md`（デコード後の値に機微情報が含まれているかのスキャン）
-- 原理（なぜ多重エンコードが生まれるか・各エンコード形式の識別方法） → `../../06_Concepts/Web_Pentest_Tooling.md`
-
----
-
-### 関連技術
-- 発見したAPIエンドポイントへのコマンドインジェクション → `Command_Injection.md`
-- Webディレクトリ・エンドポイント列挙 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 前：Webディレクトリ・エンドポイント列挙でJSファイルを発見 → `../../01_Reconnaissance/Web_Enumeration.md`
+- 後：発見したAPIエンドポイントへのコマンドインジェクション → `Command_Injection.md`
+- 後：デコード結果が JWT だった場合の攻撃手順 → `JWT_Attacks.md`
+- 後：デコード結果に ID が含まれていた場合 → `IDOR.md`
+- 関連：多重エンコードの識別方法・各エンコード形式の原理 → `../../06_Concepts/Web_Pentest_Tooling.md`

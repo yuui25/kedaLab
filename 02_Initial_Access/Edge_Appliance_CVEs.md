@@ -293,13 +293,13 @@ echo "# kedalab-[CASE_ID] CVE-2024-21887 test at $(date -Iseconds)" >> /home/[US
 
 ## 関連技術
 
-- 前：`../01_Reconnaissance/TLS_Audit.md`（証明書 Issuer / SAN / CN からアプライアンス製品名特定。Step 1 のバージョン取得の前段）
-- 前：`../01_Reconnaissance/Web_Enumeration.md`（ログイン HTML タイトル / URL パス / favicon ハッシュ / Server ヘッダーからアプライアンス確定）
-- 前：`../01_Reconnaissance/Network_Scanning.md`（典型ポート組合せでアプライアンス候補絞り込み）
-- 前：`../01_Reconnaissance/Exposed_Files.md`（管理コンソール誤公開でアプライアンス管理面を発見した場合）
-- 前：`Default_Credentials.md`（デフォルト認証情報が既に変更されている場合の代替経路として本ファイルへ）
-- 前：`Account_Lockout_Recon.md`（認証バイパス系 CVE は **MFA を迂回するため、ロックアウト確認は不要だが SIEM 側の異常ログイン検知は別軸で発火する** ことの理解）
-- 後：`../05_Tools_Reference/CVE_Notes.md`（個別 CVE のペイロード本文・成功シグナル詳細・バージョン対応表）
-- 後：`../05_Tools_Reference/Searchsploit.md`（PoC スクリプトのローカル検索・GitHub PoC 検索フロー）
-- 後：`Credential_Discovery.md`（侵害成功後の装置内設定ファイル / RADIUS / AAA 設定からの認証情報抽出）
-- 後：`Protocol_Exploitation.md`（取得した認証情報 / セッショントークンでの SSH / WinRM / 社内サービスへの横展開）
+- 前：証明書 Issuer / SAN / CN からアプライアンス製品名特定（Step 1 のバージョン取得の前段） → `../01_Reconnaissance/TLS_Audit.md`
+- 前：ログイン HTML タイトル / URL パス / favicon ハッシュ / Server ヘッダーからアプライアンス確定 → `../01_Reconnaissance/Web_Enumeration.md`
+- 前：典型ポート組合せでアプライアンス候補絞り込み → `../01_Reconnaissance/Network_Scanning.md`
+- 前：管理コンソール誤公開でアプライアンス管理面を発見した場合 → `../01_Reconnaissance/Exposed_Files.md`
+- 前：デフォルト認証情報が既に変更されている場合の代替経路として本ファイルへ → `Default_Credentials.md`
+- 前：認証バイパス系 CVE は **MFA を迂回するため、ロックアウト確認は不要だが SIEM 側の異常ログイン検知は別軸で発火する** ことの理解 → `Account_Lockout_Recon.md`
+- 後：個別 CVE のペイロード本文・成功シグナル詳細・バージョン対応表 → `../05_Tools_Reference/CVE_Notes.md`
+- 後：PoC スクリプトのローカル検索・GitHub PoC 検索フロー → `../05_Tools_Reference/Searchsploit.md`
+- 後：侵害成功後の装置内設定ファイル / RADIUS / AAA 設定からの認証情報抽出 → `Credential_Discovery.md`
+- 後：取得した認証情報 / セッショントークンでの SSH / WinRM / 社内サービスへの横展開 → `Protocol_Exploitation.md`
