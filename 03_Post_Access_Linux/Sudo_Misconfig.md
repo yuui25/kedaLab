@@ -555,7 +555,7 @@ id
 ---
 
 ## 関連技術
-- 前：GTFOBins: https://gtfobins.github.io/
+- 前：侵入後の列挙チェックリスト → `Enumeration_Checklist.md`
 - 後：その他の昇格手法 → `Capabilities.md`, `SUID_SGID.md`
-- パストラバーサルでコンテナIDを特定 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
-- Docker 分離の原理（なぜ効くか） → `../06_Concepts/Docker_Isolation.md`
+- 関連：パストラバーサルでコンテナIDを特定 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
+- 関連：Docker 分離の原理（なぜ効くか） → `../06_Concepts/Docker_Isolation.md`

@@ -83,5 +83,5 @@ perl -e 'exec "/bin/bash";'
 - セッションが切れた場合は再度リバースシェルペイロードを送り直す
 
 ### 関連技術
-- リバースシェル取得 → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
-- 侵入後の列挙 → `Enumeration_Checklist.md`
+- 前：リバースシェル取得 → `../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`
+- 後：侵入後の列挙 → `Enumeration_Checklist.md`

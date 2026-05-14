@@ -274,9 +274,9 @@ curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas
 ---
 
 ## 関連技術
-- Capabilities 発見 → `Capabilities.md`
-- SUID 発見 → `SUID_SGID.md`
-- sudo 権限 → `Sudo_Misconfig.md`
-- staff グループ / PAM 経由の昇格 → `PAM_Misconfig.md`
-- カーネルバージョンが古い / システムメールに脆弱性の言及あり → `Kernel_Exploits.md`
-- リバースシェル取得直後の安定化 → `Shell_Stabilization.md`
+- 前：リバースシェル取得直後の安定化 → `Shell_Stabilization.md`
+- 後：Capabilities 発見 → `Capabilities.md`
+- 後：SUID 発見 → `SUID_SGID.md`
+- 後：sudo 権限 → `Sudo_Misconfig.md`
+- 後：staff グループ / PAM 経由の昇格 → `PAM_Misconfig.md`
+- 後：カーネルバージョンが古い / システムメールに脆弱性の言及あり → `Kernel_Exploits.md`
