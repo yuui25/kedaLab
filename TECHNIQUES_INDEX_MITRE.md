@@ -53,6 +53,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 | T1566.001 | Phishing: Spearphishing Attachment | `02_Initial_Access/Social_Engineering.md` |
 | T1566.002 | Phishing: Spearphishing Link | `02_Initial_Access/Social_Engineering.md` |
 | T1091 | Replication Through Removable Media | `02_Initial_Access/Social_Engineering.md`（ベイティング） |
+| T1606 | Forge Web Credentials（JWT 署名バイパス・alg:none・RS256→HS256・jwk インジェクション） | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 
 ---
 

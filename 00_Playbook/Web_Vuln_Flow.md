@@ -1,13 +1,57 @@
 # Web脆弱性調査フロー（Webのみスコープ向け）
 
-## このファイルの用途
-
 **シェル取得を目的としない、Webアプリの脆弱性を網羅的に洗い出すスコープ向けのPlaybook。**
 
 SaaS・クラウドWebアプリ・APIのみを対象とした診断案件で使う。
 
 > **ペネトレとしてWebシステムを起点にシェル取得を目指す場合は、このファイルではなく `Linux_Attack_Flow.md` の Step 2 から進めること。**
 > このファイルはWeb診断スコープ（脆弱性の網羅的な洗い出し）専用。
+>
+> **商用案件の場合**：本フローに入る前にスコープ・実施可否・除外エンドポイント（決済・本番データ等）について事前合意を確認すること。
+
+---
+
+## 案件開始条件の確認
+
+**このファイルを開いたら最初にここを読む。** 手元にある情報によってスタート位置が変わる。
+
+| 提供されている情報 | 開始位置 |
+|------------------|---------|
+| URL / ドメインのみ | Step 0（スコープ確認）→ Step 1（偵察）から始める |
+| 認証情報（ID/パス）付き | Step 0 を確認後、Step 2 を**認証後の機能にも適用**する。認証後エンドポイントへの IDOR・権限昇格も確認対象 |
+| 認証情報なし・ブラックボックス | Step 1 から始めて、ログインフォームが見つかり次第 SQLi・デフォルト認証情報を確認 |
+| 「JWT を使っている」と事前に判明 | Step 1 完了後、Step 2 の JWT 行と Step 3「4層目」を優先して確認する |
+
+---
+
+## フロー概要
+
+```
+[Step 0: スコープ確認]
+       ↓
+[Step 1: 偵察]                         → 01_Reconnaissance/
+   ├─ ポートスキャン
+   ├─ ディレクトリ列挙
+   └─ vhost ファジング
+       ↓
+[Step 2: 機能別の脆弱性確認]           → 02_Initial_Access/Web_Vulnerabilities/
+   ├─ ログインフォーム → SQLi / デフォルト認証情報
+   ├─ JWT（eyJ...）   → JWT_Attacks.md（Step 3「4層目」へ）
+   ├─ URLパラメータ   → IDOR / パストラバーサル
+   ├─ ユーザー入力反映 → XSS
+   ├─ 外部URLパラメータ → SSRF
+   ├─ XMLアップロード  → XXE / XSLT インジェクション
+   ├─ OS コマンド受け取り → Command Injection
+   └─ 難読化JS / 不明機能 → JS_Obfuscation / 01_Unknown_Tech_Research
+       ↓
+[Step 3: 認証・認可の横断確認]
+   ├─ 1層目：認証なしアクセス（Broken Access Control）
+   ├─ 2層目：低権限 → 高権限（is_admin=1 等のパラメータ改ざん）
+   ├─ 3層目：横断アクセス（IDOR）
+   └─ 4層目：JWT 検出時のみ（alg 確認 → 署名バイパス）
+       ↓
+[Step 4: バージョン確認 → CVE 検索]   → 05_Tools_Reference/Searchsploit.md
+```
 
 ---
 
@@ -79,6 +123,7 @@ gobuster vhost -u http://[TARGET] -w /usr/share/seclists/Discovery/DNS/subdomain
 | 発見した機能・要素 | 確認すべき脆弱性 | 参照先 |
 |-----------------|----------------|--------|
 | ログインフォーム | SQLi・デフォルト認証情報 | `../02_Initial_Access/Web_Vulnerabilities/SQLi.md` |
+| **Authorization ヘッダーに `Bearer eyJ...` がある / Cookie に `eyJ` で始まる値がある** | JWT 操作・署名バイパス（alg:none / 弱い秘密鍵 / RS256→HS256 切り替え / kid インジェクション / jku 差し替え） → Step 3「4層目」へ | `../02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 | URLに連番IDがある | IDOR | `../02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
 | ファイルダウンロード機能 | パストラバーサル・IDOR | `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | ユーザー入力がページに反映される | XSS（反射型・格納型） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
@@ -126,6 +171,18 @@ gobuster vhost -u http://[TARGET] -w /usr/share/seclists/Discovery/DNS/subdomain
 1. 別ユーザーのオブジェクトID（ファイルID・注文IDなど）に連番を変えてアクセスできるか確認する
 
 - 参照 → `../02_Initial_Access/Web_Vulnerabilities/IDOR.md`
+
+**4層目：JWT を使った認証の場合（Step 2 で JWT を検出したとき）**
+
+セッション管理に JWT が使われている場合は以下を順に試す：
+
+1. JWT をデコードして `alg` フィールドを確認する（`eyJ` 2 つ目を base64 デコード）
+2. `alg: none` を受け付けるか試す → 最もリスクが高い実装ミス
+3. `alg` が `HS256` → 弱い秘密鍵のブルートフォース（hashcat mode 16500）
+4. `alg` が `RS256` → 公開鍵を使った HS256 切り替え / jku 差し替えを試みる
+5. ヘッダーに `kid`・`jku`・`x5u`・`jwk` フィールドがあれば → 各インジェクション手法を試みる
+
+- 参照 → `../02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md`
 
 ---
 

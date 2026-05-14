@@ -101,6 +101,12 @@
 | SSRF（サーバーサイドリクエストフォージェリ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
 | XXE（XML外部エンティティインジェクション） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XXE.md` |
 | XSLTインジェクション（プロセッサフィンガープリント・XXE-via-XSLT・PHP拡張・Java拡張） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` |
+| JWT alg:none 攻撃（署名検証スキップ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| JWT 弱い秘密鍵ブルートフォース（hashcat mode 16500） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| JWT RS256→HS256 アルゴリズム切り替え攻撃（公開鍵を HMAC 秘密鍵として悪用） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| JWT kid パラメータインジェクション（SQLi / パストラバーサル） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| JWT jku / x5u 鍵 URL 差し替え（攻撃者 JWKS への誘導） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| JWT jwk ヘッダーインジェクション（攻撃者公開鍵の埋め込み） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 | PCAPからの平文認証情報抽出 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | WebアプリDB（SQLite等）からのハッシュ取得 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | PBKDF2-HMAC-SHA256 ハッシュのクラック（mode 10900） | Initial Access | `05_Tools_Reference/Hashcat.md` |

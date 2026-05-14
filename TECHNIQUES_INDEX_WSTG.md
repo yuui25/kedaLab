@@ -85,6 +85,7 @@ OWASP Web Security Testing Guide v4.2 のテストカテゴリ・テストケー
 
 | WSTG ID | テスト項目 | kedalab ファイル |
 |---------|-----------|--------|
+| WSTG-SESS-01 | Testing for Session Management Schema（JWT トークン構造・alg 検証・署名バイパス） | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 | WSTG-SESS-09 | Testing for Session Hijacking | `02_Initial_Access/Web_Vulnerabilities/XSS.md`（Cookie スティーリング・stolen cookie ブラウザ植え替え） |
 
 > SESS-02（Cookie 属性）/ SESS-04（Session Fixation）/ SESS-05（Exposed Session Variables）/ SESS-06（CSRF）/ SESS-07（Logout）は手動確認領域。kedalab に追加判定は WRITING_GUIDE.md の「網羅的に書こうとしない」方針に従う。

@@ -325,37 +325,6 @@
   }
 
   // ============================================================
-  // Render playbooks
-  // ============================================================
-  function renderPlaybooks() {
-    const g = $("#pbGrid");
-    const list = D.playbookList || [];
-    if (!list.length) {
-      const msg = isFile
-        ? "⚠ file:// では Playbook 一覧を取得できません — HTTP サーバ経由で開いてください"
-        : (!dataLoaded
-            ? "› fetching README.md & playbooks …"
-            : (loaderErrors.length
-                ? `✕ Playbook 読み込み失敗：${escapeHtml(loaderErrors.join(" / "))}`
-                : "Playbook が見つかりません（README.md の `00_Playbook/*.md` 参照を確認）"));
-      g.innerHTML = `<div class="tb-empty">${msg}</div>`;
-      return;
-    }
-    g.innerHTML = list.map(pb => `
-      <div class="pb-card" data-file="${pb.file}">
-        <div class="pb-icon">${pb.icon || "📋"}</div>
-        <div class="pb-body">
-          <div class="pb-name">${escapeHtml(pb.name)}</div>
-          <div class="pb-entry">${escapeHtml(pb.entry || "")}</div>
-        </div>
-      </div>
-    `).join("");
-    $$(".pb-card", g).forEach(el => {
-      el.addEventListener("click", () => openMD(el.dataset.file));
-    });
-  }
-
-  // ============================================================
   // Render Quick Start (situation wizard)
   // ============================================================
   let qsActiveIdx = -1;
@@ -1127,7 +1096,6 @@
   function renderAll() {
     safeCall("chain",       renderChain);
     safeCall("quickstart",  renderQuickstart);
-    safeCall("playbooks",   renderPlaybooks);
     safeCall("raw",         renderRaw);
     safeCall("toolbar",     renderToolbar);
     safeCall("techniques",  renderTechniques);
@@ -1146,24 +1114,49 @@
   showFileBanner();
   renderAll();
 
-  // 2) After kedalab data is loaded → re-render with real content and animate stats
+  // ---- post-load finalizer (re-usable for reload too) ----
+  function finalizeLoad() {
+    dataLoaded = true;
+    renderAll();
+    animateCounters();
+    if (loaderErrors.length) {
+      setPill("✕ " + loaderErrors.length + " err · ⟲ retry", "err");
+    } else if (isFile) {
+      setPill("⚠ file:// fallback", "err");
+    } else {
+      const t = D.techniques.length;
+      const p = (D.playbookList || []).length;
+      setPill(`✓ ${t} tech · ${p} pb · ⟲ reload`, "ok");
+    }
+  }
+
+  // 2) After kedalab data is loaded → re-render and animate stats
   loadKedalabData()
     .catch(e => {
       console.error("[loader] unexpected:", e);
       loaderErrors.push("unexpected: " + e.message);
     })
-    .finally(() => {
-      dataLoaded = true;
-      renderAll();
-      animateCounters();
-      if (loaderErrors.length) {
-        setPill("✕ " + loaderErrors.length + " err — see console", "err");
-      } else if (isFile) {
-        setPill("⚠ file:// fallback", "err");
-      } else {
-        const t = D.techniques.length;
-        const p = (D.playbookList || []).length;
-        setPill(`✓ ${t} techniques · ${p} playbooks`, "ok");
-      }
+    .finally(finalizeLoad);
+
+  // ---- click pill → invalidate cache and refetch everything ----
+  let _reloading = false;
+  async function reloadKedalabData() {
+    if (_reloading || isFile) return;
+    _reloading = true;
+    loaderErrors.length = 0;
+    _mdCache.clear();
+    dataLoaded = false;
+    setPill("⋯ reloading kedalab data", "loading");
+    try { await loadKedalabData(); }
+    catch (e) { loaderErrors.push("reload: " + e.message); }
+    finalizeLoad();
+    _reloading = false;
+  }
+  const pillEl = document.getElementById("loaderPill");
+  if (pillEl) {
+    pillEl.addEventListener("click", reloadKedalabData);
+    pillEl.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); reloadKedalabData(); }
     });
+  }
 })();
