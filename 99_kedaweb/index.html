@@ -136,7 +136,23 @@
       </div>
     </div>
   </div>
-  <div id="navMatrix" class="nav-matrix"></div>
+  <div class="nav-viewport">
+    <div class="nav-viewport-toolbar">
+      <span class="hint">Ctrl + ホイールで拡大縮小 · 右クリックドラッグでパン · 枠の右下端で高さを変更</span>
+      <div class="nav-zoom-bar" id="navZoomBar">
+        <button class="nav-zoom-btn" data-act="out" type="button" title="縮小">−</button>
+        <span class="nav-zoom-pct" id="navZoomPct">100%</span>
+        <button class="nav-zoom-btn" data-act="in" type="button" title="拡大">+</button>
+        <button class="nav-zoom-btn" data-act="reset" type="button" title="リセット">⟲</button>
+      </div>
+    </div>
+    <div class="nav-viewport-frame" id="navViewportFrame">
+      <div class="nav-scroll-stage" id="navScrollStage">
+        <div id="navMatrix" class="nav-matrix"></div>
+        <svg id="navEdgeSvg" class="nav-edge-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+  </div>
   <div id="navFocus" class="nav-focus empty"></div>
   <div id="navStatus" class="nav-status">› navigator の起動には全 MD のフェッチが必要です(初回のみ)</div>
 </section>

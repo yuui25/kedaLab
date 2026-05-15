@@ -267,6 +267,7 @@ searchsploit -m [PATH_FROM_RESULTS]
 ```
 
 **NVD / GitHub でも確認:**
+
 - https://nvd.nist.gov/vuln/search → バージョン + アプリ名で検索
 - `site:github.com [アプリ名] [バージョン] exploit` または `CVE-[年]-[番号]`
 

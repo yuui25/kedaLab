@@ -48,7 +48,12 @@
   function parseMdTables(md) {
     const tables = [];
     const lines = md.split(/\r?\n/);
-    const splitCells = s => s.replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => c.trim());
+    // CommonMark: \| inside a cell is a literal pipe. Sentinel-swap so split("|") keeps it.
+    const PIPE_ESC = "";
+    const splitCells = s => s
+      .replace(/\\\|/g, PIPE_ESC)
+      .replace(/^\|/, "").replace(/\|$/, "")
+      .split("|").map(c => c.trim().replace(//g, "|"));
     let i = 0;
     while (i < lines.length) {
       const line = lines[i].trim();
@@ -695,31 +700,40 @@
   function parseRelatedTech(file, md) {
     const baseDir = file.split("/").slice(0, -1).join("/");
     const out = { prev: [], next: [], related: [] };
-    // Find any heading whose text is exactly "関連技術", at any level (## ~ ######).
-    // Files in this repo use both ## and ### for this section.
-    const headRe = /^(#{2,6})\s+関連技術\s*$/m;
-    const hm = md.match(headRe);
-    if (!hm) return out;
-    const level = hm[1].length;
-    const bodyStart = hm.index + hm[0].length;
-    // The section ends at the next heading of the same or higher level.
-    const tail = md.slice(bodyStart);
-    const endRe = new RegExp("^#{1," + level + "}\\s+", "m");
-    const em = tail.match(endRe);
-    const section = em ? tail.slice(0, em.index) : tail;
-    for (const line of section.split(/\n/)) {
-      const t = line.trim();
-      if (!t.startsWith("-")) continue;
-      let bucket;
-      if (/^-\s*前[：:]/.test(t)) bucket = out.prev;
-      else if (/^-\s*後[：:]/.test(t)) bucket = out.next;
-      else if (/^-\s*関連[：:]/.test(t)) bucket = out.related;
-      else continue;
-      const pathRe = /`([^`]+\.md)`/g;
-      let pm;
-      while ((pm = pathRe.exec(t)) !== null) {
-        const resolved = resolvePath(baseDir, pm[1]);
-        if (!bucket.includes(resolved)) bucket.push(resolved);
+    // Aggregate edges from ALL "関連技術" sections in the file (## ~ ######).
+    // A file may have multiple: subsection-level relations + a file-level
+    // closing section. Each section ends at the next heading of equal-or-higher level.
+    const headRe = /^(#{2,6})\s+関連技術\s*$/gm;
+    let hm;
+    while ((hm = headRe.exec(md)) !== null) {
+      const level = hm[1].length;
+      const bodyStart = hm.index + hm[0].length;
+      const tail = md.slice(bodyStart);
+      const endRe = new RegExp("^#{1," + level + "}\\s+", "m");
+      const em = tail.match(endRe);
+      const section = em ? tail.slice(0, em.index) : tail;
+      for (const line of section.split(/\n/)) {
+        const t = line.trim();
+        if (!t.startsWith("-")) continue;
+        let bucket;
+        if (/^-\s*前[：:]/.test(t)) bucket = out.prev;
+        else if (/^-\s*後[：:]/.test(t)) bucket = out.next;
+        else if (/^-\s*関連[：:]/.test(t)) bucket = out.related;
+        else continue;
+        const pathRe = /`([^`]+\.md)`/g;
+        let pm;
+        while ((pm = pathRe.exec(t)) !== null) {
+          const raw = pm[1];
+          let resolved;
+          if (raw.startsWith("./") || raw.startsWith("../")) {
+            resolved = resolvePath(baseDir, raw);
+          } else if (raw.includes("/")) {
+            resolved = raw;
+          } else {
+            resolved = baseDir ? baseDir + "/" + raw : raw;
+          }
+          if (!bucket.includes(resolved)) bucket.push(resolved);
+        }
       }
     }
     return out;
@@ -801,7 +815,13 @@
     const byPhase = {};
     D.phases.forEach(p => (byPhase[p.id] = []));
     D.techniques.forEach(t => { if (byPhase[t.p]) byPhase[t.p].push(t); });
-    for (const id in byPhase) byPhase[id].sort((a, b) => a.n.localeCompare(b.n, "ja"));
+    // Sort by full path with numeric awareness:
+    //  - "00_OS_Identification.md" / "01_Unknown_Tech_Research.md" come first by their prefix
+    //  - subfolder files (ACE_Abuse/, AD_CS/, …) group together
+    //  - within each group, files are alphabetical
+    for (const id in byPhase) byPhase[id].sort((a, b) =>
+      (a.f || "").localeCompare(b.f || "", "ja", { numeric: true, sensitivity: "base" })
+    );
 
     grid.innerHTML = D.phases.map(p => {
       const list = byPhase[p.id] || [];
@@ -827,6 +847,11 @@
         else setNavFocus(f);
       });
     });
+    // Re-measure stage so scroll area matches the freshly rendered grid.
+    _navNaturalW = 0; _navNaturalH = 0;
+    if (typeof applyNavZoom === "function") {
+      requestAnimationFrame(() => applyNavZoom(_navZoom));
+    }
   }
 
   function setNavFocus(file) {
@@ -836,6 +861,7 @@
     if (!file) {
       body.classList.remove("has-nav-focus");
       cells.forEach(c => c.classList.remove("focused", "prev", "next", "related"));
+      drawNavEdges(null);
       renderNavFocusPanel(null);
       return;
     }
@@ -852,9 +878,51 @@
       else if (next.has(f)) c.classList.add("next");
       else if (related.has(f)) c.classList.add("related");
     });
+    drawNavEdges(file);
     renderNavFocusPanel(file);
     const focused = document.querySelector(".nav-cell.focused");
     if (focused) focused.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  function drawNavEdges(file) {
+    const svg = document.getElementById("navEdgeSvg");
+    const matrix = document.getElementById("navMatrix");
+    if (!svg || !matrix) return;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (!file) return;
+    const W = matrix.offsetWidth, H = matrix.offsetHeight;
+    if (!W || !H) return;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.style.width  = W + "px";
+    svg.style.height = H + "px";
+    const findCell = f =>
+      matrix.querySelector('.nav-cell[data-file="' + f.replace(/"/g, '\\"') + '"]');
+    const focused = findCell(file);
+    if (!focused) return;
+    const fx = focused.offsetLeft + focused.offsetWidth / 2;
+    const fy = focused.offsetTop  + focused.offsetHeight / 2;
+    const ns = "http://www.w3.org/2000/svg";
+    const drawTo = (cell, color) => {
+      if (!cell) return;
+      const tx = cell.offsetLeft + cell.offsetWidth / 2;
+      const ty = cell.offsetTop  + cell.offsetHeight / 2;
+      const dx = tx - fx, dy = ty - fy;
+      const horizontal = Math.abs(dx) >= Math.abs(dy);
+      const c1x = horizontal ? fx + dx * 0.5 : fx;
+      const c1y = horizontal ? fy            : fy + dy * 0.5;
+      const c2x = horizontal ? tx - dx * 0.5 : tx;
+      const c2y = horizontal ? ty            : ty - dy * 0.5;
+      const p = document.createElementNS(ns, "path");
+      p.setAttribute("d", `M ${fx} ${fy} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${tx} ${ty}`);
+      p.setAttribute("stroke", color);
+      p.setAttribute("stroke-width", "1.6");
+      p.setAttribute("opacity", "0.78");
+      svg.appendChild(p);
+    };
+    const edges = effectiveEdges(file);
+    edges.prev.forEach   (f => drawTo(findCell(f), "#00d4ff"));
+    edges.next.forEach   (f => drawTo(findCell(f), "#ffb800"));
+    edges.related.forEach(f => drawTo(findCell(f), "#00ff9c"));
   }
 
   function renderNavFocusPanel(file) {
@@ -918,6 +986,16 @@
     }
     if (status) status.textContent = "› fetching markdown for navigator … (初回のみ)";
     await ensureContentIndex();
+    // Replace TECHNIQUES_INDEX per-row labels with the file's H1 (canonical title).
+    // A single file often has many sub-technique rows in the index (e.g. Web_Enumeration.md
+    // has rows like "robots.txt 隠しパス発見", "vhost ファジング", …); only the first row's
+    // label survived dedup, which made files hard to find by name. The H1 covers the file as a whole.
+    for (const t of D.techniques) {
+      const md = _mdCache.get(t.f);
+      if (!md) continue;
+      const h1 = extractH1(md);
+      if (h1) t.n = h1;
+    }
     const beforeN = D.techniques.length;
     await buildEdgesIndex();
     const addedN = D.techniques.length - beforeN;
@@ -944,6 +1022,97 @@
     document.body.classList.remove("nav-mode");
   }
 
+  // Navigator zoom (CSS variable --nav-zoom; bar + Ctrl+wheel)
+  const NAV_ZOOM_MIN = 0.4, NAV_ZOOM_MAX = 2.0, NAV_ZOOM_STEP = 0.1;
+  let _navZoom = 1;
+  let _navNaturalW = 0, _navNaturalH = 0;
+  function measureNavMatrix() {
+    const matrix = document.getElementById("navMatrix");
+    const frame  = document.getElementById("navViewportFrame");
+    if (!matrix || !frame) return;
+    // Temporarily clear positioning/transform to measure natural layout size.
+    const prevTransform = matrix.style.transform;
+    const prevPosition  = matrix.style.position;
+    const prevWidth     = matrix.style.width;
+    matrix.style.transform = "none";
+    matrix.style.position  = "static";
+    matrix.style.width     = "";
+    _navNaturalW = matrix.scrollWidth;
+    _navNaturalH = matrix.scrollHeight;
+    matrix.style.transform = prevTransform;
+    matrix.style.position  = prevPosition;
+    matrix.style.width     = prevWidth;
+    matrix.style.width     = _navNaturalW + "px";
+  }
+  function applyNavZoom(z) {
+    _navZoom = Math.max(NAV_ZOOM_MIN, Math.min(NAV_ZOOM_MAX, Math.round(z * 100) / 100));
+    const vp = document.querySelector(".nav-viewport");
+    if (vp) vp.style.setProperty("--nav-zoom", _navZoom);
+    const pct = document.getElementById("navZoomPct");
+    if (pct) pct.textContent = Math.round(_navZoom * 100) + "%";
+    if (!_navNaturalW || !_navNaturalH) measureNavMatrix();
+    const stage = document.getElementById("navScrollStage");
+    if (stage && _navNaturalW && _navNaturalH) {
+      stage.style.width  = (_navNaturalW * _navZoom) + "px";
+      stage.style.height = (_navNaturalH * _navZoom) + "px";
+    }
+  }
+  // Re-measure when matrix content changes (e.g., after data loads) or viewport resizes.
+  window.addEventListener("resize", () => {
+    _navNaturalW = 0; _navNaturalH = 0;
+    if (document.body.classList.contains("nav-mode")) {
+      applyNavZoom(_navZoom);
+      if (_navFocus) drawNavEdges(_navFocus);
+    }
+  });
+  const _navZoomBar = document.getElementById("navZoomBar");
+  if (_navZoomBar) {
+    _navZoomBar.addEventListener("click", e => {
+      const btn = e.target.closest(".nav-zoom-btn");
+      if (!btn) return;
+      const act = btn.dataset.act;
+      if (act === "in")    applyNavZoom(_navZoom + NAV_ZOOM_STEP);
+      else if (act === "out")   applyNavZoom(_navZoom - NAV_ZOOM_STEP);
+      else if (act === "reset") applyNavZoom(1);
+    });
+  }
+  const _navFrame = document.getElementById("navViewportFrame");
+  if (_navFrame) {
+    _navFrame.addEventListener("wheel", e => {
+      if (!e.ctrlKey) return;
+      e.preventDefault();
+      applyNavZoom(_navZoom + (e.deltaY < 0 ? NAV_ZOOM_STEP : -NAV_ZOOM_STEP));
+    }, { passive: false });
+    // Right-click drag = pan
+    let panStartX = 0, panStartY = 0, panScrollL = 0, panScrollT = 0;
+    let panning = false, panMoved = false;
+    _navFrame.addEventListener("mousedown", e => {
+      if (e.button !== 2) return;
+      panning = true; panMoved = false;
+      panStartX = e.clientX; panStartY = e.clientY;
+      panScrollL = _navFrame.scrollLeft; panScrollT = _navFrame.scrollTop;
+      _navFrame.style.cursor = "grabbing";
+      e.preventDefault();
+    });
+    window.addEventListener("mousemove", e => {
+      if (!panning) return;
+      const dx = e.clientX - panStartX;
+      const dy = e.clientY - panStartY;
+      if (!panMoved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) panMoved = true;
+      _navFrame.scrollLeft = panScrollL - dx;
+      _navFrame.scrollTop  = panScrollT - dy;
+    });
+    window.addEventListener("mouseup", e => {
+      if (!panning || e.button !== 2) return;
+      panning = false;
+      _navFrame.style.cursor = "";
+    });
+    // Suppress context menu only when an actual pan happened
+    _navFrame.addEventListener("contextmenu", e => {
+      if (panMoved) { e.preventDefault(); panMoved = false; }
+    });
+  }
+
   // Wire nav links — Navigator entry toggles page mode; others exit it
   $$(".nav-link").forEach(a => {
     a.addEventListener("click", () => {
@@ -965,8 +1134,10 @@
       const toks = q.split(/\s+/).filter(Boolean);
       $$(".nav-cell").forEach(c => {
         if (!toks.length) { c.classList.remove("qfilter-out"); return; }
-        const hay = (c.textContent + " " + c.dataset.file).toLowerCase();
-        c.classList.toggle("qfilter-out", !toks.every(t => hay.includes(t)));
+        const f = c.dataset.file;
+        const body = _contentIndex.get(f) || "";
+        const hay = (c.textContent + " " + f).toLowerCase();
+        c.classList.toggle("qfilter-out", !toks.every(t => hay.includes(t) || body.includes(t)));
       });
     });
     _navSearchEl.addEventListener("keydown", e => {
@@ -1182,7 +1353,14 @@
         if (href && href.endsWith(".md") && !href.startsWith("http")) {
           a.addEventListener("click", e => {
             e.preventDefault();
-            const resolved = resolvePath(baseDir, href);
+            let resolved;
+            if (href.startsWith("./") || href.startsWith("../")) {
+              resolved = resolvePath(baseDir, href);
+            } else if (href.includes("/")) {
+              resolved = href;
+            } else {
+              resolved = baseDir ? baseDir + "/" + href : href;
+            }
             openMD(resolved);
           });
         }
@@ -1201,8 +1379,8 @@
   // walk text nodes, replace ".md" path strings with clickable anchors
   function linkifyMdPaths(root, baseDir) {
     const SKIP = new Set(["A", "PRE", "SCRIPT", "STYLE"]);
-    // matches: optional ./ or ../, word/digit segments, ending in .md
-    const RE = /(?:\.{1,2}\/)?(?:[\w][\w\-]*\/)*[\w][\w\-]*\.md\b/g;
+    // matches: zero or more ./ or ../ prefixes, word/digit segments, ending in .md
+    const RE = /(?:\.\.?\/)*(?:[\w][\w\-]*\/)*[\w][\w\-]*\.md\b/g;
 
     function walk(node) {
       if (node.nodeType === 1) {
@@ -1223,10 +1401,18 @@
           frag.appendChild(document.createTextNode(text.slice(lastIdx, m.index)));
         }
         const raw = m[0];
-        // resolve: root-relative if no ./ or ../ prefix, else relative to baseDir
-        const resolved = (raw.startsWith("./") || raw.startsWith("../"))
-          ? resolvePath(baseDir, raw)
-          : raw;
+        // resolve:
+        //  - "./X.md" or "../X.md"           → relative to baseDir
+        //  - "01_Foo/X.md" (top-level prefix) → root-relative
+        //  - "X.md" (bare filename)           → sibling = baseDir/X.md
+        let resolved;
+        if (raw.startsWith("./") || raw.startsWith("../")) {
+          resolved = resolvePath(baseDir, raw);
+        } else if (raw.includes("/")) {
+          resolved = raw;
+        } else {
+          resolved = baseDir ? baseDir + "/" + raw : raw;
+        }
         const a = document.createElement("a");
         a.className = "md-auto";
         a.href = "#";
@@ -1283,8 +1469,12 @@
     src = src.replace(/((?:^\|.*\|[ \t]*\n)+)/gm, block => {
       const lines = block.trim().split("\n").map(l => l.trim());
       if (lines.length < 2 || !/^\|[\s:|\-]+\|$/.test(lines[1])) return block;
+      // CommonMark: \| inside a cell is a literal pipe. Sentinel-swap so split("|") doesn't break it.
+      const PIPE_ESC = "";
       const rows = lines.filter((_, i) => i !== 1).map(l =>
-        l.replace(/^\|/, "").replace(/\|$/, "").split("|").map(c => c.trim())
+        l.replace(/\\\|/g, PIPE_ESC)
+         .replace(/^\|/, "").replace(/\|$/, "")
+         .split("|").map(c => c.trim().split(PIPE_ESC).join("|"))
       );
       const head = rows[0];
       const body = rows.slice(1);
@@ -1319,18 +1509,35 @@
 
     // paragraphs — split on blank lines, wrap non-block lines
     const html = src.split(/\n{2,}/).map(chunk => {
-      if (/^<(h\d|ul|ol|table|blockquote|hr|pre)/.test(chunk.trim())) return chunk;
-      if (/^ F\d+ /.test(chunk.trim())) return chunk;
       const t = chunk.trim();
       if (!t) return "";
+      if (/^<(h\d|ul|ol|table|blockquote|hr|pre)/.test(t)) return chunk;
+      if (/^ F\d+ /.test(t)) return chunk;
+      // Defensive: chunk may contain a block element mid-text when markdown
+      // source omits a blank line (e.g. **bold:**\n- item). Split it so
+      // inline() does not escape the generated <ul>/<ol>/<table>.
+      if (/<(ul|ol|table|blockquote|pre|h[1-6])\b/.test(t) || /<hr\s*\/?>/.test(t)) {
+        const blockRe = /<(ul|ol|table|blockquote|pre|h[1-6])\b[^>]*>[\s\S]*?<\/\1>|<hr\s*\/?>/g;
+        const parts = [];
+        let last = 0;
+        let m;
+        while ((m = blockRe.exec(t)) !== null) {
+          const before = t.slice(last, m.index).trim();
+          if (before) parts.push("<p>" + inline(before.replace(/\n/g, " ")) + "</p>");
+          parts.push(m[0]);
+          last = m.index + m[0].length;
+        }
+        const after = t.slice(last).trim();
+        if (after) parts.push("<p>" + inline(after.replace(/\n/g, " ")) + "</p>");
+        return parts.join("\n");
+      }
       return "<p>" + inline(t.replace(/\n/g, " ")) + "</p>";
     }).join("\n");
 
-    // re-insert fences
+    // re-insert fences (highlight() handles HTML-escaping internally)
     return html.replace(/ F(\d+) /g, (_, i) => {
       const f = fences[+i];
-      const code = escapeHtml(f.code);
-      return `<pre><code class="lang-${escapeHtml(f.lang)}">${highlight(code, f.lang)}</code></pre>`;
+      return `<pre><code class="lang-${escapeHtml(f.lang)}">${highlight(f.code, f.lang)}</code></pre>`;
     });
   }
 
@@ -1350,24 +1557,41 @@
     return s;
   }
 
-  // very light syntax highlighting for code blocks
+  // Syntax highlighter — sentinel-based to avoid the classic
+  // 'regex matches its own injected span markup' bug.
+  // Strategy: run regex on RAW code, record matches as token table, replace
+  // each match with a sentinel-wrapped index, escape HTML on the result,
+  // then expand sentinels back into <span> markup.
   function highlight(code, lang) {
-    if (!lang) return code;
-    const kw = {
-      bash: /\b(if|then|fi|for|do|done|while|case|esac|in|echo|sudo|export|cd|ls|cat|grep|awk|sed|find|chmod|chown|mkdir|rm|cp|mv|tar|gzip|gunzip|wget|curl|nmap|nc|python3?|bash|sh)\b/g,
-      python: /\b(def|class|import|from|return|if|elif|else|for|while|try|except|with|as|in|not|and|or|is|None|True|False|self|lambda|pass|break|continue|yield)\b/g,
-      powershell: /\b(Get-|Set-|New-|Remove-|Add-|Invoke-|Where-Object|ForEach-Object|Select-|param|function|return|if|else|elseif|foreach|while|try|catch|finally)/g,
-      sql: /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|UNION|GROUP|ORDER|BY|LIMIT|HAVING|AS|AND|OR|NOT|NULL|TRUE|FALSE|EXEC|EXECUTE)\b/gi
-    };
-    const re = kw[lang.toLowerCase()];
-    if (re) code = code.replace(re, '<span style="color:#ff3d8a">$&</span>');
-    // strings
-    code = code.replace(/("([^"\\]|\\.)*"|'([^'\\]|\\.)*')/g, '<span style="color:#ffb800">$1</span>');
-    // comments
-    code = code.replace(/(#[^\n]*)/g, '<span style="color:#5b6f8a">$1</span>');
-    // CVE / hex
-    code = code.replace(/(CVE-\d{4}-\d+)/g, '<span style="color:#00d4ff">$1</span>');
-    return code;
+    const SENT_O = '', SENT_C = '';
+    const tokens = [];
+    function mark(re, color) {
+      code = code.replace(re, m => {
+        const idx = tokens.length;
+        tokens.push({ color, text: m });
+        return SENT_O + idx + SENT_C;
+      });
+    }
+    // Strings first (so quote chars are consumed before keyword/comment matches).
+    mark(/(\"([^\"\\\\]|\\\\.)*\"|'([^'\\\\]|\\\\.)*')/g, '#ffb800');
+    // Line comments (bash/python '#').
+    mark(/(#[^\n]*)/g, '#5b6f8a');
+    if (lang) {
+      const kw = {
+        bash: /\b(if|then|fi|for|do|done|while|case|esac|in|echo|sudo|export|cd|ls|cat|grep|awk|sed|find|chmod|chown|mkdir|rm|cp|mv|tar|gzip|gunzip|wget|curl|nmap|nc|python3?|bash|sh)\b/g,
+        python: /\b(def|class|import|from|return|if|elif|else|for|while|try|except|with|as|in|not|and|or|is|None|True|False|self|lambda|pass|break|continue|yield)\b/g,
+        powershell: /\b(Get-|Set-|New-|Remove-|Add-|Invoke-|Where-Object|ForEach-Object|Select-|param|function|return|if|else|elseif|foreach|while|try|catch|finally)/g,
+        sql: /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE|JOIN|UNION|GROUP|ORDER|BY|LIMIT|HAVING|AS|AND|OR|NOT|NULL|TRUE|FALSE|EXEC|EXECUTE)\b/gi
+      };
+      const reKw = kw[lang.toLowerCase()];
+      if (reKw) mark(reKw, '#ff3d8a');
+    }
+    mark(/(CVE-\d{4}-\d+)/g, '#00d4ff');
+    code = escapeHtml(code);
+    return code.replace(new RegExp(SENT_O + '(\\d+)' + SENT_C, 'g'), (_, i) => {
+      const t = tokens[+i];
+      return `<span style="color:${t.color}">${escapeHtml(t.text)}</span>`;
+    });
   }
 
   // ============================================================
