@@ -20,7 +20,7 @@ try {
     $file = $file -replace '/', '\'
 
     if ($file -notmatch '\\kedalab\\.+\.md$') { exit 0 }
-    if ($file -match '\\kedalab\\(_[^\\]+|99_kedaweb)\\') { exit 0 }
+    if ($file -match '\\kedalab\\(_[^\\]+|99_kedaweb|\.claude|\.git)\\') { exit 0 }
     if ($file -match '\\kedalab\\[^\\]+\.md$') { exit 0 }
 
     if (-not (Test-Path -LiteralPath $file)) { exit 0 }
@@ -38,12 +38,15 @@ try {
         $issues += "[I3] Missing '## or ### " + $relSectionHeader + "' section (kedaweb Navigator edge source)"
     }
 
-    # I4: prev/next/related labels (full-width and half-width colons both accepted)
+    # I4: prev/next/related labels (full-width and half-width colons both accepted).
+    # 06_Concepts/ files are exempt — concept files have no procedural before/after flow,
+    # so `関連：` only is acceptable (per WRITING_GUIDE「06_Concepts/ ファイルの書き方」).
     $labelPrev    = [char]0x524D  # 前
     $labelNext    = [char]0x5F8C  # 後
     $labelRelated = [char]0x95A2 + [char]0x9023  # 関連
     $labelPattern = '(' + $labelPrev + '|' + $labelNext + '|' + $labelRelated + ')[:' + [char]0xFF1A + ']'
-    if ($content -notmatch $labelPattern) {
+    $isConceptFile = $relPathFwd.StartsWith('06_Concepts/')
+    if (-not $isConceptFile -and $content -notmatch $labelPattern) {
         $issues += "[I4] Missing prev/next/related labels in relation section"
     }
 
@@ -82,13 +85,17 @@ try {
     }
 
     # WRITING_GUIDE self-check patterns
+    # WG-PLATFORM is checked line-by-line so we can skip the sanctioned template
+    # boilerplate (HIGH IMPACT warning / 演習環境での扱い row). Other patterns are
+    # full-content checks since they should never appear anywhere in public files.
     $wgPatterns = @(
-        @{ Pattern = 'HTB|HackTheBox|Hack The Box|TryHackMe|OSCP|VulnHub'; Label = 'WG: training-platform name' },
         @{ Pattern = 'user\.txt|root\.txt|flag\.txt';                       Label = 'WG: CTF flag filename' },
         @{ Pattern = '10\.10\.\d+\.\d+';                                    Label = 'WG: HTB-style IP (10.10.x.x)' },
         @{ Pattern = 'corp\.local';                                         Label = 'WG: corp.local domain' },
         @{ Pattern = 'Password123!|P@ssw0rd1234!';                          Label = 'WG: training weak password' },
-        @{ Pattern = '<[a-z][a-z _-]+>';                                    Label = 'WG: lowercase placeholder (use [UPPER_SNAKE_CASE])' }
+        # Placeholder regex requires a separator (_ - or space) inside so that
+        # standalone HTML/XML tags like <script>/<html>/<title> don't false-positive.
+        @{ Pattern = '<[a-z]+[ _-][a-z _-]*>';                              Label = 'WG: lowercase placeholder (use [UPPER_SNAKE_CASE])' }
     )
 
     foreach ($pat in $wgPatterns) {
@@ -96,6 +103,61 @@ try {
         if ($m.Success) {
             $issues += "$($pat.Label) - hit: '$($m.Value)'"
         }
+    }
+
+    # WG-PLATFORM: skip lines in template context (HIGH IMPACT / 演習環境での扱い row /
+    # `HTB / OSCP` boilerplate phrase that the WRITING_GUIDE template explicitly sanctions).
+    $platRe = 'HTB|HackTheBox|Hack The Box|TryHackMe|OSCP|VulnHub'
+    foreach ($ln in $content -split "`n") {
+        if ($ln -match $platRe) {
+            if ($ln -match '演習環境|演習環境での扱い|HIGH IMPACT|HTB\s*/\s*OSCP') { continue }
+            $mp = [regex]::Match($ln, $platRe)
+            $issues += "WG: training-platform name - hit: '$($mp.Value)'"
+            break
+        }
+    }
+
+    # F1/F3: path-form checks inside 関連技術 section
+    #   F1: ban root-relative `01_Foo/X.md` (use ../Folder/X.md or bare sibling)
+    #   F3: ban directory-only path `Folder/` (link non-existent — kedaweb only resolves .md)
+    $relHeaderRe = '(?m)^#{2,6}\s*' + $relSectionHeader + '\s*$'
+    $f1Found = $false; $f3Found = $false
+    foreach ($mh in [regex]::Matches($content, $relHeaderRe)) {
+        $bodyStart = $mh.Index + $mh.Length
+        $tail = $content.Substring($bodyStart)
+        $level = ($mh.Value -split '\s')[0].Length
+        $endRe = '(?m)^#{1,' + $level + '}\s+'
+        $em = [regex]::Match($tail, $endRe)
+        $section = if ($em.Success) { $tail.Substring(0, $em.Index) } else { $tail }
+        if (-not $f1Found) {
+            $rm = [regex]::Match($section, '`(0[0-8]_[A-Za-z_]+/[^`]+\.md)`')
+            if ($rm.Success) {
+                $issues += "[F1] Root-relative path in 関連技術: '$($rm.Groups[1].Value)' (use ../Folder/X.md or bare sibling)"
+                $f1Found = $true
+            }
+        }
+        if (-not $f3Found) {
+            # backtick-quoted nav directory ending in `/`. Excludes:
+            #  - `.git/` etc. (artifact mentions in prose — start with .)
+            #  - `getcap -r /` etc. (shell command snippets — contain spaces)
+            # Only match path-like content: optional ./ or ../, then letter-led segments.
+            # Each segment = word char then word chars (allows digit-prefixed like 02_Foo).
+            # Disallows leading `.` so `.git/` (prose) is excluded.
+            $dm = [regex]::Match($section, '`((?:\.\.?/)?\w[\w]*(?:/\w[\w]*)*/)`')
+            if ($dm.Success) {
+                $issues += "[F3] Directory reference in 関連技術: '$($dm.Groups[1].Value)' (use a concrete *.md target)"
+                $f3Found = $true
+            }
+        }
+        if ($f1Found -and $f3Found) { break }
+    }
+
+    # F2: bold label immediately followed by list/table without blank line
+    $f2Re = '(?m)\*\*[^\n*]+[:' + [char]0xFF1A + ']\*\*\r?\n[-*|]'
+    $mF2 = [regex]::Match($content, $f2Re)
+    if ($mF2.Success) {
+        $snippet = $mF2.Value -replace "`r?`n", ' ⏎ '
+        $issues += "[F2] Missing blank line after bold label before list/table: '$snippet'"
     }
 
     if ($issues.Count -gt 0) {

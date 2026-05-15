@@ -180,6 +180,7 @@ cat ~/.ssh/
 ```
 
 **着眼点：**
+
 - `.bash_history` に平文パスワードが残っていることがある
 - `.ssh/id_rsa` がある場合は他ホストへのSSH接続に使える
 - **Ruby アプリのプロセス（ruby / unicorn / puma）として侵入した場合は `.bundle/config` を確認する**

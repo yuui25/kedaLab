@@ -16,12 +16,14 @@
 以下の **2 テンプレートの組み合わせ** が揃ったときに実施する：
 
 **条件A（Enrollment Agent テンプレート）：**
+
 - `Enrollment Agent: True`（EKU = Certificate Request Agent）
 - `Requires Manager Approval: False`
 - `Authorized Signatures Required: 0`
 - `Enrollment Rights` に低権限グループが含まれる
 
 **条件B（代理申請先テンプレート）：**
+
 - `Client Authentication: True`
 - `Authorized Signatures Required: 1` 以上（Enrollment Agent 証明書による署名が必要）
 - `Application Policies` に `Certificate Request Agent` が含まれる

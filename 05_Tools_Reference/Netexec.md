@@ -39,6 +39,7 @@ nxc smb [IP] -u [USER] -H '[NTLM_HASH]'
 ```
 
 **出力の読み方：**
+
 - `[+]` → 認証成功
 - `[-]` → 認証失敗
 - `(Pwn3d!)` → 管理者権限あり（PSExec / WMI でコマンド実行可能）
@@ -162,6 +163,7 @@ nxc winrm [IP] -u users -p '[PASSWORD]' --continue-on-success
 ```
 
 **刺さらなかったとき：**
+
 - `--rid-brute` で `ACCESS_DENIED` になる → 権限が不足しているか、RPC/Windows セキュリティへのアクセスが制限されている。impacket-lookupsid を試す（`../02_Initial_Access/Protocol_Exploitation.md` RPC セクション参照）
 - ドメイン名が不明で grep にマッチしない → まず `nxc smb [IP] -u [USER] -p '[PASSWORD]'` の出力でドメイン名（NetBIOS 名）を確認する。多くの場合 `domain:` ラベルの後ろに表示される
 - **正規表現 `\w+\.\w+` がマッチしない（出力が空のまま）** → 組織のユーザー命名規則が `firstname.lastname` 形式以外（例：`jdunn`・`user001`・`j-dunn` 等）の場合、上記の正規表現は刺さらない。以下のように受け口を広げる：

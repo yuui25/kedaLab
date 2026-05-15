@@ -133,3 +133,10 @@ io: &1 !ruby/object:Net::BufferedIO
 
 - [elttam blog: Ruby Gem Deserialization Gadget Chains](https://www.elttam.com/blog/ruby-gems-deserialization/)
 - [CVE-2022-25765 (PDFKit) + YAML.load chain の組み合わせ](https://security.snyk.io/vuln/SNYK-RUBY-PDFKIT-2940462)
+
+---
+
+## 関連技術
+
+- 関連：`../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン5: Ruby YAML.load Gadget Chain 手順）
+

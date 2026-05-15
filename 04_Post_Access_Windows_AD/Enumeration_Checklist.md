@@ -344,6 +344,7 @@ type C:\inetpub\[サイト名]\app.py
 **`inetpub` とは何か：** IIS（Internet Information Services、Windows 標準の Web サーバー）のデフォルトルートディレクトリ。`C:\inetpub\wwwroot` がデフォルト公開フォルダだが、複数サイトを運用している場合はサイト名のサブフォルダが作られる。Webアプリが稼働しているサーバーでは必ず確認する。
 
 **着眼点：**
+
 - `web.config` に DB 接続文字列・パスワード・API キーが平文で書かれていることがある
 - `app.py` / `*.py` / `*.php` 等のソースからパスワードハッシュのアルゴリズムが判明する（クラックのモード選択に使う）
 - アプリの認証ロジックを読むことでバイパス方法が見つかる場合がある
@@ -430,6 +431,7 @@ exit
 ```
 
 **注意点：**
+
 - PSSession を多段で積み上げると混乱する。`whoami` で常に現在のユーザーを確認する
 - ループバック（`127.0.0.1`）接続が失敗する場合は、WinRM のローカルループバック許可を確認: `winrm get winrm/config/client`
 
@@ -501,6 +503,7 @@ searchsploit [技術名] [バージョン]
 → CVE の絞り込み基準・新しい OS 用の調べ方の詳細 → `../../05_Tools_Reference/Searchsploit.md`（「searchsploit が0件のときのフロー」）
 
 **注意点・落とし穴：**
+
 - 実行前に `C:\Windows\Temp` への書き込み権限があるか確認する（`echo test > C:\Windows\Temp\test.txt`）
 - PowerShell の実行ポリシーが `Restricted` の場合は `.ps1` を直接実行できない。`IEX` 経由か `powershell -ExecutionPolicy Bypass -File exploit.ps1` で回避
 - GitHub から落とした PoC は README で**前提条件**（OS バージョン・権限・必要なグループ）を必ず確認してから実行する
@@ -591,7 +594,10 @@ $etwpatch = [System.Runtime.InteropServices.Marshal]
 ## 関連技術
 - 前：WinRM シェルの取得 → `../../02_Initial_Access/Protocol_Exploitation.md`（WinRMセクション）
 - 前：パスワードスプレーで初期シェル取得 → `../../00_Playbook/Windows_AD_Attack_Flow.md`（Step 3.5）
-- 後：BloodHound で ACE が判明 → `ACE_Abuse/` 配下の該当ファイル
+- 後：BloodHound で GenericAll が判明 → `ACE_Abuse/GenericAll.md`
+- 後：BloodHound で GenericWrite が判明 → `ACE_Abuse/GenericWrite.md`
+- 後：BloodHound で WriteDACL が判明 → `ACE_Abuse/WriteDACL.md`
+- 後：BloodHound で ForceChangePassword が判明 → `ACE_Abuse/ForcePasswordChange.md`
 - 後：SeMachineAccountPrivilege がある → `Delegation_Attacks/RBCD.md`
 - 後：SeEnableDelegationPrivilege がある → `Delegation_Attacks/Unconstrained.md`
 - 後：Kerberoastable アカウントがある → `Kerberos_Attacks/Kerberoasting.md`

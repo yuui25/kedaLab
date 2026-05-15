@@ -315,6 +315,7 @@ BUNDLE_HTTPS://RUBYGEMS__ORG/: "[USER]:[PASSWORD]"
 - ダブルアンダースコア (`__`) はURLの `.`（ドット）を表すBundlerのエスケープ規則
 
 **取得した認証情報の確認：**
+
 - `[USERNAME]` が OS ユーザー名と一致する場合、`[PASSWORD]` が OS ユーザーのパスワードである可能性が高い
 - `su [USERNAME]` または `ssh [USERNAME]@[HOST]` で試す
 

@@ -61,6 +61,7 @@ GPP のパスワードは `Groups.xml` 等の `cpassword=` 属性に **AES-256-C
 ```
 
 **暗号化の構造：**
+
 - アルゴリズム: AES-256-CBC
 - IV: 固定値（全ての `cpassword` で同じ）
 - Key: 固定値（32バイト）
@@ -170,3 +171,12 @@ grep -ril "cpassword" /tmp/sysvol_dump/
 - 手順（Credential Discovery としての位置づけ） → `../02_Initial_Access/Credential_Discovery.md`
 - SYSVOL ナビゲーション観点 → `../01_Reconnaissance/SMB_Enumeration.md`
 - Playbook での分岐 → `../00_Playbook/Windows_AD_Attack_Flow.md`
+
+---
+
+## 関連技術
+
+- 関連：`../01_Reconnaissance/SMB_Enumeration.md`（SYSVOL からの GPP cpassword 取得）
+- 関連：`../02_Initial_Access/Credential_Discovery.md`（GPP 復号パターン）
+
+- 関連：../02_Initial_Access/Credential_Discovery.md（GPP 復号パターン）

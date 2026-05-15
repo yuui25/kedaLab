@@ -113,3 +113,10 @@ contextBridge.exposeInMainWorld('myAPI', {
 - **webPreferences の設定を直接確認する**: デフォルト値に頼らず、`BrowserWindow` の生成コードを grep する。
 - **preload スクリプトの有無**: preload がある場合、`contextBridge.exposeInMainWorld` で何を公開しているかを確認する。不必要に Node.js の生 API を渡していないか。
 - **fork・派生プロジェクト**: 元のプロジェクトが修正しても、fork 先がそのまま古い設定を引き継いでいることがある。
+
+---
+
+## 関連技術
+
+- 関連：`../02_Initial_Access/Web_Vulnerabilities/Electron_XSS_RCE.md`（XSS → RCE 到達の手順）
+

@@ -176,6 +176,7 @@ python sensitive_scan.py request.txt --no-low
 | **上のどれにも当てはまらない機能に当たった** | 機能を観察 → 英語で言語化 → 脆弱性クラスを特定するフロー | `01_Unknown_Tech_Research.md` |
 
 **確認の進め方：**
+
 - Burp Suiteで全リクエストをキャプチャしながら操作する
 - パラメータが変わるたびに上の表を参照して「この機能は何を確認すべきか」を意識する
 - 1つの機能に複数の脆弱性が重なる場合がある（例：ファイルアップロード → IDOR + パストラバーサル）
@@ -243,6 +244,14 @@ searchsploit [ソフトウェア名] [バージョン]   # [Attacker]
 ## 関連技術
 
 - 前：`00_OS_Identification.md`（OS・スコープの初期確認）
-- 後：`../02_Initial_Access/Web_Vulnerabilities/`（各脆弱性の詳細手順）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/XSS.md`（入力点が反映される場合）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/SQLi.md`（DB アクセスする入力点）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（OS コマンド呼び出し系・PDFKit 等）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/IDOR.md`（連番 ID / 直接参照）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/SSRF.md`（URL を受け取るフォーム）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md`（JWT ベースの認証）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（パスを受け取るパラメータ）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/XXE.md` / `../02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md`（XML/XSLT 処理）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/File_Upload.md`（アップロード機能）
 - 後：`01_Unknown_Tech_Research.md`（Step 2 でどの脆弱性クラスにも当てはまらない機能に当たった場合の調査フロー）
 - 関連：`Linux_Attack_Flow.md`（Web を起点にシェル取得を目指すペネトレスコープの場合はこのファイルではなく Linux_Attack_Flow.md の Step 2 へ）

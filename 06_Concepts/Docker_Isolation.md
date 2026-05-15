@@ -77,11 +77,13 @@ Linux のインストール慣習として、最初のディスク（`sda`）の
 ## privileged コンテナと非 privileged コンテナの違い
 
 **通常のコンテナ（non-privileged）：**
+
 - デバイスアクセスは cgroup の devices コントローラで制限される
 - デフォルトでは特定のデバイス（tty, null, zero 等）のみアクセス可
 - ブロックデバイスへのアクセスは通常ブロックされる
 
 **privileged コンテナ（`--privileged` フラグ付き）：**
+
 - cgroup の devices 制限が解除される
 - ホストのほぼ全デバイスにアクセス可能
 - `CAP_SYS_ADMIN` を含む全 capability が付与される
@@ -146,3 +148,10 @@ capsh --decode=0000003fffffffff
 - 手順 → `../03_Post_Access_Linux/Sudo_Misconfig.md`（パターン4）
 - コンテナ内にいるかの確認方法 → `../03_Post_Access_Linux/Enumeration_Checklist.md`
 - Docker に関連する CVE・エクスプロイト検索 → `../05_Tools_Reference/Searchsploit.md`
+
+---
+
+## 関連技術
+
+- 関連：`../03_Post_Access_Linux/Sudo_Misconfig.md`（Docker グループ悪用・コンテナ脱出の手順）
+

@@ -265,6 +265,6 @@ allowlist の修正が不完全だった結果、別バリアントが公開 CVE
 
 ## 関連技術
 
-- 前：Web アプリケーションのエンドポイント列挙 → `01_Reconnaissance/Web_Enumeration.md`
-- 後：デシリアライズバイパス手順 → `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md`（未作成）
-- 後：RCE 取得後の次の手 → `03_Post_Access_Linux/Enumeration_Checklist.md`
+- 関連：Web アプリケーションのエンドポイント列挙 → `../01_Reconnaissance/Web_Enumeration.md`
+- 関連：デシリアライズバイパス手順 → `../02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md`
+- 関連：RCE 取得後の次の手 → `../03_Post_Access_Linux/Enumeration_Checklist.md`

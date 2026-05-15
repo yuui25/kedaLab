@@ -109,6 +109,7 @@ SAIF はリスクに対する緩和策（Control）を定義し、**モデル作
 | **Adversarial Training and Testing** | 敵対的入力でモデルを訓練し、攻撃への耐性を高める | Model Evasion, Prompt Injection, Sensitive Data Disclosure | 作成者・利用者 |
 
 **作成者 vs 利用者の責任区分を確認する意味：**
+
 - 評価対象が「モデルを提供する側」なのか「モデルを使ったアプリを構築する側」なのかによって、どの Control を評価すべきかが変わる
 - 利用者側は基盤モデルの作成者側 Control に依存している部分があるため、基盤モデルの選定時にその Control の実装状況を確認する必要がある
 

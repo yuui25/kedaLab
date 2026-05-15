@@ -147,6 +147,7 @@ del C:\Windows\Temp\[DRIVER_NAME].sys
 ```
 
 **原状回復チェックリスト：**
+
 - ✅ `sc.exe stop / delete` でサービスを削除
 - ✅ `.sys` ファイルをターゲットから削除
 - ✅ `driverquery` で `[SVC_NAME]` が一覧から消えたことを確認
