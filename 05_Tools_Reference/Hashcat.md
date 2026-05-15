@@ -360,9 +360,9 @@ hashcat -m 10900 hashes.txt /usr/share/wordlists/rockyou.txt --force
 ---
 
 ## 関連技術
-- Kerberoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`
-- ASREPRoasting ハッシュの取得 → `../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`
-- Grafana DB からのハッシュ取得 → `../02_Initial_Access/Credential_Discovery.md`（パターン5）
-- Grafana パストラバーサルでの DB 取得 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
-- CMS Made Simple SQLi からのハッシュ取得 → `../02_Initial_Access/Web_Vulnerabilities/SQLi.md`（タイムベースブラインドSQLi）
-- MSSQL DB からの Werkzeug/Django PBKDF2 ハッシュ取得 → `../02_Initial_Access/MSSQL_Exploitation.md`
+- 前：`../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`（Kerberoasting ハッシュの取得）
+- 前：`../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`（ASREPRoasting ハッシュの取得）
+- 前：`../02_Initial_Access/Credential_Discovery.md`（Grafana DB からのハッシュ取得）
+- 前：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（Grafana パストラバーサルでの DB 取得）
+- 前：`../02_Initial_Access/Web_Vulnerabilities/SQLi.md`（CMS Made Simple SQLi からのハッシュ取得）
+- 前：`../02_Initial_Access/MSSQL_Exploitation.md`（MSSQL DB からの Werkzeug/Django PBKDF2 ハッシュ取得）

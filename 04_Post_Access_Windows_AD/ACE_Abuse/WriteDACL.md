@@ -97,5 +97,6 @@ dacledit.py -action write \
 ---
 
 ## 関連技術
-- GenericAll を取得後 → `GenericAll.md`
-- DCSync を実行 → `../Credential_Dumping.md`
+- 前：`../../05_Tools_Reference/BloodHound.md`（BloodHound で WriteDACL 権限を発見後）
+- 後：`GenericAll.md`（GenericAll を自己付与後に実施する操作）
+- 後：`../Credential_Dumping.md`（DCSync 権限付与後に DCSync を実行）

@@ -1,0 +1,38 @@
+﻿{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_comment": "kedalab プロジェクト用 Claude Code 設定。Sonnet を既定モデル、Write/Edit 後に kedaweb 不変条件 + WRITING_GUIDE 自己チェックを hook で実行する。",
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .claude/hooks/kedaweb-compat.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}

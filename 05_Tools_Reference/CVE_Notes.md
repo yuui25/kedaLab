@@ -740,3 +740,11 @@ curl -sk -X POST https://[TARGET]/mgmt/tm/util/bash \
 ### 確認されたバージョン
 
 - 13.1.5.1 / 14.1.5.6 / 15.1.10.2 / 16.1.4.1 / 17.1.0.3 以降はパッチ済み
+
+---
+
+## 関連技術
+- 前：`../02_Initial_Access/Edge_Appliance_CVEs.md`（エッジアプライアンス CVE の着火条件・フィンガープリント）
+- 関連：`../02_Initial_Access/Web_Vulnerabilities/Command_Injection.md`（PDFKit コマンドインジェクション）
+- 関連：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（Grafana CVE-2021-43798）
+- 関連：`Hashcat.md`（Grafana / CMS Made Simple ハッシュのクラック）

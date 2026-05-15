@@ -50,3 +50,8 @@ Azure VM / ACI / App Service のマネージド ID を利用した、
 
 現時点での優先フェーズ（AD CS / NTLM Relay 系 / 特権トークン / DPAPI）が完了した後に
 着手範囲を検討します。
+
+---
+
+## 関連技術
+- 関連：`../04_Post_Access_Windows_AD/Enumeration_Checklist.md`（オンプレミス AD の現行スコープ）

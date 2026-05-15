@@ -120,3 +120,11 @@ smb2-security-mode: signing required → NTLMリレー不可
 - `--min-rate` を高くしすぎると一部のポートが `filtered` と誤判定されることがある
 - AD 環境では `-Pn` が必要な場合がある（ICMP をブロックしている場合）
 - 出力ファイルは調査フォルダに必ず保存して後から参照できるようにする
+
+---
+
+## 関連技術
+- 後：`../01_Reconnaissance/Web_Enumeration.md`（Web ポートが開いていた場合）
+- 後：`../01_Reconnaissance/SMB_Enumeration.md`（445 が開いていた場合）
+- 後：`../01_Reconnaissance/LDAP_Enumeration.md`（389 / 636 が開いていた場合）
+- 関連：`Searchsploit.md`（バージョン検出後に既知 CVE を検索）

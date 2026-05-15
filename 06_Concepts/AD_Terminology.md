@@ -54,3 +54,11 @@
 | RBCD | Resource-Based Constrained Delegation |
 | SPN | Service Principal Name |
 | RID | Relative Identifier |
+
+---
+
+## 関連技術
+- `../00_Playbook/Windows_AD_Attack_Flow.md`（AD 攻撃フロー全体）
+- `../04_Post_Access_Windows_AD/Enumeration_Checklist.md`（AD 侵害後列挙）
+- `../05_Tools_Reference/BloodHound.md`（権限グラフの可視化）
+- `Windows_Standalone_vs_AD.md`（AD とスタンドアロンの違い）

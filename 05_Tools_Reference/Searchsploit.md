@@ -440,12 +440,10 @@ https://nvd.nist.gov/vuln/detail/CVE-2021-43798
 
 ---
 
-## 関連ツール・リソース
+## 関連技術
+- 前：`../01_Reconnaissance/Web_Enumeration.md`（サービスバージョン確認後に CVE を調査）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（パストラバーサル CVE の実施）
+- 後：`../02_Initial_Access/Edge_Appliance_CVEs.md`（エッジアプライアンス CVE の実施）
+- 関連：`CVE_Notes.md`（具体的な CVE ペイロード集）
 
-- Exploit-DB Web: https://www.exploit-db.com/
-- NVD (CVE詳細・影響バージョン): https://nvd.nist.gov/vuln/search
-- PacketStorm: https://packetstormsecurity.com/
-- GitHub PoC 検索: `site:github.com CVE-[YEAR]-[NUMBER]`
-- Webバージョン確認からCVE特定 → `../01_Reconnaissance/Web_Enumeration.md`
-- パストラバーサルの実施 → `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`
-- エッジアプライアンス CVE（Citrix / Fortinet / Ivanti / Palo Alto / F5 系の PoC 選定・GitHub リポジトリ評価基準） → `../02_Initial_Access/Edge_Appliance_CVEs.md`
+外部リソース: Exploit-DB（https://www.exploit-db.com/）/ NVD（https://nvd.nist.gov/vuln/search）/ PacketStorm（https://packetstormsecurity.com/）/ GitHub PoC 検索（`site:github.com CVE-[YEAR]-[NUMBER]`）

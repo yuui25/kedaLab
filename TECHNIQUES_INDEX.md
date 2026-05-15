@@ -329,6 +329,7 @@
 | 原理 | 参照元の作業ファイル | ファイルパス |
 |------|-----------------|------------|
 | Windows AD 環境とスタンドアロンの違い（ポート・認証・攻撃軸・BloodHound 有効性・各 Step の適用可否） | `00_Playbook/Windows_AD_Attack_Flow.md` / `00_Playbook/00_OS_Identification.md` | `06_Concepts/Windows_Standalone_vs_AD.md` |
+| AD 用語クイックリファレンス（TGT・SPN・ACE・DCSync 等の一言定義） | `00_Playbook/Windows_AD_Attack_Flow.md` / `04_Post_Access_Windows_AD/` 全般 | `06_Concepts/AD_Terminology.md` |
 | OS フィンガープリンティング（TTL 初期値の由来・FS の大文字小文字区別の仕様差） | `00_Playbook/00_OS_Identification.md` | `06_Concepts/OS_Fingerprinting_Principles.md` |
 | XSLT・XXEの動作原理（外部エンティティ解決の仕組み・libxslt の制限・パラメータエンティティ vs 一般エンティティ） | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` / `02_Initial_Access/Web_Vulnerabilities/XXE.md` | `06_Concepts/XSLT_XML_Processing.md` |
 | YAML.load 任意デシリアライゼーション（Psych の !ruby/object タグ・Gadget Chain 原理・Ruby バージョン差異） | `03_Post_Access_Linux/Sudo_Misconfig.md`（パターン5） | `06_Concepts/YAML_Deserialization.md` |

@@ -132,6 +132,6 @@ hashcat -m 18200 asrep_hashes.txt /usr/share/wordlists/rockyou.txt
 ---
 
 ## 関連技術
-- ユーザー列挙 → `../../01_Reconnaissance/LDAP_Enumeration.md`
-- ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`
-- Kerberoasting との違い → `Kerberoasting.md`（こちらは認証情報が必要、SPN付きアカウントが対象）
+- 前：`../../01_Reconnaissance/LDAP_Enumeration.md`（ユーザー列挙）
+- 後：`../../05_Tools_Reference/Hashcat.md`（ハッシュのクラック）
+- 関連：`Kerberoasting.md`（認証情報が必要な類似手法）

@@ -114,5 +114,6 @@ Add-ADGroupMember -Identity '[GROUP_NAME]' -Members '[CURRENT_USER]'
 ---
 
 ## 関連技術
-- SPN 付与後のハッシュ取得 → `../Kerberos_Attacks/Kerberoasting.md`
-- RBCD 攻撃 → `../Delegation_Attacks/RBCD.md`
+- 前：`../../05_Tools_Reference/BloodHound.md`（BloodHound で GenericWrite 権限を発見後）
+- 後：`../Kerberos_Attacks/Kerberoasting.md`（SPN 付与後のハッシュ取得）
+- 関連：`../Delegation_Attacks/RBCD.md`（コンピューターオブジェクトへの RBCD）

@@ -1,5 +1,6 @@
-REVIEW/
-speech_draft.md
+# `_` プレフィックスのトップレベルディレクトリは公開対象外（kedalab フォルダ規約）
+# 詳細: _workspace/conventions/Folder_Convention_20260515.md
+/_*/
 
-# 公開前の作業領域(中身は .gitignore とは別に管理。クローン経路には乗らない)
-_pending/
+# Claude Code: 個人オーバーライド設定のみ除外（共有設定 settings.json は commit）
+.claude/settings.local.json

@@ -190,3 +190,12 @@ impacket-smbclient '[DOMAIN]/[USER]:[PASSWORD]@[IP]'
 - `-just-dc-ntlm` を付けずに secretsdump を実行すると大量の出力が出るため注意
 - Kerberos 認証使用時は時刻同期が必須（`sudo ntpdate [DC_IP]`）
 - `[DC_FQDN]` は FQDN（完全修飾ドメイン名）を使用。IPアドレスでは Kerberos 認証が失敗する場合がある
+
+---
+
+## 関連技術
+- 関連：`../04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md`（GetUserSPNs）
+- 関連：`../04_Post_Access_Windows_AD/Kerberos_Attacks/ASREPRoasting.md`（GetNPUsers）
+- 関連：`../04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md`（getST・rbcd）
+- 関連：`../04_Post_Access_Windows_AD/Credential_Dumping.md`（secretsdump）
+- 関連：`../04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md`（ticketer）

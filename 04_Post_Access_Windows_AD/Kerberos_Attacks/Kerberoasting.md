@@ -125,6 +125,6 @@ john --show [TARGET_USER].hash
 ---
 
 ## 関連技術
-- SPN を付与する → `../ACE_Abuse/GenericWrite.md`
-- ハッシュのクラック → `../../05_Tools_Reference/Hashcat.md`
-- クラックしたパスワードで → `../../02_Initial_Access/Credential_Discovery.md`（使い回し確認）
+- 関連：`../ACE_Abuse/GenericWrite.md`（SPN を付与して Targeted Kerberoasting）
+- 後：`../../05_Tools_Reference/Hashcat.md`（ハッシュのクラック）
+- 後：`../../02_Initial_Access/Credential_Discovery.md`（クラックしたパスワードで使い回し確認）

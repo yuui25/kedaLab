@@ -126,6 +126,6 @@ impacket-ticketer \
 ---
 
 ## 関連技術
-- TGT の取得 → `../Delegation_Attacks/Unconstrained.md`
-- TGS の取得（RBCD後） → `../Delegation_Attacks/RBCD.md`
-- krbtgt ハッシュの取得 → `../Credential_Dumping.md`
+- 前：`../Delegation_Attacks/Unconstrained.md`（TGT の取得）
+- 前：`../Delegation_Attacks/RBCD.md`（TGS の取得・RBCD 後）
+- 前：`../Credential_Dumping.md`（krbtgt ハッシュの取得）

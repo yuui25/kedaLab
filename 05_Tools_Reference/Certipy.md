@@ -416,3 +416,10 @@ openssl pkcs12 -in [CERT].pfx -out [CERT_PROTECTED].pfx -passout pass:[STRONG_RA
 | ESC13 | `../04_Post_Access_Windows_AD/AD_CS/ESC13.md` |
 | ESC14 | `../04_Post_Access_Windows_AD/AD_CS/ESC14.md` |
 | ESC15 | `../04_Post_Access_Windows_AD/AD_CS/ESC15.md` |
+
+---
+
+## 関連技術
+- 前：`../04_Post_Access_Windows_AD/AD_CS/Overview.md`（AD CS 列挙・共通フロー）
+- 関連：`../04_Post_Access_Windows_AD/AD_CS/ESC1.md`（各 ESC 攻撃手順は ESC ファイルを参照）
+- 後：`../04_Post_Access_Windows_AD/Credential_Dumping.md`（NT ハッシュ取得後に DCSync）

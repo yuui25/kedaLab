@@ -149,6 +149,7 @@ BloodHound GUI で対象ノードを選択 → 「Inbound Object Control」→ `
 ---
 
 ## 関連技術
-- RBCD 攻撃 → `../Delegation_Attacks/RBCD.md`
-- Kerberoasting → `../Kerberos_Attacks/Kerberoasting.md`
-- GenericWrite との違い → `GenericWrite.md`（SPN 設定・logon script のみ）
+- 前：`../../05_Tools_Reference/BloodHound.md`（BloodHound で GenericAll 権限を発見後）
+- 関連：`../Delegation_Attacks/RBCD.md`（コンピューターオブジェクトへの GenericAll → RBCD）
+- 関連：`../Kerberos_Attacks/Kerberoasting.md`（Targeted Kerberoasting）
+- 関連：`GenericWrite.md`（GenericAll より限定的な権限との比較）

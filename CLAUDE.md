@@ -22,6 +22,9 @@ kedalab はペネトレスト・AI Red Teaming のナレッジリポジトリ。
    - ペネトレスト系の手順 → `01_Reconnaissance/` 〜 `05_Tools_Reference/`
    - AI攻撃の手順（プローブクエリ・ツール・ペイロード） → `07_AI_Red_Teaming/`
    - AI/MLの概念・動作原理・背景知識 → `06_Concepts/AI_ML/`
+   - 該当する MITRE ATT&CK ID があれば `TECHNIQUES_INDEX_MITRE.md` にも追記
+   - 該当する OWASP WSTG ID があれば `TECHNIQUES_INDEX_WSTG.md` にも追記
+   - 判断基準: Web 系 → WSTG、AD/Linux/ネットワーク系 → ATT&CK（ID が無い場合は無理に当てはめない）
 4. `00_Playbook/` の該当フローに分岐として追加できるか確認する
 5. 「なぜそうなるか」の原理が重要な場合は `06_Concepts/` に分離し、作業ファイルには1行リンクのみ追加する
 6. 新しい「案件開始シナリオ」（ドメイン渡し・認証情報付き等、これまでなかった提供情報パターン）が発生した場合は
@@ -52,8 +55,14 @@ kedalab/
 │   ├── 04_AI_Data_Attacks/          # データポイズニング・ラベルフリッピング
 │   ├── 05_AI_Application_System/    # MCPの脆弱性・モデルデプロイ改ざん
 │   └── 06_AI_Evasion/               # 敵対的サンプル・First-Order/Sparsity攻撃
-└── 08_Cloud_Identity/               # クラウドID基盤（現在スコープ外・将来拡張用の見出し予約）
+├── 08_Cloud_Identity/               # クラウドID基盤（現在スコープ外・将来拡張用の見出し予約）
+├── 99_kedaweb/                      # Web ビューア（実行時に MD パース）
+├── _pending/                        # 公開不可：embargo 中の CVE 関連
+└── _workspace/                      # 公開不可：レビュー・定義・下書き・メタ文書
 ```
+
+**`_` 接頭辞のトップレベルディレクトリは公開対象外**（kedaweb 不可視・GitHub 非 push）。
+規約詳細: [`_workspace/conventions/Folder_Convention_20260515.md`](./_workspace/conventions/Folder_Convention_20260515.md)
 
 ---
 
