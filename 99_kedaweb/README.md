@@ -2,6 +2,8 @@
 
 kedalab のナレッジを動的に閲覧する SPA。サイバーパンク・ターミナル風 UI。
 
+![alt text](top.png)
+
 ## アーキテクチャ — kedalab MD が単一の真実
 
 **kedaweb はメンテ不要。** すべてのコンテンツは実行時に kedalab の MD ファイルをパースして生成される。
