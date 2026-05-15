@@ -38,13 +38,20 @@ try {
         $issues += "[I3] Missing '## or ### " + $relSectionHeader + "' section (kedaweb Navigator edge source)"
     }
 
-    # I4: prev/next/related labels (full-width and half-width colons both accepted).
-    # 06_Concepts/ files are exempt — concept files have no procedural before/after flow,
-    # so `関連：` only is acceptable (per WRITING_GUIDE「06_Concepts/ ファイルの書き方」).
+    # I4: prev/next/related labels.
+    # Accepted forms:
+    #   `前：…`            — canonical, half or full-width colon
+    #   `前（条件A）：…`   — parenthesized qualifier (half or full-width parens)
+    #   `前 → …`           — arrow separator instead of colon
+    # 06_Concepts/ files are exempt — concept files have no procedural before/after flow
+    # (per WRITING_GUIDE「06_Concepts/ ファイルの書き方」).
     $labelPrev    = [char]0x524D  # 前
     $labelNext    = [char]0x5F8C  # 後
     $labelRelated = [char]0x95A2 + [char]0x9023  # 関連
-    $labelPattern = '(' + $labelPrev + '|' + $labelNext + '|' + $labelRelated + ')[:' + [char]0xFF1A + ']'
+    $parenOpenCls  = '[（(]'
+    $parenCloseCls = '[）)]'
+    $sepCls = '[:' + [char]0xFF1A + [char]0x2192 + ']'  # : / ： / →
+    $labelPattern = '(' + $labelPrev + '|' + $labelNext + '|' + $labelRelated + ')(?:' + $parenOpenCls + '[^）)]*' + $parenCloseCls + ')?\s*' + $sepCls
     $isConceptFile = $relPathFwd.StartsWith('06_Concepts/')
     if (-not $isConceptFile -and $content -notmatch $labelPattern) {
         $issues += "[I4] Missing prev/next/related labels in relation section"

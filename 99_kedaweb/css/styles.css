@@ -414,79 +414,6 @@ section {
 .section-h .accent { color: var(--acc-g); }
 
 /* =================================================================
-   Attack chain — compact pill strip
-   ================================================================= */
-.chain {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-.chain-node {
-  background: linear-gradient(180deg, rgba(20,32,46,0.6), rgba(10,15,23,0.6));
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--node-c, var(--acc-g));
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  position: relative;
-  flex: 1 1 200px;
-  min-width: 160px;
-}
-.chain-node:hover {
-  border-color: var(--node-c, var(--acc-g));
-  background: linear-gradient(180deg, rgba(0,255,156,0.06), rgba(10,15,23,0.7));
-  transform: translateX(2px);
-}
-.chain-node .code {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--fg-2);
-}
-.chain-node .glyph {
-  font-size: 16px;
-  color: var(--node-c, var(--acc-g));
-}
-.chain-node .name {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--fg-0);
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.chain-node .jp { display: none; }
-.chain-node .count {
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 1px 6px;
-  background: var(--bg-3);
-  border: 1px solid var(--line);
-  border-radius: 99px;
-  color: var(--fg-2);
-  flex-shrink: 0;
-}
-.chain-node .count strong {
-  color: var(--node-c, var(--acc-g));
-  font-weight: 700;
-}
-.chain-arrow { display: none; }
-
-/* Compact section header — used by Chain / Playbook / etc. */
-.compact-section { padding-top: 36px; padding-bottom: 36px; }
-.compact-section .section-h.compact-h {
-  font-size: 18px;
-  margin: 0 0 14px;
-}
-
-/* =================================================================
    Collapsible section (Browser / Raw)
    ================================================================= */
 .collapsible {
@@ -573,7 +500,6 @@ section {
 body.nav-mode .page-nav { display: block; }
 body.nav-mode .hero,
 body.nav-mode #quickstart,
-body.nav-mode #chain,
 body.nav-mode #browser,
 body.nav-mode #raw {
   display: none;

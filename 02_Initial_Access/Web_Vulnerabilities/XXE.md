@@ -1,16 +1,16 @@
-## XXE（XML外部エンティティインジェクション）
+# XXE（XML外部エンティティインジェクション）
 
-### 着火条件
+## 着火条件
 - WebアプリがXMLを入力として受け付けている（フォームのXMLアップロード・APIの `Content-Type: application/xml`・SOAPリクエスト等）
 - サーバー側のXMLパーサーが外部エンティティの処理を許可している
 
-### 環境前提
+## 環境前提
 - 実行環境: テスター端末（ペイロード作成）/ ターゲット（XML処理実行）
 - 必要なツール: Burp Suite（リクエスト改ざん）、テキストエディタ
 - Blind XXEにはコールバック受信が必要（`python3 -m http.server`・テスター側の到達可能インターフェースのIP確認）
 - オフライン代替: Blind XXE用のHTTPサーバーは `python3 -m http.server` で代替可能
 
-### 観点・着眼点
+## 観点・着眼点
 
 **先に確認すること：**
 
@@ -30,7 +30,7 @@
 - `DTD is prohibited` / `DOCTYPE is not allowed` が返る → DOCTYPEブロッキングが有効。この脆弱性は使えない
 - エンティティ参照がそのまま文字列として出力される → パーサーがエンティティ展開を行っていない（無効化済み）
 
-### 手順
+## 手順
 
 **① クラシックXXE（ファイル読み込み）**
 
@@ -153,7 +153,7 @@ echo "BASE64_STRING" | base64 -d   # [Attacker]
 
 > 原理 → `../../06_Concepts/XSLT_XML_Processing.md`
 
-### 刺さらなかったとき
+## 刺さらなかったとき
 
 - `DTD is prohibited` / `DOCTYPE is not allowed` → DOCTYPEブロッキングが有効。XXEは使えない。代替としてXPathインジェクション・パラメータ改ざんを検討する
 - `Entity 'xxe' not defined` → 宣言構文が間違っている。`<!ENTITY xxe SYSTEM "...">` の構文を確認する
@@ -161,14 +161,14 @@ echo "BASE64_STRING" | base64 -d   # [Attacker]
 - `Cannot resolve URI` → ファイルパスの形式が違う（`file://` と `file:///` の違い）または対象ファイルの読み込み権限不足
 - ファイルを読めるが内容が空 → XMLとして不正な文字が含まれている。⑥のPHPラッパー（Base64）を試す
 
-### 注意点・落とし穴
+## 注意点・落とし穴
 
 - XMLのエンティティ値に `<` や `&` が含まれるとパースエラーになり内容が出力されない。PHP環境なら `php://filter/convert.base64-encode/resource=` でBase64化する
 - 多くの最新フレームワーク（Laravel・Spring等）はデフォルトで外部エンティティを無効化しているため、古い設定のアプリ・カスタムパーサー・古いバージョンのフレームワークで有効なことが多い
 - SOAPリクエストでもXXEが成立する場合がある。`Content-Type: text/xml` に変えてボディにDOCTYPEを挿入して試す
 - パラメータエンティティ（`%xxe;`）と一般エンティティ（`&xxe;`）を混同すると動作しない。コンテンツ内の参照には `&` を使う
 
-### 関連技術
+## 関連技術
 - 前：XMLアップロード機能の発見・リクエストのContent-Type確認 → `../../01_Reconnaissance/Web_Enumeration.md`
 - 後：ファイル読み込みで認証情報取得 → `../Credential_Discovery.md`
 - 後：XSLT処理が存在する場合はXSLTインジェクションも試す → `XSLT_Injection.md`

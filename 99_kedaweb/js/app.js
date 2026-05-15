@@ -151,9 +151,14 @@
     return out;
   }
 
-  // Extract H1 title from a markdown source.
+  // Extract a display title from a markdown source.
+  // Strips fenced code blocks first so shell comments like `# [Attacker] …` inside
+  // ```bash ... ``` aren't mistaken for the document title. Prefers H1; falls back
+  // to the first H2 (kedalab convention is inconsistent — some files start with H2).
   function extractH1(md) {
-    const m = md.match(/^#\s+(.+)$/m);
+    const stripped = md.replace(/```[\s\S]*?```/g, '');
+    let m = stripped.match(/^#\s+(.+)$/m);
+    if (!m) m = stripped.match(/^##\s+(.+)$/m);
     return m ? m[1].trim() : null;
   }
 
@@ -383,30 +388,6 @@
       .replace(/\[ok\]/g, '<span style="color:#00ff9c">[ok]</span>');
   }
   boot();
-
-  // ============================================================
-  // Render chain (phase nodes)
-  // ============================================================
-  function renderChain() {
-    const c = $("#chainGrid");
-    c.innerHTML = D.phases.map(p => `
-      <div class="chain-node" data-phase="${p.id}" style="--node-c: ${p.color};">
-        <div class="code">${p.code}</div>
-        <div class="glyph">${p.glyph}</div>
-        <div class="name">${p.name}</div>
-        <div class="jp">${p.jp}</div>
-        <div class="count"><strong>${phaseCounts[p.id]}</strong></div>
-      </div>
-    `).join("");
-    $$(".chain-node", c).forEach(el => {
-      el.addEventListener("click", () => {
-        const pid = el.dataset.phase;
-        // scroll to browser, set filter
-        setFilter(pid);
-        document.getElementById("browser").scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-  }
 
   // ============================================================
   // Render Quick Start (situation wizard)
@@ -716,9 +697,14 @@
         const t = line.trim();
         if (!t.startsWith("-")) continue;
         let bucket;
-        if (/^-\s*前[：:]/.test(t)) bucket = out.prev;
-        else if (/^-\s*後[：:]/.test(t)) bucket = out.next;
-        else if (/^-\s*関連[：:]/.test(t)) bucket = out.related;
+        // Label forms accepted:
+        //   `- 前：…`         (canonical)
+        //   `- 前（条件A）：…` (parenthesized qualifier — half- or full-width parens)
+        //   `- 後（X）→ …`    (arrow separator instead of colon)
+        // Separator: `:` `：` (U+FF1A) or `→` (U+2192).
+        if (/^-\s*前(?:[（(][^）)]*[）)])?\s*[：:→]/.test(t)) bucket = out.prev;
+        else if (/^-\s*後(?:[（(][^）)]*[）)])?\s*[：:→]/.test(t)) bucket = out.next;
+        else if (/^-\s*関連(?:[（(][^）)]*[）)])?\s*[：:→]/.test(t)) bucket = out.related;
         else continue;
         const pathRe = /`([^`]+\.md)`/g;
         let pm;
@@ -1718,7 +1704,6 @@
     }
   }
   function renderAll() {
-    safeCall("chain",       renderChain);
     safeCall("quickstart",  renderQuickstart);
     safeCall("raw",         renderRaw);
     safeCall("toolbar",     renderToolbar);
