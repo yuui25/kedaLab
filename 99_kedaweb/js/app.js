@@ -1099,6 +1099,17 @@
     });
   }
 
+  // Brand "KEDALAB" → ホームに戻る (exit nav-mode, scroll to top, clear hash)
+  const _brandHome = document.getElementById("brandHome");
+  if (_brandHome) {
+    _brandHome.addEventListener("click", e => {
+      e.preventDefault();
+      if (document.body.classList.contains("nav-mode")) exitNavMode();
+      if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
   // Wire nav links — Navigator entry toggles page mode; others exit it
   $$(".nav-link").forEach(a => {
     a.addEventListener("click", () => {
