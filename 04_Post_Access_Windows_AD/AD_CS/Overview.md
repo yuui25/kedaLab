@@ -1,6 +1,6 @@
 # AD CS 列挙 — Certipy による脆弱テンプレート発見
 
-> **[HIGH IMPACT]** AD CS（Active Directory 証明書サービス）への攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** AD CS（Active Directory 証明書サービス）への攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 持続化に該当（証明書は有効期限まで認証に使用可能）
 > - [x] SIEM/EDR で確実に検知される（Event ID 4886・4887・4768・MDI アラート）
 > - [ ] 業務停止リスク（列挙自体は低リスク。証明書発行・CA 設定変更は別途評価）
@@ -234,11 +234,11 @@ impacket-wmiexec \
 | `Vulnerabilities` セクションがどのテンプレートにもない | 管理者が設定を修正済み。ESC8（WebEnrollment HTTP 存在確認）は別途 `curl -k http://[CA_SERVER]/certsrv/` で確認 |
 | `certipy auth` が `KDC_ERR_PADATA_TYPE_NOSUPP` を返す | DC が PKINIT をサポートしていない（Server 2008 以前等）。または KDC 証明書が不一致。`gettgtpkinit.py`（PKINITtools）へのフォールバックを試す |
 | 時刻同期エラー（Clock skew）でチケットが拒否される | `sudo ntpdate -u [DC_IP]` または `sudo timedatectl set-ntp false && sudo date -s "$(net time -S [DC_IP] 2>/dev/null \| awk '{print $4,$5,$6}')"` |
-| `certipy find` 実行後に MDI アラートが出た | 列挙行為が検知されている。商用案件ではスコープ確認 |
+| `certipy find` 実行後に MDI アラートが出た | 列挙行為が検知されている。本番ではスコープ確認 |
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★（列挙のみ：口頭確認可）/ ★★★（証明書発行・CA 設定変更：書面承認必須）
 - **想定されるSIEM/EDR検知**: Event ID 4886（証明書の要求受信）/ 4887（証明書の発行）/ 4768（TGT 要求）/ MDI「AD CS 関連の不審な証明書要求」アラート

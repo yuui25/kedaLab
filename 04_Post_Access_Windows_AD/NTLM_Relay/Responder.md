@@ -1,6 +1,6 @@
 # Responder — LLMNR / NBT-NS / mDNS / WPAD ポイズニング
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 業務停止リスク（WPAD 偽装による HTTP トラフィック乗っ取り・名前解決の横取りによる一時疎通障害）
 > - [ ] 持続化に該当
 > - [ ] 不可逆な設定変更を含む
@@ -264,7 +264,7 @@ hashcat -m 5600 /usr/share/responder/logs/SMB-NTLMv2-SSP-[TARGET_IP].txt [WORDLI
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。アクティブなネットワークポイズニングは SIEM/MDI で即アラートが上がり、ネットワーク上の全クライアントに影響が及ぶ可能性がある
 - **想定されるSIEM/EDR検知**: MDI「LLMNR/NBNS Poisoning and Relay」アラート / ネットワーク IDS シグネチャ / Event ID 4776

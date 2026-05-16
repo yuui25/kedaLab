@@ -1,6 +1,6 @@
 # ntlmrelayx — NTLM リレー攻撃
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 業務停止リスク（リレー先サービスの認証基盤への直接操作・マシンアカウント作成による AD 変更）
 > - [x] 持続化に該当（Shadow Credentials / RBCD 設定はそのままバックドア権限として残る）
 > - [ ] 不可逆な設定変更を含む（設定した RBCD・Shadow Credentials は削除可能だが要確認）
@@ -247,7 +247,7 @@ ntlmrelayx.py \
 ```
 
 > MSSQL で xp_cmdshell が無効な場合、ntlmrelayx が自動で有効化を試みる。
-> 商用案件では xp_cmdshell の有効化自体が「不可逆な設定変更」扱いになる可能性があるため、事前合意が必要。
+> 本番では xp_cmdshell の有効化自体が「不可逆な設定変更」扱いになる可能性があるため、事前合意が必要。
 
 ---
 
@@ -322,7 +322,7 @@ ntlmrelayx.py \
 - **Shadow Credentials の削除漏れはバックドアになる**：`msDS-KeyCredentialLink` にテスター生成の公開鍵が残ると、誰でも対象マシンの TGT を取得できる状態になる
 - **RBCD 設定の削除漏れも同様**：`msDS-AllowedToActOnBehalfOfOtherIdentity` に残ったエントリはバックドア権限になる
 - **ESC8 は AD CS のネットワークアクセス設定に依存**：WebEnrollment が HTTP でのみアクセス可能なことが前提。HTTPS のみ（証明書バインド付き）の環境では NTLM リレーが困難
-- **ntlmrelayx の `-c` でコマンドを実行すると新規サービスが作成される**：Event ID 7045 が必ず記録される。商用案件では `socks` + `proxychains` 経由での操作（直接コマンド実行を避ける）の方が検知リスクが低い
+- **ntlmrelayx の `-c` でコマンドを実行すると新規サービスが作成される**：Event ID 7045 が必ず記録される。本番では `socks` + `proxychains` 経由での操作（直接コマンド実行を避ける）の方が検知リスクが低い
 
 ---
 
@@ -339,7 +339,7 @@ ntlmrelayx.py \
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。LDAP 操作・マシンアカウント作成・証明書取得はドメイン全体への影響が直接及ぶ
 - **想定されるSIEM/EDR検知**: MDI NTLM Relay アラート / Event ID 4741・4662・4624 / Sysmon Event 3 / サービス作成 Event 7045

@@ -361,7 +361,7 @@ with open("/usr/share/wordlists/rockyou.txt", errors="ignore") as f:
 
 # エッジアプライアンス系 CVE（境界デバイス）
 
-> **[HIGH IMPACT 共通注意]** 以下の CVE は **業務停止 / 持続化 / 不可逆設定変更 / SIEM 検知必至** のいずれか（多くは全て）に該当する。商用案件では **CVE 単位の個別書面承認 + SOC 事前通知 + 業務時間外実施枠** を必ず取得する。検査前のフィンガープリント特定・着火条件は `../02_Initial_Access/Edge_Appliance_CVEs.md` を参照。
+> **[HIGH IMPACT 共通注意]** 以下の CVE は **業務停止 / 持続化 / 不可逆設定変更 / SIEM 検知必至** のいずれか（多くは全て）に該当する。本番では **CVE 単位の個別書面承認 + SOC 事前通知 + 業務時間外実施枠** を必ず取得する。検査前のフィンガープリント特定・着火条件は `../02_Initial_Access/Edge_Appliance_CVEs.md` を参照。
 
 ---
 
@@ -388,7 +388,7 @@ curl -sk https://[TARGET]/vpn/index.html | grep -iE "build|version"   # [Attacke
 ### PoC リポジトリ（GitHub）
 
 - `Mandiant/Citrix-IOC-Scanner` — 既存侵害の検出専用（攻撃 PoC ではない、防御寄り）
-- 完全 RCE PoC は公開リポジトリでは流通が限定的。商用案件では **検知系 + バージョン照合のみ** で十分
+- 完全 RCE PoC は公開リポジトリでは流通が限定的。本番では **検知系 + バージョン照合のみ** で十分
 
 ### 確認されたバージョン
 

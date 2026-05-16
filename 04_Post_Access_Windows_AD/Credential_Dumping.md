@@ -1,6 +1,6 @@
 # 認証情報のダンプ（DCSync / Pass-The-Hash）
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [ ] 業務停止リスク（サービス・認証）
 > - [x] 持続化に該当（取得した krbtgt ハッシュは Golden Ticket に直結）
 > - [ ] 不可逆な設定変更を含む
@@ -121,7 +121,7 @@ impacket-secretsdump -sam sam.hive -system system.hive LOCAL
 
 ---
 
-### 商用案件での前提
+### 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。DCSync はドメイン全体の認証情報取得に直結する最重要操作
 - **想定されるSIEM/EDR検知**:

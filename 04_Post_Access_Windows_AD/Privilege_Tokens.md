@@ -1,6 +1,6 @@
 # Windows 特権トークン悪用
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [ ] 業務停止リスク（サービス・認証）
 > - [ ] 持続化に該当
 > - [ ] 不可逆な設定変更を含む
@@ -210,7 +210,7 @@ Administrator:500:aad3b435b51404eeaad3b435b51404ee:[NTLM_HASH]:::
 
 ## SeDebugPrivilege — LSASS ダンプ
 
-> **[HIGH IMPACT]** 本手法は LSASS プロセスへの直接アクセスを行うため、EDR/Defender for Endpoint で確実に検知される。商用案件では最高優先度の合意事項。
+> **[HIGH IMPACT]** 本手法は LSASS プロセスへの直接アクセスを行うため、EDR/Defender for Endpoint で確実に検知される。本番では最高優先度の合意事項。
 
 ### 着火条件
 
@@ -367,7 +367,7 @@ takeown /F C:\Windows\System32\config\SAM /A
 
 ---
 
-### 商用案件での前提
+### 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。LSASS ダンプはドメイン内すべての認証情報に波及する操作
 - **想定されるSIEM/EDR検知**:

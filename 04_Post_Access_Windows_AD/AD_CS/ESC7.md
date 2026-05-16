@@ -1,6 +1,6 @@
 # ESC7 — Vulnerable CA ACL（ManageCA / ManageCertificates）
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 不可逆な設定変更を含む（CA フラグ変更・CA Officer 追加は CA 設定を直接変更する）
 > - [x] 持続化に該当（CA Officer 権限が残るとバックドアになる。証明書も持続化経路）
 > - [x] SIEM/EDR で確実に検知される（Event ID 4886・4887・MDI アラート）
@@ -197,7 +197,7 @@ certipy ca \
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。CA 設定変更はドメイン全体の PKI に影響
 - **想定されるSIEM/EDR検知**: Event ID 4886・4887（証明書発行）/ CA 設定変更イベント / MDI「CA 設定の不審な変更」

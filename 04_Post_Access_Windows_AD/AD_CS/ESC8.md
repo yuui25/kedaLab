@@ -1,6 +1,6 @@
 # ESC8 — NTLM Relay to AD CS HTTP WebEnrollment
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 業務停止リスク（DC$ への Coerce は DC に直接 RPC 呼び出しを行う）
 > - [x] 持続化に該当（取得した DC$ 証明書はパスワードリセット後も有効）
 > - [x] SIEM/EDR で確実に検知される（MDI「NTLM Relay to ADCS」アラート / Event ID 4886・4887・4768）
@@ -156,13 +156,13 @@ impacket-secretsdump \
 ## 注意点・落とし穴
 
 - **ESC8 は HTTP での WebEnrollment が前提**：HTTPS のみで Extended Protection for Authentication が有効な環境では NTLM Relay が困難。環境確認が重要
-- **DC への Coerce は MDI でほぼ確実に検知される**：PetitPotam / PrinterBug による DC への RPC 呼び出しは MDI アラート対象。商用案件では検知前提で書面合意を取る
+- **DC への Coerce は MDI でほぼ確実に検知される**：PetitPotam / PrinterBug による DC への RPC 呼び出しは MDI アラート対象。本番では検知前提で書面合意を取る
 - **Responder の SMB/HTTP を Off にしてから ntlmrelayx を起動**：ポート競合で両方が機能不全になる（詳細 → `../NTLM_Relay/ntlmrelayx.md`）
 - **ntlmrelayx が出力する証明書は Base64 PFX 形式**：`echo ... | base64 -d` でバイナリ pfx に変換してから `certipy auth` に渡す
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。DC への Coerce + WebEnrollment Relay + DCSync は多段階のドメイン全体操作
 - **想定されるSIEM/EDR検知**: MDI「NTLM Relay to AD CS」アラート / MDI「Suspected DCE/RPC Exploitation Attempt」（Coerce 部分）/ Event ID 4886・4887・4768 / ネットワーク NDR（DC から CA サーバーへの認証コールバック）

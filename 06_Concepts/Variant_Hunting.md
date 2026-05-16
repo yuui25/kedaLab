@@ -133,7 +133,7 @@ Level 3 は必ず自分が所有・管理するインスタンスで確認する
 ```
 
 > 上の `[CANDIDATE_REPO]` `[CLIENT_RENDERING_FILE]:[LINE]` `[SERVER_RESPONSE_FIELD]` 等は、
-> 実案件では実体名に置き換わる。**自分の調査ノートで使うときも、kedalab に逆輸入する際は
+> 本番では実体名に置き換わる。**自分の調査ノートで使うときも、kedalab に逆輸入する際は
 > 角括弧プレースホルダに戻す**（特に発見が未公開 / 報告中の段階では絶対に固有値を持ち込まない）。
 
 ---
@@ -196,6 +196,79 @@ Level 3 は必ず自分が所有・管理するインスタンスで確認する
 | 高 | 同じ問題ドメイン（ノートアプリ / メールクライアント等）の別プロジェクト |
 | 中 | 同じライブラリ・フレームワークを使う別プロジェクト |
 | 低 | 問題ドメインが違うが同じ技術スタック（Electron）を使うだけ |
+
+---
+
+## ターゲットライブラリの仕様・ソースコードを調べる手順
+
+PoC 解析・脆弱コードのデータフロー確認をするとき、未知のクラスやメソッドに当たる。以下の順で仕様を確認する。
+
+**調べる順序（速い順）：**
+
+1. **公式ドキュメント** — `[LIBRARY_NAME] docs` で検索
+   - API リファレンスが充実していれば、クラス/メソッドの引数・デフォルト値・戻り値がすぐわかる
+2. **PyPI ページ** — `https://pypi.org/project/[LIBRARY_NAME]/`
+   - ホームページリンクとドキュメントリンクへの入口
+3. **GitHub README** — リポジトリの README に基本的な使用例が載っていることが多い
+4. **ターミナルで直接調べる**（ライブラリがインストール済みなら）
+   ```bash
+   python -c "import [MODULE]; help([MODULE].[CLASS])"
+   ```
+   デフォルト引数・メソッドシグネチャが即確認できる
+5. **GitHub の raw URL でソースコードを固定バージョンで読む**
+   ```
+   https://raw.githubusercontent.com/[ORG]/[REPO]/refs/tags/v[VERSION]/[FILE_PATH]
+   ```
+   特定バージョンのコードを固定して読むことで、「このバージョンに本当にバグがあるか」をテキストで直接確認できる
+
+**注意：行番号は Advisory に書かない**
+
+GitHub の UI や WebFetch で見えた行番号は、バージョンやブランチが変わるとズレる。
+Advisory ドラフトに行番号を書くと次のリリースで誤情報になる。
+「関数名 + コード片」で特定する。
+
+---
+
+## GHSA/CVE 提出時の CWE 選定
+
+CWE (Common Weakness Enumeration) は GHSA / CVE 申請フォームで必須の欄。
+2,000 件以上あるが、実際に使うのは限られた「よく使う型」がほとんど。
+
+### 適切な番号を見つける手順
+
+**Step 1：脆弱性の「何が問題か」を1文で書く**
+
+例: 「展開後のデータサイズに上限がない」「ユーザー入力を SQL にそのまま埋め込む」
+
+**Step 2：CWE 公式サイトで検索**
+
+- URL: `https://cwe.mitre.org/`
+- 検索ボックスに英語キーワードを入力（例: `decompression`, `injection`, `path traversal`）
+
+**Step 3：公開済み同型 CVE の CWE を参照する**
+
+- 同型バグの公開済み CVE を NVD (`https://nvd.nist.gov/`) で検索
+- その CVE に記載されている CWE を参考にする
+
+**Step 4：GHSA フォームの候補から選ぶ**
+
+- CWE 欄に番号またはキーワードを入力すると名称付きで候補が出る
+- 名称を読んで「今回のバグの説明と一致するか」を確認する
+
+### よく使う CWE 早見表
+
+| CWE | 名称 | 代表的なバグ |
+|-----|------|------------|
+| CWE-409 | Improper Handling of Highly Compressed Data | decompression bomb |
+| CWE-22  | Path Traversal | `../` によるディレクトリ脱出 |
+| CWE-79  | XSS | Stored / Reflected / DOM XSS |
+| CWE-89  | SQL Injection | ユーザー入力の生補間 |
+| CWE-94  | Code Injection | テンプレートへのコード混入 |
+| CWE-918 | SSRF | サーバー経由の内部リクエスト |
+| CWE-400 | Uncontrolled Resource Consumption | 無制限ループ・メモリ消費 |
+| CWE-502 | Deserialization of Untrusted Data | Java/Python デシリアライズ |
+
+> 主分類として最も具体的な CWE を1つ選び、副分類として二次的な影響（例: CWE-400）を追加することが多い。フォームが1つしか許さない場合は「主分類のみ」でよい。
 
 ---
 

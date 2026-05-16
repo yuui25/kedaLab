@@ -196,7 +196,7 @@ Remove-Item -Path "HKCU:\Software\Classes\mscfile" -Recurse -Force
 | `ConsentPromptBehaviorAdmin = 1` または `2` | 安全なデスクトップ上でのプロンプト。バイパス困難 | 資格情報スプレー・SeImpersonate 等の別経路へ切り替える |
 | Administrators グループに入っていない | 前提条件不成立 | SeImpersonate 等の低権限からの昇格手法を先に試す |
 
-> **商用案件の注意点：** UAC バイパス自体は Sysmon Event ID 13（RegistryEvent: HKCU\Software\Classes 下の書き込み）で検知される。Defender for Endpoint は `bypassuac_` 系の挙動パターンを「UAC modification」として検知する。合意範囲内であることを確認してから実施する。
+> **本番の注意点：** UAC バイパス自体は Sysmon Event ID 13（RegistryEvent: HKCU\Software\Classes 下の書き込み）で検知される。Defender for Endpoint は `bypassuac_` 系の挙動パターンを「UAC modification」として検知する。合意範囲内であることを確認してから実施する。
 
 ---
 
@@ -517,7 +517,7 @@ searchsploit [技術名] [バージョン]
 
 > **AMSI（Antimalware Scan Interface）とは：** Windows 10 以降に搭載された API。PowerShell / VBScript / WScript 等がスクリプトを実行する直前に AV エンジンに内容を渡してスキャンさせる仕組み。ファイル書き込みなしでもメモリ上のスクリプト内容を検査できる。
 
-**攻撃者の思考トレース：** AMSI が有効な環境で `.ps1` を直接実行するとブロックされる。AMSI は `amsi.dll` として PowerShell プロセスにロードされているため、そのメモリ上の `AmsiScanBuffer` 関数をパッチして無効化する手法が広く使われる。ただし商用案件ではパッチ方式は EDR がトリップレットするため、Downgrade Attack（PowerShell v2）が相対的に低リスクな場合がある。
+**攻撃者の思考トレース：** AMSI が有効な環境で `.ps1` を直接実行するとブロックされる。AMSI は `amsi.dll` として PowerShell プロセスにロードされているため、そのメモリ上の `AmsiScanBuffer` 関数をパッチして無効化する手法が広く使われる。ただし本番ではパッチ方式は EDR がトリップレットするため、Downgrade Attack（PowerShell v2）が相対的に低リスクな場合がある。
 
 #### AMSI の有効状態確認
 
@@ -531,7 +531,7 @@ searchsploit [技術名] [バージョン]
 #### 方法 1 — PowerShell Downgrade Attack（PS v2 へのダウングレード）
 
 **検知性：低〜中。EDR では「PowerShell v2 の起動」が怪しいシグナルとして記録されることがある。**
-商用案件では `amsi.dll` メモリパッチより相対的にリスクが低い。
+本番では `amsi.dll` メモリパッチより相対的にリスクが低い。
 
 ```powershell
 # [Target] PowerShell v2 で起動（AMSI は v3 以降に搭載されたため v2 には存在しない）
@@ -554,7 +554,7 @@ Get-WindowsFeature -Name PowerShell-V2 2>$null
 
 #### 方法 2 — AmsiScanBuffer メモリパッチ
 
-> **[HIGH IMPACT]** ETW パッチ・AMSI メモリパッチはカーネルレベルの EDR（CrowdStrike / SentinelOne 等）で「Suspicious AMSI patch」として確実に検知される。商用案件では事前合意が必要。**EDR が有効な環境での実施は最高リスク扱い**。
+> **[HIGH IMPACT]** ETW パッチ・AMSI メモリパッチはカーネルレベルの EDR（CrowdStrike / SentinelOne 等）で「Suspicious AMSI patch」として確実に検知される。本番では事前合意が必要。**EDR が有効な環境での実施は最高リスク扱い**。
 
 ```powershell
 # [Target] AmsiScanBuffer を常に「スキャン結果 = 0（クリーン）」に書き換えるパッチ
@@ -565,29 +565,29 @@ $b.SetValue($null,$true)
 # amsiInitFailed を true にして AMSI 初期化失敗を模倣する（軽量な回避方法）
 ```
 
-**実際の商用案件での注意：** 上記コードそのまま貼り付けてもAMSI自身に検知されてブロックされる。文字列を ROT13・base64・変数分割などで難読化してからペーストする必要がある。難読化コードの生成方法は都度変わるため、ツール（Invoke-Obfuscation 等）または手動分割を使う。
+**実際の本番での注意：** 上記コードそのまま貼り付けてもAMSI自身に検知されてブロックされる。文字列を ROT13・base64・変数分割などで難読化してからペーストする必要がある。難読化コードの生成方法は都度変わるため、ツール（Invoke-Obfuscation 等）または手動分割を使う。
 
 #### 方法 3 — ETW 無効化との組み合わせ
 
-> **ETW（Event Tracing for Windows）** はEDR がリアルタイムで PowerShell の動作ログを取得するチャネル。ETW 無効化は AMSI バイパスより検知リスクが高く、**商用案件では原則としてETW パッチは禁止操作として扱うこと。**
+> **ETW（Event Tracing for Windows）** はEDR がリアルタイムで PowerShell の動作ログを取得するチャネル。ETW 無効化は AMSI バイパスより検知リスクが高く、**本番では原則としてETW パッチは禁止操作として扱うこと。**
 
 ```powershell
 # [Target] ETW の PowerShell プロバイダを無効化（NtTraceEvent をパッチ）
-# ※ 高リスク操作。EDR が必ず検知する。商用案件では事前書面合意がない限り実施しない
+# ※ 高リスク操作。EDR が必ず検知する。本番では事前書面合意がない限り実施しない
 [Reflection.Assembly]::LoadWithPartialName('System.Core') | Out-Null
 $etwpatch = [System.Runtime.InteropServices.Marshal]
-# ... (実装は省略。商用案件ではこの手法は事前合意なしに使用しない)
+# ... (実装は省略。本番ではこの手法は事前合意なしに使用しない)
 ```
 
-#### AMSI バイパスの検知観点と商用案件での扱い
+#### AMSI バイパスの検知観点と本番での扱い
 
-| 方法 | Sysmon / EDR 検知 | 商用案件リスク |
+| 方法 | Sysmon / EDR 検知 | 本番リスク |
 |------|-----------------|-------------|
 | PowerShell v2 Downgrade | Sysmon Event ID 1（PS v2 起動）/ Defender「PowerShell downgrade attack」 | 中（使用前に合意推奨） |
 | `amsiInitFailed` パッチ | EDR「AMSI bypass attempt」/ Sysmon Event ID 10（PS への自己プロセスアクセス） | 高（書面合意必須） |
-| ETW パッチ | EDR「ETW tampering」/ Sysmon Event ID 8（CreateRemoteThread to ntdll.dll） | 最高（商用案件では原則禁止） |
+| ETW パッチ | EDR「ETW tampering」/ Sysmon Event ID 8（CreateRemoteThread to ntdll.dll） | 最高（本番では原則禁止） |
 
-**商用案件での結論：** AMSI が壁になる場合は、まず **PowerShell v2 Downgrade** を試みる。それも使えない環境（PS v2 削除済み・Defender が v2 も監視）では、**ツール選択を変える**（PoC を C# バイナリにコンパイルして直接 EXE 実行 → AMSI は PS スクリプトを対象とするため）か、**実施範囲をクライアントに再確認**する。
+**本番での結論：** AMSI が壁になる場合は、まず **PowerShell v2 Downgrade** を試みる。それも使えない環境（PS v2 削除済み・Defender が v2 も監視）では、**ツール選択を変える**（PoC を C# バイナリにコンパイルして直接 EXE 実行 → AMSI は PS スクリプトを対象とするため）か、**実施範囲をクライアントに再確認**する。
 
 ---
 

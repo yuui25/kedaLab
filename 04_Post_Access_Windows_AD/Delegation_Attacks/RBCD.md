@@ -1,6 +1,6 @@
 # RBCD（Resource-Based Constrained Delegation）攻撃
 
-> **[HIGH IMPACT]** 本攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** 本攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [ ] 業務停止リスク（サービス・認証）
 > - [ ] 持続化に該当
 > - [x] 不可逆な設定変更を含む（マシンアカウント作成・msDS-AllowedToActOnBehalfOfOtherIdentity 属性の変更）
@@ -268,11 +268,11 @@ impacket-psexec [DOMAIN]/administrator@[DC_FQDN] -k -no-pass
 - `-spn 'cifs/[DC_FQDN]'` の `[DC_FQDN]` は `[DC_HOSTNAME].[DOMAIN_FQDN]` のような完全修飾名にする（IPではKerberosが通らない）
 - `KRB5CCNAME` 環境変数は `export` でセッションに設定する（sudo で実行する場合は `-E` オプション）
 - マシンアカウントの作成上限（デフォルト10台 / ドメイン管理者が変更している場合もある）に達している場合は、既存のマシンアカウントを制御できる場合のみそれを利用する
-- ルートB の Rubeus.exe は多くの AV/EDR で検知される。実案件では検知回避手段（難読化ビルド・メモリ内実行等）を事前合意の上で実施する
+- ルートB の Rubeus.exe は多くの AV/EDR で検知される。本番では検知回避手段（難読化ビルド・メモリ内実行等）を事前合意の上で実施する
 
 ---
 
-### 商用案件での前提
+### 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。マシンアカウント作成と DC への RBCD 属性書き込みを伴うため、ドメイン全体への影響と監査ログ痕跡が残る
 - **想定されるSIEM/EDR検知**:

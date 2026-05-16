@@ -72,7 +72,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 
 ## TA0003 Persistence（持続化）
 
-> **注**: kedalab は侵入後の権限取得までを主スコープとしており、長期 Persistence は商用案件で原則禁止のため最小限の記載に留めている。
+> **注**: kedalab は侵入後の権限取得までを主スコープとしており、長期 Persistence は本番で原則禁止のため最小限の記載に留めている。
 
 | Technique ID | 技術名 | kedalab ファイル |
 |------|-------|--------|

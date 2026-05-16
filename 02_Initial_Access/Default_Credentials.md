@@ -259,7 +259,7 @@ nuclei -t default-logins/jenkins/ -t default-logins/grafana/ -t default-logins/t
 | MSSQL `sa` 通過 | `xp_cmdshell` 有効化で OS コマンド実行 → `../02_Initial_Access/MSSQL_Exploitation.md` |
 | MongoDB / Redis 認証無し | `db.getCollectionNames()` / `KEYS *` で全データ列挙、設定ファイル / セッション / 認証情報の混入確認 |
 | ルータ / スイッチ管理 | 設定 export → 平文・難読化された無線 PSK・SNMP コミュニティ・他機器のクレデンシャルを取得 |
-| IPMI 通過 | 仮想メディアでブート ISO マウント → ホスト OS の単独パスワード変更 / SOL（Serial-over-LAN）でコンソールアクセス（**業務影響大、商用案件では事前合意必須**） |
+| IPMI 通過 | 仮想メディアでブート ISO マウント → ホスト OS の単独パスワード変更 / SOL（Serial-over-LAN）でコンソールアクセス（**業務影響大、本番では事前合意必須**） |
 | プリンタ | アドレス帳（メール / SMB / LDAP 認証情報の保存）取得、PostScript / PJL 経由のファイル読込 |
 | IP カメラ | RTSP ストリーム取得、ONVIF API でデバイス情報、ファームウェアダンプ |
 
@@ -281,7 +281,7 @@ nuclei -t default-logins/jenkins/ -t default-logins/grafana/ -t default-logins/t
 
 ## 注意点・落とし穴
 
-> **[HIGH IMPACT]** デフォルト認証情報試行・辞書攻撃は以下の理由で商用案件では原則禁止または個別合意必須：
+> **[HIGH IMPACT]** デフォルト認証情報試行・辞書攻撃は以下の理由で本番では原則禁止または個別合意必須：
 > - [x] 業務停止リスク（ロックアウトポリシーが厳しい環境では正規ユーザー巻き込みでサービス停止）
 > - [ ] 持続化に該当
 > - [ ] 不可逆な設定変更を含む（試行のみなら通常該当なし。ただし通った後にデプロイ・xp_cmdshell 有効化等を行うと該当）
@@ -301,7 +301,7 @@ nuclei -t default-logins/jenkins/ -t default-logins/grafana/ -t default-logins/t
 
 ---
 
-## 商用案件での前提
+## 本番での前提
 
 - **事前合意の要否**: ★★★（書面承認必須）。特に SCADA / IPMI / VPN アプライアンス管理画面 / 業務基幹アプリ管理画面はパスワードロックアウトと業務停止リスクで厳格な確認対象
 - **想定される SIEM / EDR 検知**:

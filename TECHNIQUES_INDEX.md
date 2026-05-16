@@ -254,7 +254,7 @@
 | UAC バイパス — UACME / Metasploit bypassuac モジュールの使い分けと検知性 | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 1.3） |
 | AMSI 有効状態確認（AmsiUtils クラス検出）と PowerShell Downgrade Attack（v2 起動） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
 | AMSI バイパス — AmsiScanBuffer メモリパッチ（amsiInitFailed 設定）と検知性 | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
-| AMSI バイパス — ETW 無効化との組み合わせ（商用案件では原則禁止） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
+| AMSI バイパス — ETW 無効化との組み合わせ（本番では原則禁止） | Post Access AD/Win | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8: AMSI バイパス） |
 | BYOVD（Bring Your Own Vulnerable Driver）— 脆弱ドライバーロードで EDR Kernel Callback を削除 | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |
 | BYOVD — LOLDrivers.io / Microsoft Vulnerable Driver Blocklist による脆弱ドライバー選定 | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |
 | BYOVD — sc.exe による脆弱カーネルドライバー登録・起動・原状回復（Sysmon Event ID 6 / 7045） | Post Access AD/Win | `04_Post_Access_Windows_AD/BYOVD.md` |

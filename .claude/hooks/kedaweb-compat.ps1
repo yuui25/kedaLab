@@ -102,7 +102,10 @@ try {
         @{ Pattern = 'Password123!|P@ssw0rd1234!';                          Label = 'WG: training weak password' },
         # Placeholder regex requires a separator (_ - or space) inside so that
         # standalone HTML/XML tags like <script>/<html>/<title> don't false-positive.
-        @{ Pattern = '<[a-z]+[ _-][a-z _-]*>';                              Label = 'WG: lowercase placeholder (use [UPPER_SNAKE_CASE])' }
+        @{ Pattern = '<[a-z]+[ _-][a-z _-]*>';                              Label = 'WG: lowercase placeholder (use [UPPER_SNAKE_CASE])' },
+        # WG-TONE: implicit job-prerequisite expressions. kedalab is a learner's
+        # personal notebook; avoid wording that claims professional pentester context.
+        @{ Pattern = '商用案件|商用ペネトレ|商用環境|商用本番|業務として実施|職業ペネトレ|プロのペンテスター|脆弱性診断の現場|クライアントとの合意'; Label = 'WG-TONE: job-prerequisite wording (use 本番 / 学習者向けの表現)' }
     )
 
     foreach ($pat in $wgPatterns) {

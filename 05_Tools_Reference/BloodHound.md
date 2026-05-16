@@ -166,7 +166,7 @@ MATCH (u:User) WHERE u.dontreqpreauth=true RETURN u.name
 - `bloodhound-python` は DC への接続が必要なため、名前解決の設定（`/etc/hosts` や `-ns` オプション）が重要
 - 大規模なドメインでは収集に時間がかかるため、`-c DCOnly` で DC 情報のみ先に取得する方法もある
 - BloodHound の情報は収集時点のスナップショットのため、ACE の変更後は再収集が必要
-- SharpHound.exe は多くのAV/EDRで検知されるため、実案件では事前合意と回避策（難読化ビルド等）を検討する
+- SharpHound.exe は多くのAV/EDRで検知されるため、本番では事前合意と回避策（難読化ビルド等）を検討する
 
 ---
 

@@ -109,7 +109,7 @@ Add-ADGroupMember -Identity '[GROUP_NAME]' -Members '[CURRENT_USER]'
 - targetedKerberoast.py は SPN のクリーンアップまで自動で行うが、ツールが途中で失敗した場合は手動でクリーンアップが必要（`bloodyAD ... set object '[TARGET_USER]' servicePrincipalName -v ''`）
 - logon script の手法は、ターゲットユーザーが実際にログインするまで実行されない（環境によっては長時間待機が必要）
 - SPN を設定する際、ターゲットアカウントが既にSPNを持っている場合は Kerberoasting が既に可能な場合もある。`impacket-GetUserSPNs` を先に実行して確認する
-- 手動方式 (A-2) で SPN を付与した場合、**ハッシュ取得後に必ず SPN を削除する**（原状回復。商用案件では必須、演習環境でも習慣化推奨）
+- 手動方式 (A-2) で SPN を付与した場合、**ハッシュ取得後に必ず SPN を削除する**（原状回復。本番では必須、演習環境でも習慣化推奨）
 
 ---
 
