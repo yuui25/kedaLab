@@ -508,5 +508,5 @@ evil-winrm -i [IP] -u Administrator -H '[NTLM_HASH]'
 - 前：`00_OS_Identification.md`（Windows と確定し、88番 Kerberos 等から AD 環境と判断してからこのフローに入る）
 - 後：`../04_Post_Access_Windows_AD/Enumeration_Checklist.md`（シェル取得後の侵入後列挙）
 - 後：`../04_Post_Access_Windows_AD/Credential_Dumping.md`（DCSync → 全ハッシュ取得の詳細）
-- 関連：`Internal_Network_Pentest_Flow.md`（内部 VLAN 全体のペネトレが対象で、AD はその一部という位置づけの場合の上位フロー）
+- 関連：`Internal_LAN_Pentest_Flow.md`（内部 VLAN 全体のペネトレが対象で、AD はその一部という位置づけの場合の上位フロー）
 - 関連：`../06_Concepts/Windows_Standalone_vs_AD.md`（AD かスタンドアロンか判断がつかない場合）

@@ -318,7 +318,7 @@
 | Windows AD 攻撃フロー（偵察 → 初期アクセス → AD列挙 → DCSync） | Windows AD全体フロー | `00_Playbook/Windows_AD_Attack_Flow.md` |
 | Web脆弱性調査フロー（Webのみスコープ向け偵察 → 機能別脆弱性確認 → 認証・認可横断確認） | Webスコープ限定フロー | `00_Playbook/Web_Vuln_Flow.md` |
 | 技術名が分からない状態からの調査フロー（機能観察 → 英語化 → 脆弱性クラス特定） | 未知技術マッピング | `00_Playbook/01_Unknown_Tech_Research.md` |
-| 内部ネットワークペネトレテスト全体フロー（VLAN アクセス開始 → ホスト発見 → AD 列挙 → DC 陥落 → 横展開） | 内部ネットワーク全体フロー | `00_Playbook/Internal_Network_Pentest_Flow.md` |
+| 内部ネットワークペネトレテスト全体フロー（VLAN アクセス開始 → ホスト発見 → AD 列挙 → DC 陥落 → 横展開） | 内部ネットワーク全体フロー | `00_Playbook/Internal_LAN_Pentest_Flow.md` |
 
 ---
 

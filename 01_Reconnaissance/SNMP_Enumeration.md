@@ -251,4 +251,4 @@ snmpset -v 2c -c [WRITE_COMMUNITY] [TARGET_IP] \
 - 後：ARP / ルーティングテーブルから発見した新ホストへのスキャン → `Network_Scanning.md`
 - 後：取得した Windows ユーザーリストへのパスワードスプレー → `../05_Tools_Reference/Netexec.md`
 - 後：インストール済みソフトウェアのバージョンから CVE 検索 → `../05_Tools_Reference/Searchsploit.md`
-- 後：内部ネットワーク全体フロー（SNMP はトポロジー把握の起点として使う） → `../00_Playbook/Internal_Network_Pentest_Flow.md`
+- 後：内部ネットワーク全体フロー（SNMP はトポロジー把握の起点として使う） → `../00_Playbook/Internal_LAN_Pentest_Flow.md`
