@@ -66,7 +66,7 @@ OWASP Web Security Testing Guide v4.2 のテストカテゴリ・テストケー
 | WSTG-ATHN-03 | Testing for Weak Lock Out Mechanism | `02_Initial_Access/Account_Lockout_Recon.md` |
 | WSTG-ATHN-06 | Testing for Browser Cache Weaknesses | （手動確認・kedalab 化候補） |
 | WSTG-ATHN-07 | Testing for Weak Password Policy | `02_Initial_Access/Account_Lockout_Recon.md`（FGPP / msDS-PasswordSettings） |
-| WSTG-ATHN-10 | Testing for Weaker Authentication in Alternative Channel | `02_Initial_Access/Protocol_Exploitation.md`（SSH / FTP / WinRM） |
+| WSTG-ATHN-10 | Testing for Weaker Authentication in Alternative Channel | `02_Initial_Access/Protocol_Exploitation.md`（SSH / FTP / WinRM） / `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md`（ソーシャルログイン経路の信頼境界破り） |
 
 ---
 
@@ -85,8 +85,8 @@ OWASP Web Security Testing Guide v4.2 のテストカテゴリ・テストケー
 
 | WSTG ID | テスト項目 | kedalab ファイル |
 |---------|-----------|--------|
-| WSTG-SESS-01 | Testing for Session Management Schema（JWT トークン構造・alg 検証・署名バイパス） | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
-| WSTG-SESS-09 | Testing for Session Hijacking | `02_Initial_Access/Web_Vulnerabilities/XSS.md`（Cookie スティーリング・stolen cookie ブラウザ植え替え） |
+| WSTG-SESS-01 | Testing for Session Management Schema（JWT トークン構造・alg 検証・署名バイパス / OAuth id_token・access_token の検証） | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` / `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| WSTG-SESS-09 | Testing for Session Hijacking | `02_Initial_Access/Web_Vulnerabilities/XSS.md`（Cookie スティーリング・stolen cookie ブラウザ植え替え） / `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md`（Implicit Flow Token Leakage） |
 
 > SESS-02（Cookie 属性）/ SESS-04（Session Fixation）/ SESS-05（Exposed Session Variables）/ SESS-06（CSRF）/ SESS-07（Logout）は手動確認領域。kedalab に追加判定は WRITING_GUIDE.md の「網羅的に書こうとしない」方針に従う。
 
@@ -129,7 +129,7 @@ OWASP Web Security Testing Guide v4.2 のテストカテゴリ・テストケー
 | WSTG ID | テスト項目 | kedalab ファイル |
 |---------|-----------|--------|
 | WSTG-CLNT-01 | Testing for DOM-Based Cross Site Scripting | `02_Initial_Access/Web_Vulnerabilities/XSS.md`（DOM 型 XSS） |
-| WSTG-CLNT-04 | Testing for Client-side URL Redirect | `02_Initial_Access/Web_Vulnerabilities/XSS.md`（DOM 偽装・フィッシングリダイレクト） |
+| WSTG-CLNT-04 | Testing for Client-side URL Redirect | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md`（バイパス全般・`javascript:` スキーム経由 XSS 化・SSRF 連鎖） / `02_Initial_Access/Web_Vulnerabilities/XSS.md`（DOM 偽装・フィッシングリダイレクト） / `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md`（redirect_uri バイパス・Open Redirect 連鎖） |
 | WSTG-CLNT-09 | Testing for Cross Origin Resource Sharing | （手動・kedalab 化候補） |
 
 ---

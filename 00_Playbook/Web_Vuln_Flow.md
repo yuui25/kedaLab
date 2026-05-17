@@ -160,6 +160,8 @@ python sensitive_scan.py request.txt --no-low
 |-----------------|----------------|--------|
 | ログインフォーム | SQLi・デフォルト認証情報 | `../02_Initial_Access/Web_Vulnerabilities/SQLi.md` |
 | **Authorization ヘッダーに `Bearer eyJ...` がある / Cookie に `eyJ` で始まる値がある** | JWT 操作・署名バイパス（alg:none / 弱い秘密鍵 / RS256→HS256 切り替え / kid インジェクション / jku 差し替え） → Step 3「4層目」へ | `../02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| **「Login with Google / GitHub / Microsoft」等のソーシャルログインボタンがある / `/oauth/authorize` `/.well-known/openid-configuration` が存在する / リクエストに `redirect_uri=` `state=` `client_id=` が観測される** | OAuth フロー攻撃（redirect_uri バイパス → 被害者 code 奪取 / state 欠落 → アカウント連携乗っ取り / Implicit Token Leak / id_token 検証バイパス / email・sub 信頼性 / PKCE 欠落 / client_secret 漏洩）。id_token が JWT なら Step 3「4層目」と併用 | `../02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| **URL パラメータに `redirect=` `return=` `next=` `url=` `dest=` `continue=` `target=` 等が観測される / ログイン後・ログアウト後の遷移先が URL 制御 / JS に `location.href = userInput` が存在** | Open Redirect（バイパス全般 / `javascript:` スキーム → XSS 化 / SSRF 302 follow 防御回避 / OAuth `redirect_uri` バイパス構成要素 / Referer 経由 token 漏洩）。単独では低スコアだがチェーンで化ける | `../02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
 | URLに連番IDがある | IDOR | `../02_Initial_Access/Web_Vulnerabilities/IDOR.md` |
 | ファイルダウンロード機能 | パストラバーサル・IDOR | `../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md` |
 | ユーザー入力がページに反映される | XSS（反射型・格納型） | `../02_Initial_Access/Web_Vulnerabilities/XSS.md` |
@@ -250,6 +252,8 @@ searchsploit [ソフトウェア名] [バージョン]   # [Attacker]
 - 後：`../02_Initial_Access/Web_Vulnerabilities/IDOR.md`（連番 ID / 直接参照）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/SSRF.md`（URL を受け取るフォーム）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md`（JWT ベースの認証）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md`（OAuth / OIDC ソーシャルログイン）
+- 後：`../02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md`（リダイレクト系パラメータ / 単独 + OAuth・SSRF・XSS への連鎖）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/Path_Traversal.md`（パスを受け取るパラメータ）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/XXE.md` / `../02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md`（XML/XSLT 処理）
 - 後：`../02_Initial_Access/Web_Vulnerabilities/File_Upload.md`（アップロード機能）

@@ -114,6 +114,18 @@
 | JWT kid パラメータインジェクション（SQLi / パストラバーサル） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 | JWT jku / x5u 鍵 URL 差し替え（攻撃者 JWKS への誘導） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
 | JWT jwk ヘッダーインジェクション（攻撃者公開鍵の埋め込み） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
+| OAuth redirect_uri 検証バイパス（サブストリングマッチ / Path Traversal / Open Redirect 連鎖 / HPP / IDN）→ 被害者 code 奪取 → アカウント乗っ取り | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OAuth state 欠落・固定による CSRF → 既存アカウントに攻撃者 IdP 連携を強制（アカウント連携乗っ取り） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OAuth Implicit Flow Token Leakage（URL fragment の access_token → Referer / 履歴 / JS 経由漏洩） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OpenID Connect id_token 検証バイパス（iss / aud / azp / nonce / exp 検証ミス・JWT 攻撃と併用） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OAuth email / sub 信頼性攻撃（federated identity confusion / `email_verified` 不検証 → 既存アカウント乗っ取り） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OAuth PKCE 欠落・downgrade（`code_challenge_method=plain` 許容 → モバイル app / public client の code 横取り成立） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| OAuth client_secret 漏洩悪用（モバイル app バンドル / SPA / GitHub 由来 → confidential client なりすまし） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/OAuth_Attacks.md` |
+| Open Redirect バイパス各種（プロトコル相対 `//` / userinfo `@` / バックスラッシュ・多重スラッシュ / URL エンコード / IDN・Punycode） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
+| Open Redirect `javascript:` スキーム経由 XSS 化（DOM ベース `location.href = userInput` 系で成立） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
+| Open Redirect 経由の SSRF 防御回避（攻撃者ホスト → 302 で内部 IP / メタデータ API へ転送） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
+| Open Redirect の OAuth `redirect_uri` バイパス連鎖（victim 内 open redirect で OAuth code を attacker へ転送 → アカウント乗っ取り） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
+| Open Redirect 経由の認証 token / OAuth code Referer 漏洩（`Referrer-Policy` 設定次第） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/Open_Redirect.md` |
 | PCAPからの平文認証情報抽出 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | WebアプリDB（SQLite等）からのハッシュ取得 | Initial Access | `02_Initial_Access/Credential_Discovery.md` |
 | PBKDF2-HMAC-SHA256 ハッシュのクラック（mode 10900） | Initial Access | `05_Tools_Reference/Hashcat.md` |
