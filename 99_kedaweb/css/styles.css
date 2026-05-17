@@ -100,9 +100,10 @@ body::after {
 }
 #boot.fade { opacity: 0; transform: scale(1.05); pointer-events: none; }
 #boot-log {
-  white-space: pre-wrap;
+  white-space: pre;
   text-shadow: 0 0 6px rgba(0, 255, 156, 0.6);
   max-width: 900px;
+  overflow-x: auto;
 }
 .cursor::after {
   content: "▊";

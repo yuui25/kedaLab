@@ -349,11 +349,12 @@
     "[boot] linking AI red teaming module ......... [OK]",
     "[boot] starting matrix subsystem ............. [OK]",
     "",
-    "  ██ ▄█▀▓█████ ▓█████▄  ▄▄▄       ██▓    ▄▄▄       ▄▄▄▄   ",
-    "  ██▄█▒ ▓█   ▀ ▒██▀ ██▌▒████▄    ▓██▒   ▒████▄    ▓█████▄ ",
-    " ▓███▄░ ▒███   ░██   █▌▒██  ▀█▄  ▒██░   ▒██  ▀█▄  ▒██▒ ▄██",
-    " ▓██ █▄ ▒▓█  ▄ ░▓█▄   ▌░██▄▄▄▄██ ▒██░   ░██▄▄▄▄██ ▒██░█▀  ",
-    " ▒██▒ █▄░▒████▒░▒████▓  ▓█   ▓██▒░██████▒▓█   ▓██▒░▓█  ▀█▓",
+    "    ██╗  ██╗███████╗██████╗  █████╗ ██╗      █████╗ ██████╗ ",
+    "    ██║ ██╔╝██╔════╝██╔══██╗██╔══██╗██║     ██╔══██╗██╔══██╗",
+    "    █████╔╝ █████╗  ██║  ██║███████║██║     ███████║██████╔╝",
+    "    ██╔═██╗ ██╔══╝  ██║  ██║██╔══██║██║     ██╔══██║██╔══██╗",
+    "    ██║  ██╗███████╗██████╔╝██║  ██║███████╗██║  ██║██████╔╝",
+    "    ╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ",
     "",
     "[ok] welcome. press [ctrl+k] to search, [esc] to close."
   ];
@@ -863,6 +864,12 @@
       else if (prev.has(f)) c.classList.add("prev");
       else if (next.has(f)) c.classList.add("next");
       else if (related.has(f)) c.classList.add("related");
+      // Override search filter for focus + neighbours so edges can land on real
+      // positions (display:none cells report offsetLeft/Top=0, which sends
+      // lines into the top-left corner).
+      if (f === file || prev.has(f) || next.has(f) || related.has(f)) {
+        c.classList.remove("qfilter-out");
+      }
     });
     drawNavEdges(file);
     renderNavFocusPanel(file);
@@ -1126,6 +1133,18 @@
   // In-page search box
   const _navSearchEl = document.getElementById("navSearch");
   if (_navSearchEl) {
+    // When the filter changes while a focus is active, cell layout shifts —
+    // re-run focus to keep neighbour cells visible (so they have non-zero
+    // offsets) and redraw edges against the new layout.
+    const reapplyFocusAfterFilter = () => {
+      if (!_navFocus) return;
+      const edges = effectiveEdges(_navFocus);
+      const keep = new Set([_navFocus, ...edges.prev, ...edges.next, ...edges.related]);
+      $$(".nav-cell").forEach(c => {
+        if (keep.has(c.dataset.file)) c.classList.remove("qfilter-out");
+      });
+      requestAnimationFrame(() => drawNavEdges(_navFocus));
+    };
     _navSearchEl.addEventListener("input", e => {
       const q = e.target.value.toLowerCase().trim();
       const toks = q.split(/\s+/).filter(Boolean);
@@ -1136,6 +1155,7 @@
         const hay = (c.textContent + " " + f).toLowerCase();
         c.classList.toggle("qfilter-out", !toks.every(t => hay.includes(t) || body.includes(t)));
       });
+      reapplyFocusAfterFilter();
     });
     _navSearchEl.addEventListener("keydown", e => {
       if (e.key === "Enter") {
@@ -1144,6 +1164,7 @@
       } else if (e.key === "Escape") {
         e.target.value = "";
         $$(".nav-cell").forEach(c => c.classList.remove("qfilter-out"));
+        reapplyFocusAfterFilter();
       }
     });
   }
