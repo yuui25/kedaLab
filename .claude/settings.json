@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .claude/hooks/kedaweb-compat.ps1"
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:/keda/.shared/hooks/kedaweb-compat.ps1"
           }
         ]
       }
