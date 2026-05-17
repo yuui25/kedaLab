@@ -28,7 +28,7 @@ try {
     $content = [System.IO.File]::ReadAllText($file, [System.Text.Encoding]::UTF8)
     $issues = @()
 
-    $kedalabRoot = 'C:\Users\fujiz\マイドライブ\kedalab'
+    $kedalabRoot = 'C:\keda\kedalab'
     $relPath = $file -replace [regex]::Escape($kedalabRoot + '\'), ''
     $relPathFwd = $relPath -replace '\\', '/'
 
