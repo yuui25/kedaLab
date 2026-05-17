@@ -104,6 +104,8 @@
 | ハッシュ形式の特定（hashid / 形式文字列の読み方 / --example-hashes） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | Flask / Werkzeug PBKDF2 ハッシュのクラック（mode 10000 変換） | Initial Access | `05_Tools_Reference/Hashcat.md` |
 | SSRF（サーバーサイドリクエストフォージェリ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
+| SSRF defense bypass：8進数・16進数・整数表記 IP リテラル（ipaddress 解析失敗パターン） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
+| SSRF defense bypass：IPv4-mapped IPv6 (`::ffff:127.0.0.1`)（Python 3.11.9 / 3.12.4 未満限定） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/SSRF.md` |
 | XXE（XML外部エンティティインジェクション） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XXE.md` |
 | XSLTインジェクション（プロセッサフィンガープリント・XXE-via-XSLT・PHP拡張・Java拡張） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/XSLT_Injection.md` |
 | JWT alg:none 攻撃（署名検証スキップ） | Initial Access | `02_Initial_Access/Web_Vulnerabilities/JWT_Attacks.md` |
@@ -339,6 +341,7 @@
 | Java ObjectInputStream クラス解決の2経路（resolveClass / resolveProxyClass）と allowlist バイパス原理 | `02_Initial_Access/Web_Vulnerabilities/Java_Deserialization_Bypass.md` | `06_Concepts/Java_Deserialization.md` |
 | Electron の nodeIntegration / contextIsolation の仕組みと XSS → RCE エスカレーション原理 | `02_Initial_Access/Web_Vulnerabilities/Electron_XSS_RCE.md` | `06_Concepts/Electron_Security.md` |
 | バリアントハンティング（既知 CVE のバグクラスから類似プロジェクトの変種を探す手法） | CVE 研究・脆弱性調査全般 | `06_Concepts/Variant_Hunting.md` |
+| CVE 提出前の最終 verification ゲート（Docker で最新 base image にて PoC 再実行・前提崩壊検出） | CVE 研究 | `06_Concepts/Variant_Hunting.md` |
 | Web 診断ツール使い分けの原理（スクリプト / Burp / DevTools の役割分担・Cookie Prefix 仕様） | Web 診断全般 | `06_Concepts/Web_Pentest_Tooling.md` |
 | /etc/hosts へのドメイン名登録（AD 攻撃の前提・vhost 発見後の登録）| `00_Playbook/Windows_AD_Attack_Flow.md` / `01_Reconnaissance/Web_Enumeration.md` | `06_Concepts/Hosts_File_For_AD.md` |
 | MITRE ATT&CK マッピング運用ガイド（ID 引きの考え方・本リポジトリでの使い方） | TECHNIQUES_INDEX_MITRE.md 全般 | `06_Concepts/MITRE_ATTCK_Guide.md` |

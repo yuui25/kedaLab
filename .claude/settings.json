@@ -30,6 +30,10 @@
           {
             "type": "command",
             "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:/keda/.shared/hooks/kedaweb-compat.ps1"
+          },
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:/keda/.shared/hooks/snapshot-if-state-changed.ps1"
           }
         ]
       }
