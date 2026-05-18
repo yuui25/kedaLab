@@ -81,19 +81,7 @@ kedalab を動的に閲覧する Web ビューア。**実行時に `TECHNIQUES_I
 
 ---
 
-## 姉妹プロジェクトの状況把握
+## エコシステム全体
 
-`C:\keda\` 配下のセキュリティ系3プロジェクト (kedalab / kedacve / kedabounty) は、
-お互いの状態スナップショットを `C:\keda\.shared\state\` で共有している。
-
-- `kedacve_engagements.md` — kedacve の `engagements/OVERVIEW.md` ミラー
-- `kedabounty_targets.md` — kedabounty の登録プログラム一覧
-- `kedalab_pending.md` — kedalab `_pending/` 配下の embargo 中ナレッジ
-
-**読むタイミング:** 案件の重複確認・経路判断 (CNA vs bounty) ・橋渡し作業など、
-他プロジェクトの現状を踏まえる必要があるとき。通常作業では読まなくてよい。
-スナップショットは各 source ファイル (OVERVIEW.md / targets/*.md / _pending/*.md) が
-Write/Edit されると自動更新される (`C:\keda\.shared\hooks\snapshot-if-state-changed.ps1`)。
-
-**全体仕様・波及範囲**: `C:\keda\ECOSYSTEM.md` を参照 (どのファイルを編集すると何が起きるか、
-何が deny-check で block されるか、公開対象の境界等)。
+**全体仕様・波及範囲**: `C:\keda\ECOSYSTEM.md` を参照（どのファイルを編集すると何が起きるか、
+何が deny-check で block されるか、公開対象の境界等）。kedalab 外との連携・状態同期の仕組みもここに集約。

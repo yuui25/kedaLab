@@ -360,6 +360,7 @@
 | OWASP WSTG マッピング運用ガイド（Web 系チェック項目の引き方） | TECHNIQUES_INDEX_WSTG.md 全般 | `06_Concepts/OWASP_WSTG_Guide.md` |
 | ペネトレ基礎（攻撃者視点の前提・思考の組み立て方） | 初学者導入 | `06_Concepts/Pentest_Fundamentals.md` |
 | CVSS スコアリング（v3.1 / v4.0 構造差・Worst-case vs Likely-case・Environmental・報告書記載フォーマット） | 報告書作成・CVE 申請 | `06_Concepts/CVSS_Scoring.md` |
+| CVE 研究スターター（起点 CVE 入手元・ライブラリ仕様調査・CWE 選定） | CVE 研究着手 | `06_Concepts/CVE_Research_Starter.md` |
 | リバースシェルの原理（接続方向・インターフェース選択・bash/python/perl/nc のペイロード差） | `02_Initial_Access/Web_Vulnerabilities/Command_Injection.md` / `03_Post_Access_Linux/Shell_Stabilization.md` | `06_Concepts/Reverse_Shell.md` |
 | Entra ID / ハイブリッド AD・クラウド ID 基盤（現スコープ外・将来拡張領域の見出し予約） | （未実装）| `08_Cloud_Identity/README.md` |
 
