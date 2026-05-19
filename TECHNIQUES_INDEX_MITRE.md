@@ -41,6 +41,14 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 
 ---
 
+## TA0042 Resource Development（リソース開発）
+
+| Technique ID | 技術名 | kedalab ファイル |
+|------|-------|--------|
+| T1588.005 | Obtain Capabilities: Exploits | `05_Tools_Reference/Searchsploit.md` |
+
+---
+
 ## TA0001 Initial Access（初期アクセス）
 
 | Technique ID | 技術名 | kedalab ファイル |
@@ -76,6 +84,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 
 | Technique ID | 技術名 | kedalab ファイル |
 |------|-------|--------|
+| T1098 | Account Manipulation | `04_Post_Access_Windows_AD/ACE_Abuse/ForcePasswordChange.md` / `04_Post_Access_Windows_AD/ACE_Abuse/WriteDACL.md` |
 | T1098.005 | Account Manipulation: Device Registration（Shadow Credentials） | `04_Post_Access_Windows_AD/ACE_Abuse/GenericAll.md` |
 | T1136.002 | Create Account: Domain Account | `04_Post_Access_Windows_AD/Delegation_Attacks/Unconstrained.md`（マシンアカウント作成） |
 | T1505.003 | Server Software Component: Web Shell | `02_Initial_Access/Web_Vulnerabilities/File_Upload.md` |
@@ -101,7 +110,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 
 | Technique ID | 技術名 | kedalab ファイル |
 |------|-------|--------|
-| T1562.001 | Impair Defenses: Disable or Modify Tools | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8 AMSI バイパス） / `04_Post_Access_Windows_AD/BYOVD.md`（BYOVD で EDR Kernel Callback 削除） |
+| T1685 | Disable or Modify Tools | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Step 8 AMSI バイパス） / `04_Post_Access_Windows_AD/BYOVD.md`（BYOVD で EDR Kernel Callback 削除） |
 | T1027 | Obfuscated Files or Information | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` |
 | T1140 | Deobfuscate/Decode Files or Information | `02_Initial_Access/Web_Vulnerabilities/JS_Obfuscation.md` / `02_Initial_Access/Binary_Analysis.md` |
 | T1550.002 | Use Alternate Authentication Material: Pass the Hash | `04_Post_Access_Windows_AD/Credential_Dumping.md` / `02_Initial_Access/Protocol_Exploitation.md`（WinRM PTH） |
@@ -118,7 +127,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 | T1003.006 | OS Credential Dumping: DCSync | `04_Post_Access_Windows_AD/Credential_Dumping.md` |
 | T1110.002 | Brute Force: Password Cracking | `05_Tools_Reference/Hashcat.md` |
 | T1110.003 | Brute Force: Password Spraying | `05_Tools_Reference/Netexec.md` / `02_Initial_Access/Account_Lockout_Recon.md` |
-| T1110.001 | Brute Force: Password Guessing | `02_Initial_Access/Default_Credentials.md`（hydra / medusa） |
+| T1110.001 | Brute Force: Password Guessing | `02_Initial_Access/Default_Credentials.md`（hydra / medusa） / `01_Reconnaissance/SNMP_Enumeration.md`（コミュニティ文字列ブルート） |
 | T1558.001 | Steal or Forge Kerberos Tickets: Golden Ticket | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | T1558.002 | Steal or Forge Kerberos Tickets: Silver Ticket | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
 | T1558.003 | Steal or Forge Kerberos Tickets: Kerberoasting | `04_Post_Access_Windows_AD/Kerberos_Attacks/Kerberoasting.md` / `04_Post_Access_Windows_AD/ACE_Abuse/GenericWrite.md`（Targeted） |
@@ -142,7 +151,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 | Technique ID | 技術名 | kedalab ファイル |
 |------|-------|--------|
 | T1018 | Remote System Discovery | `01_Reconnaissance/Network_Scanning.md` / `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
-| T1046 | Network Service Discovery | `01_Reconnaissance/Network_Scanning.md` / `05_Tools_Reference/Nmap.md` |
+| T1046 | Network Service Discovery | `01_Reconnaissance/Network_Scanning.md` / `05_Tools_Reference/Nmap.md` / `01_Reconnaissance/SNMP_Enumeration.md`（UDP 161 ホスト発見） |
 | T1057 | Process Discovery | `05_Tools_Reference/pspy.md` / `03_Post_Access_Linux/Enumeration_Checklist.md` |
 | T1083 | File and Directory Discovery | `03_Post_Access_Linux/Enumeration_Checklist.md` / `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | T1082 | System Information Discovery | `04_Post_Access_Windows_AD/Enumeration_Checklist.md`（Get-ComputerInfo） |
@@ -164,7 +173,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 | T1021.002 | Remote Services: SMB/Windows Admin Shares | `02_Initial_Access/Protocol_Exploitation.md`（psexec/smbexec） |
 | T1021.006 | Remote Services: Windows Remote Management | `02_Initial_Access/Protocol_Exploitation.md`（evil-winrm） |
 | T1550.002 | Use Alternate Authentication Material: Pass the Hash | `04_Post_Access_Windows_AD/Credential_Dumping.md` |
-| T1550.003 | Use Alternate Authentication Material: Pass the Ticket | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` |
+| T1550.003 | Use Alternate Authentication Material: Pass the Ticket | `04_Post_Access_Windows_AD/Kerberos_Attacks/Pass_The_Ticket.md` / `04_Post_Access_Windows_AD/Delegation_Attacks/RBCD.md`（S4U チケット偽造） |
 | T1570 | Lateral Tool Transfer | `05_Tools_Reference/Impacket_Suite.md` / `03_Post_Access_Linux/Kernel_Exploits.md`（python3 -m http.server） |
 
 ---
@@ -176,6 +185,7 @@ ATT&CK Navigator: https://mitre-attack.github.io/attack-navigator/
 | T1005 | Data from Local System | `03_Post_Access_Linux/Enumeration_Checklist.md` / `04_Post_Access_Windows_AD/Enumeration_Checklist.md` |
 | T1039 | Data from Network Shared Drive | `01_Reconnaissance/SMB_Enumeration.md` |
 | T1213 | Data from Information Repositories | `01_Reconnaissance/Exposed_Files.md` |
+| T1602.001 | Data from Configuration Repository: SNMP (MIB Dump) | `01_Reconnaissance/SNMP_Enumeration.md` |
 
 ---
 
