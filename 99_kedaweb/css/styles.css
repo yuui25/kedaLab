@@ -101,10 +101,10 @@ body::after {
 #boot.fade { opacity: 0; transform: scale(1.05); pointer-events: none; }
 #boot-log {
   white-space: pre;
+  font-family: "Consolas", "Cascadia Mono", monospace;
   line-height: 1;
   text-shadow: 0 0 6px rgba(0, 255, 156, 0.6);
   max-width: 900px;
-  overflow-x: auto;
 }
 .cursor::after {
   content: "▊";
