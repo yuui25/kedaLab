@@ -358,6 +358,7 @@
 | /etc/hosts へのドメイン名登録（AD 攻撃の前提・vhost 発見後の登録）| `00_Playbook/Windows_AD_Attack_Flow.md` / `01_Reconnaissance/Web_Enumeration.md` | `06_Concepts/Hosts_File_For_AD.md` |
 | MITRE ATT&CK マッピング運用ガイド（ID 引きの考え方・本リポジトリでの使い方） | TECHNIQUES_INDEX_MITRE.md 全般 | `06_Concepts/MITRE_ATTCK_Guide.md` |
 | OWASP WSTG マッピング運用ガイド（Web 系チェック項目の引き方） | TECHNIQUES_INDEX_WSTG.md 全般 | `06_Concepts/OWASP_WSTG_Guide.md` |
+| ペネトレプロセス・ガイドライン運用ガイド（NIST SP 800-115 / PTES の章軸・使い分け） | TECHNIQUES_INDEX_GUIDELINES.md 全般 | `06_Concepts/Pentest_Guidelines_Guide.md` |
 | ペネトレ基礎（攻撃者視点の前提・思考の組み立て方） | 初学者導入 | `06_Concepts/Pentest_Fundamentals.md` |
 | CVSS スコアリング（v3.1 / v4.0 構造差・Worst-case vs Likely-case・Environmental・報告書記載フォーマット） | 報告書作成・CVE 申請 | `06_Concepts/CVSS_Scoring.md` |
 | CVE 研究スターター（起点 CVE 入手元・ライブラリ仕様調査・CWE 選定） | CVE 研究着手 | `06_Concepts/CVE_Research_Starter.md` |

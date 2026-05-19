@@ -34,6 +34,7 @@
   <div class="search-wrap">
     <span class="search-icon">›</span>
     <input id="topSearch" class="search-input" type="text" placeholder="技術・CVE・ツール名・本文で検索…" autocomplete="off" />
+    <button id="topSearchClear" class="search-clear" hidden title="クリア">×</button>
     <span class="kbd-hint">Ctrl + K</span>
   </div>
   <nav class="nav-links">
@@ -121,6 +122,7 @@
       <div class="nav-search-wrap">
         <span class="search-icon">›</span>
         <input id="navSearch" class="search-input" type="text" placeholder="技術を検索 → Enter で第1ヒットにフォーカス…" autocomplete="off" />
+        <button id="navSearchClear" class="search-clear" hidden title="クリア">×</button>
       </div>
       <div class="nav-legend">
         <span class="lg-chip lg-focus">FOCUS</span>
@@ -166,7 +168,10 @@
 <div id="modal" class="modal-bg" role="dialog" aria-modal="true">
   <div class="modal">
     <div class="modal-head">
-      <div id="modalPath" class="modal-path">—</div>
+      <div class="modal-head-left">
+        <button id="modalBack" class="modal-back" hidden>[←] back</button>
+        <div id="modalPath" class="modal-path">—</div>
+      </div>
       <button id="modalClose" class="modal-close">[×] close</button>
     </div>
     <div id="modalBody" class="modal-body"></div>
@@ -176,7 +181,10 @@
 <!-- cmd palette -->
 <div id="palette" class="palette">
   <div class="palette-box">
-    <input id="paletteInput" class="palette-input" type="text" placeholder="› 検索: 技術名 / タグ / CVE / ファイル名…" />
+    <div class="palette-input-wrap">
+      <input id="paletteInput" class="palette-input" type="text" placeholder="› 検索: 技術名 / タグ / CVE / ファイル名…" />
+      <button id="paletteClear" class="search-clear" hidden title="クリア">×</button>
+    </div>
     <div id="paletteList" class="palette-list"></div>
   </div>
 </div>

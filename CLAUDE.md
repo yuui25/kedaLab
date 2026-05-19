@@ -24,7 +24,8 @@ kedalab はペネトレスト・AI Red Teaming のナレッジリポジトリ。
    - AI/MLの概念・動作原理・背景知識 → `06_Concepts/AI_ML/`
    - 該当する MITRE ATT&CK ID があれば `TECHNIQUES_INDEX_MITRE.md` にも追記
    - 該当する OWASP WSTG ID があれば `TECHNIQUES_INDEX_WSTG.md` にも追記
-   - 判断基準: Web 系 → WSTG、AD/Linux/ネットワーク系 → ATT&CK（ID が無い場合は無理に当てはめない）
+   - 該当する NIST SP 800-115 章番号・PTES フェーズがあれば `TECHNIQUES_INDEX_GUIDELINES.md` にも追記
+   - 判断基準: Web 系 → WSTG、AD/Linux/ネットワーク系 → ATT&CK、ペネトレ全体プロセスのフェーズ（情報収集・スキャン・脆弱性検証・侵入後活動など）に明確に該当する → NIST / PTES（ID・章・フェーズが無い・曖昧な場合は無理に当てはめない）
 4. `00_Playbook/` の該当フローに分岐として追加できるか確認する
 5. 「なぜそうなるか」の原理が重要な場合は `06_Concepts/` に分離し、作業ファイルには1行リンクのみ追加する
 6. 新しい「案件開始シナリオ」（ドメイン渡し・認証情報付き等、これまでなかった提供情報パターン）が発生した場合は

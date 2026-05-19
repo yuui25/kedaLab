@@ -26,6 +26,7 @@ skill 本文と矛盾した場合は **4 ファイル側が優先**。
 
 - `./TECHNIQUES_INDEX_AI_ML.md` — AI/ML 系トピック扱い時
 - `./TECHNIQUES_INDEX_MITRE.md` / `./TECHNIQUES_INDEX_WSTG.md` — 該当 ID がある時
+- `./TECHNIQUES_INDEX_GUIDELINES.md` — NIST SP 800-115 章 / PTES フェーズに明確該当する時
 - `./_pending/README.md` — `_pending/` への新規作成時
 - `./_workspace/conventions/Folder_Convention_20260515.md` — フォルダ規約
 

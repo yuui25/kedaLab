@@ -1317,18 +1317,54 @@
   const modalBody = $("#modalBody");
   const modalPath = $("#modalPath");
   $("#modalClose").addEventListener("click", closeModal);
+  $("#modalBack").addEventListener("click", goBack);
+
+  function wireSearchClear(inputId, clearId) {
+    const input = $("#" + inputId);
+    const clear = $("#" + clearId);
+    if (!input || !clear) return;
+    const update = () => { clear.hidden = !input.value; };
+    input.addEventListener("input", update);
+    clear.addEventListener("click", () => {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    });
+    update();
+  }
+  wireSearchClear("topSearch", "topSearchClear");
+  wireSearchClear("navSearch", "navSearchClear");
+  wireSearchClear("paletteInput", "paletteClear");
   modal.addEventListener("click", e => {
     if (e.target === modal) closeModal();
   });
 
+  const docStack = [];
+
+  function updateBackButton() {
+    const btn = $("#modalBack");
+    if (btn) btn.hidden = docStack.length <= 1;
+  }
+
+  function goBack() {
+    if (docStack.length <= 1) return;
+    docStack.pop();
+    const prev = docStack[docStack.length - 1];
+    openMD(prev, true);
+  }
+
   function closeModal() {
     modal.classList.remove("open");
     modalBody.innerHTML = "";
+    docStack.length = 0;
+    updateBackButton();
   }
 
-  async function openMD(file) {
+  async function openMD(file, isBack = false) {
     if (!file) return;
     modal.classList.add("open");
+    if (!isBack) docStack.push(file);
+    updateBackButton();
     // breadcrumb-like path
     const parts = file.split("/");
     modalPath.innerHTML = parts.map((p, i) =>

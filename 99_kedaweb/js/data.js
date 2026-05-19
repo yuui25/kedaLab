@@ -30,6 +30,7 @@ window.KEDA_DATA = {
     { name: "TECHNIQUES_INDEX_AI_ML.md", file: "TECHNIQUES_INDEX_AI_ML.md", desc: "AI/ML 全技術" },
     { name: "TECHNIQUES_INDEX_MITRE.md", file: "TECHNIQUES_INDEX_MITRE.md", desc: "MITRE ATT&CK マッピング" },
     { name: "TECHNIQUES_INDEX_WSTG.md",  file: "TECHNIQUES_INDEX_WSTG.md",  desc: "OWASP WSTG マッピング" },
+    { name: "TECHNIQUES_INDEX_GUIDELINES.md", file: "TECHNIQUES_INDEX_GUIDELINES.md", desc: "NIST SP 800-115 / PTES マッピング" },
     { name: "README.md",                 file: "README.md",                 desc: "リポジトリ全体README" },
     { name: "WRITING_GUIDE.md",          file: "WRITING_GUIDE.md",          desc: "書き方ガイド" },
     { name: "CLAUDE.md",                 file: "CLAUDE.md",                 desc: "AI への指示" }
