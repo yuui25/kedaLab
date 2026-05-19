@@ -1387,6 +1387,22 @@ details.qs-tips-acc[open] .qs-tips { animation: coll-slide 0.3s ease; }
   color: var(--acc-g);
   border-color: var(--acc-g);
 }
+.modal-nav {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--fg-1);
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 8px;
+}
+.modal-nav:hover {
+  color: var(--acc-c);
+  border-color: var(--acc-c);
+}
 .modal-close {
   background: transparent;
   border: 1px solid var(--line);

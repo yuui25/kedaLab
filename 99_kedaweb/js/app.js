@@ -1318,6 +1318,13 @@
   const modalPath = $("#modalPath");
   $("#modalClose").addEventListener("click", closeModal);
   $("#modalBack").addEventListener("click", goBack);
+  $("#modalNav").addEventListener("click", () => {
+    const file = docStack[docStack.length - 1];
+    if (!file) return;
+    closeModal();
+    enterNavMode();
+    setTimeout(() => setNavFocus(file), 200);
+  });
 
   function wireSearchClear(inputId, clearId) {
     const input = $("#" + inputId);
@@ -1365,6 +1372,8 @@
     modal.classList.add("open");
     if (!isBack) docStack.push(file);
     updateBackButton();
+    const navBtn = $("#modalNav");
+    if (navBtn) navBtn.hidden = !D.techniques.some(t => t.f === file);
     // breadcrumb-like path
     const parts = file.split("/");
     modalPath.innerHTML = parts.map((p, i) =>

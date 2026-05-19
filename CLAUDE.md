@@ -65,6 +65,9 @@ kedalab/
 **`_` 接頭辞のトップレベルディレクトリは公開対象外**（kedaweb 不可視・GitHub 非 push）。
 規約詳細: [`_workspace/conventions/Folder_Convention_20260515.md`](./_workspace/conventions/Folder_Convention_20260515.md)
 
+`06_Concepts/` 直下のファイル数が **25 を超えた場合はサブフォルダ化を検討開始**、**30 を超えた場合は必須対応**。
+トリガー条件・分類ロジック・移行手順: [`_workspace/conventions/Subfolder_Threshold_20260519.md`](./_workspace/conventions/Subfolder_Threshold_20260519.md)
+
 ---
 
 ## 99_kedaweb/ について
