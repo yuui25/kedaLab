@@ -6,6 +6,8 @@
 > **本番の場合**：本フローに入る前にスコープ・実施可否・業務影響について事前合意を確認すること。
 > 詳細は [`../README.md`](../README.md) Step 0 と [`../06_Concepts/Pentest_Fundamentals.md`](../06_Concepts/Pentest_Fundamentals.md) を参照。
 
+> **「外部」スコープの用語について**：本フローの「外部」は NIST SP 800-115 §2.4.1 "External and Internal" で定義された業界標準のテスティングビューポイントに対応する（自組織のセキュリティ境界の外側、インターネット側からのテスト）。ガイドライン章マッピング → [`../TECHNIQUES_INDEX_GUIDELINES.md`](../TECHNIQUES_INDEX_GUIDELINES.md)。ガイドライン概要 → [`../06_Concepts/Pentest_Guidelines_Guide.md`](../06_Concepts/Pentest_Guidelines_Guide.md)
+
 ---
 
 ## このファイルをいつ使うか（着火条件）
@@ -32,7 +34,7 @@
 | 提供されている情報 | 開始位置 |
 |------------------|---------|
 | IPのみ（製品不明） | Step 1（ポートスキャン・バナー取得）から始める |
-| FQDNのみ（IP不明） | `../01_Reconnaissance/DNS_Enumeration.md` でIP解決 → Step 1へ |
+| FQDN / 組織名のみ（IP不明） | `../01_Reconnaissance/DNS_Enumeration.md` で WHOIS / DNS 取得 → Step 1へ（公開情報からの組織特定・関連 IP レンジ確認も含む） |
 | IPとポートスコープ指定あり（例：443のみ） | 指定ポートの Step 1b（TLS証明書取得）から始める |
 | 製品名は判明しているがバージョン不明 | Step 2（Edge CVE照合）へ直接進む |
 | 製品名・バージョン判明 + CVE既確認 | Step 3（誤設定・誤公開）または Step 5（cred試行前確認）へ |
@@ -61,16 +63,16 @@
 
 各ステップは「前のステップで得た情報」を次の判断に使う。スキップは判断根拠が記録できる場合のみ許容する。
 
-> **Step 着手の優先順位**：【必須】のStep（1・2・5）を先に完了させる。
-> 【条件次第】のStep（3・4・6）は以下の着手条件で判定する：
->
-> | Step | 着手する条件 | 着手しない（後回し）条件 |
-> |---|---|---|
-> | Step 3（誤設定・誤公開） | Step 2 で悪用可能な CVE なし／製品が CVE 対象外／製品名のみ判明でバージョン不明 | Step 2 で悪用可能な CVE が見つかった（先に Step 2 を完遂） |
-> | Step 4（TLS監査） | 診断スコープに TLS 評価が含まれる、または証明書から組織情報を抜きたい | スコープに TLS 評価がなく、Step 1b で製品識別が済んでいる |
-> | Step 6（デフォルト認証情報） | Step 5 で「閾値あり・短時間でロック解除」または演習環境と確認できた | Step 5 でロックアウトが厳しい（5回で永久ロック等）／本番でクライアント承認なし |
->
-> Step 2 で CVE が見つかった場合はそこに集中し、Step 3〜6 は後回しにしてよい。
+**Step 着手の優先順位**：【必須】のStep（1・2・5）を先に完了させる。
+【条件次第】のStep（3・4・6）は以下の着手条件で判定する：
+
+| Step | 着手する条件 | 着手しない（後回し）条件 |
+|---|---|---|
+| Step 3（誤設定・誤公開） | Step 2 で悪用可能な CVE なし／製品が CVE 対象外／製品名のみ判明でバージョン不明 | Step 2 で悪用可能な CVE が見つかった（先に Step 2 を完遂） |
+| Step 4（TLS監査） | 診断スコープに TLS 評価が含まれる、または証明書から組織情報を抜きたい | スコープに TLS 評価がなく、Step 1b で製品識別が済んでいる |
+| Step 6（デフォルト認証情報） | Step 5 で「閾値あり・短時間でロック解除」または演習環境と確認できた | Step 5 でロックアウトが厳しい（5回で永久ロック等）／本番でクライアント承認なし |
+
+Step 2 で CVE が見つかった場合はそこに集中し、Step 3〜6 は後回しにしてよい。
 
 ---
 
@@ -88,6 +90,7 @@
 | `Server:` ヘッダー / HTML タイトルに製品名が見える | Step 2（Edge CVE照合）へ |
 | Web が応答するが製品不明 | `../01_Reconnaissance/Web_Enumeration.md` でフィンガープリント追加 |
 | ポートスキャン結果が空（全ポートフィルタリング）| `../01_Reconnaissance/Network_Scanning.md` の「フィルタリング環境での追加オプション」セクションを参照 |
+| メール系ポート（25 / 465 / 587 / 110 / 995 / 143 / 993）が開いている | `../02_Initial_Access/Protocol_Exploitation.md` の SMTP / POP / IMAP セクションへ（メールサーバー対象。ユーザー列挙・スプレー・オープンリレー確認） |
 
 ### Step 1b — TLS証明書から製品識別
 
@@ -215,6 +218,7 @@ Step 3 で発見した認証情報候補もここで使用する。
 ## 関連技術
 
 - 前：`../00_Playbook/00_OS_Identification.md`（OS / 製品種別の判定。「インターネット境界機器らしい」と判断された場合に本フローへ）
+- 後（内部 NW への侵入確立）：`Internal_LAN_Pentest_Flow.md`（External 突破後、内部 VLAN に接続可能になった場合に Internal テストへ移行。NIST §2.4.1 では External を先に完遂してから Internal に進む順序が推奨される）
 - 後：`../00_Playbook/Web_Vuln_Flow.md`（全ステップ失敗時、または Web アプリ層に脆弱性の手がかりが見つかった場合に転換）
 - 後：`../03_Post_Access_Linux/Enumeration_Checklist.md`（Step 6 でシェルを取得した後の Linux 侵入後フロー）
 - 後：`../04_Post_Access_Windows_AD/Enumeration_Checklist.md`（アプライアンス経由でWindows環境に踏み込んだ場合）

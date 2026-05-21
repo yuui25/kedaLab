@@ -319,6 +319,7 @@
 | netexec（nxc）/ CrackMapExec — パスワードスプレー・SMB/WinRM認証確認 | `05_Tools_Reference/Netexec.md` |
 | pspy（procfs ポーリング型プロセス観察ツール・短命 root プロセス検出） | `05_Tools_Reference/pspy.md` |
 | Certipy（AD CS 列挙・証明書申請・PKINIT 認証・CA 管理の統合ツール。find / req / auth / ca / template / forge / relay） | `05_Tools_Reference/Certipy.md` |
+| GOAD（AD攻撃練習ラボ）の構築（VMware Workstation + WSL / Vagrant + ansible。host-only vmnet 手動IP・WSL1・version選択等の注意点） | `05_Tools_Reference/GOAD_Lab_Setup.md` |
 
 ---
 
